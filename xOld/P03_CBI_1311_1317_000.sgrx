@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CEDResources>
+	<DocCfs>
+		<ExptBook>
+			<BkItem id="0" time="1731521823" FTime="193567.97400000002" Strs="2" s0="Sampling initialised using config C:\Talyta_CortezGrippe\DYSTONIA_project\CONFIGS\9_CBI.sgcx" s1="Signal version 6.05, using micro1401, monitor revision 18, USB driver 2.08"/>
+			<BkItem id="1" time="1731521823" Class="6" FTime="193568.021" Strs="6" s0="Sampling configuration description" s1="Fixed interval mode, multiple frame states, triggered capture initially" s2="Sampling 1500 points at 5000 Hz (sweep duration 0.3 s), ADC ports sampled 0" s3="Pulses output, 0.1 ms resolution, using DACs 0,1" s4="States 0 to 2 in use, dynamic outputs mode, random ordering, 1 repeats, 12 cycles" s5="Automatic filing into C:\Ozzy\lobuleExperiment, using filename template P03_CBI_%d%m_%H%M, save on finish"/>
+			<BkItem id="2" time="1731521823" Class="6" FTime="193568.021" Strs="3" s0="ADC ports and calibration" s1="1 ADC port sampled to generate waveform channels" s2="Channel 1 &quot;R FDI&quot; sampled on ADC port 0, zero V is 0 V, full scale (5 V) is 5 V"/>
+			<BkItem id="3" time="1731521823" Class="2" FTime="193568.021" Strs="6" s0="Pulse outputs and frame timings for state 0" s1="Pulse outputs length is 0.3 s, sampling starts at 0 s" s2="Fixed-interval triggers every 5 s" s3="DAC output 0 has 0 pulses, initial level is 0 V" s4="DAC output 1 has 0 pulses, initial level is 0 V" s5="Control track holds 0 actions"/>
+			<BkItem id="4" time="1731521823" Class="2" FTime="193568.021" Strs="7" s0="Pulse outputs and frame timings for state 1" s1="Pulse outputs length is 0.3 s, sampling starts at 0 s" s2="Fixed-interval triggers every 5 s" s3="DAC output 0 has 1 pulse, initial level is 0 V" s4="  #1 at 0.2 s: square pulse size 5 V, length 0.001 s" s5="DAC output 1 has 0 pulses, initial level is 0 V" s6="Control track holds 0 actions"/>
+			<BkItem id="5" time="1731521823" Class="2" FTime="193568.021" Strs="8" s0="Pulse outputs and frame timings for state 2" s1="Pulse outputs length is 0.3 s, sampling starts at 0 s" s2="Fixed-interval triggers every 5 s" s3="DAC output 0 has 1 pulse, initial level is 0 V" s4="  #1 at 0.2 s: square pulse size 5 V, length 0.001 s" s5="DAC output 1 has 1 pulse, initial level is 0 V" s6="  #1 at 0.195 s: square pulse size 5 V, length 0.001 s" s7="Control track holds 0 actions"/>
+			<BkItem id="6" time="1731521969" Strs="1" s0="Sampling started, writing to disk enabled"/>
+			<BkItem id="7" time="1731522066" Class="1" FTime="96.751" Strs="1" s0="Sampling restarted, deleting 18 saved frames"/>
+			<BkItem id="8" time="1731522246" Strs="1" s0="Sampling started, writing to disk enabled"/>
+			<BkItem id="9" time="1731522382" FTime="135.814" Strs="1" s0="Sampling finished, 24 frames stored in new file"/>
+			<BkItem id="10" time="1731522382" Class="4" Strs="1" s0="Data file saved as C:\Ozzy\lobuleExperiment\P03_CBI_1311_1317_000.cfs"/>
+		</ExptBook>
+		<View>
+			<WPlace flags="2" showc="3" minx="-1" miny="-1" maxx="-8" maxy="-30" t="0" b="874" l="0" r="1030"/>
+			<Font hgt="-12" hthou="-125" wgt="400" paf="18" fnam="Times New Roman"/>
+			<Chan Version="1" Chan="0" DMode="2" DWidth="1" DError="1" LnType="0" AxMin="-1.0058488403451988" AxMax="1.0032362459546917" AdcAxMin="-1.0058488403451988" AdcAxMax="1.0032362459546917" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0"/>
+			<Chan Version="1" Chan="1" DMode="11" DWidth="1" DError="1" LnType="0" Ax="0" AdcAxMax="10" RateAxMax="10" ChType="1" DefDMode="11" BackOv="0"/>
+			<XInfo Right="0.29999999242136255" CurFr="24" DCStart="XLow()" DCEnd="XHigh()" DCRatio="1000" XAxSmall="5" VCLabMode="3" HCLabMode="3" VCCount="1" HCCount="4">
+				<VCur id="0" LabMode="3" LabPos="0.2" Num="0"/>
+				<HCur id="1" Pos="-0.5088646347868049" LabMode="3" LabPos="0.2" Num="1"/>
+				<HCur id="2" Pos="0.5062520403962978" LabMode="3" LabPos="0.2" Num="2"/>
+				<HCur id="3" Pos="-0.5108115831586969" LabMode="3" LabPos="0.2" Num="3" Chan="1"/>
+				<HCur id="4" Pos="0.49771385025719195" LabMode="3" LabPos="0.2" Num="4" Chan="1"/>
+			</XInfo>
+			<ChOrder Chans="2">
+				<c id="0"/>
+				<c id="1" Chan="1"/>
+			</ChOrder>
+			<CursVals XZero="0" YZero="0"/>
+			<CursRegs XZero="0" YZero="0"/>
+			<OvDraw3d YProp="0.5" XScale="0.5" YScale="0.5"/>
+		</View>
+	</DocCfs>
+</CEDResources>

@@ -16,7 +16,7 @@ SonicDuration = 500000 ; %in microseconds
 xdrCenterFreq = 500000;   % in hertz
 PRP = 1000; % Pulse rep period in microseconds( 10us resolution ) MUST BE GREATER than burst length
 burstLength = 300;   %  in microseconds( 10us resolution )
-globalPower = 1; % 30000
+globalPower = 30000; % 30000
 %duty cycle = 50%
 
 % % Offline 
