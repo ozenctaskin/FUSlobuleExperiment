@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CEDResources>
 	<Sample>
-		<!--Sampling configuration saved to C:\Ozzy\lobuleExperiment\scripts\Test_Lobule8.sgcx on Monday, November 18, 2024 4:36:04 PM-->
+		<!--Sampling configuration saved to C:\Ozzy\lobuleExperiment\scripts\runTMS.sgcx on Wednesday, November 27, 2024 8:36:59 PM-->
 		<SampCtl t="71" b="0" l="-1" r="2"/>
 		<PulseDlg t="467" b="793" l="838" r="1394"/>
-		<General SampType="1" NumPorts="3" ADCRange="5" IdealRate="5000" ActualRate="5000" Points="4000" XCUnits="Pts">
+		<General SampType="1" NumPorts="2" ADCRange="5" IdealRate="5000" ActualRate="5000" Points="4000" XCUnits="Pts">
 			<Ports>
 				<p id="0" n="0"/>
-				<p id="1" n="1"/>
-				<p id="2" n="2"/>
+				<p id="1" n="4"/>
 			</Ports>
 		</General>
 		<Ports ArtLimit="100" ArtPercent="0"/>
@@ -26,7 +25,7 @@
 			</DACs>
 		</Outputs>
 		<States StaNum="3" DigIMask="255" StaOrder="1" StaIdleEnd="10"/>
-		<Auto AutoName="X_Lobule8_%d%m%y_" AutoPath="C:\Ozzy\lobuleExperiment\data" LimFrames="1" MaxFrames="20" MaxSize="0" MaxTime="0"/>
+		<Auto AutoName="X_%d%m%y_" AutoPath="C:\Ozzy\lobuleExperiment\data" LimFrames="1" MaxFrames="30" MaxSize="0" MaxTime="0"/>
 		<Pulses States="1">
 			<State id="0" Repeats="1">
 				<PulseList id="0">
@@ -192,10 +191,11 @@
 			<c id="126" Units="V"/>
 			<c id="127" Units="V"/>
 		</CondPorts>
-		<ExtraPorts Count="3">
+		<ExtraPorts Count="4">
 			<p id="0" Name="FDI" Opts=""/>
 			<p id="1" Name="ADM" Opts=""/>
-			<p id="2" Name="FUS" Opts=""/>
+			<p id="2" Name="NA" Opts=""/>
+			<p id="4" Name="FUS" Opts=""/>
 		</ExtraPorts>
 		<AuxTel/>
 		<AuxState/>
@@ -206,20 +206,18 @@
 			<WPlace flags="2" showc="3" minx="-1" miny="-1" maxx="-8" maxy="-30" t="0" b="894" l="0" r="866"/>
 			<Font hgt="-11" hthou="-115" wgt="400" paf="16" fnam="Times New Roman"/>
 			<Chan Version="1" Chan="0" DMode="2" DWidth="1" DError="1" LnType="0" AxMin="-1.3701793792187738" AxMax="1.373449497068938" AdcAxMin="-1.3701793792187738" AdcAxMax="1.373449497068938" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0"/>
-			<Chan Version="1" Chan="1" DMode="2" DWidth="1" DError="1" LnType="0" Vis="0" AxMin="-5" AxMax="5" AdcAxMin="-5" AdcAxMax="5" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0"/>
-			<Chan Version="1" Chan="2" DMode="2" DWidth="1" DError="1" LnType="0" AxMin="-5" AxMax="5" AdcAxMin="-5" AdcAxMax="5" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0"/>
-			<Chan Version="1" Chan="3" DMode="11" DWidth="1" DError="1" LnType="0" Ax="0" AdcAxMax="10" RateAxMax="10" ChType="1" DefDMode="11" BackOv="0"/>
+			<Chan Version="1" Chan="1" DMode="2" DWidth="1" DError="1" LnType="0" AxMin="-5" AxMax="5" AdcAxMin="-5" AdcAxMax="5" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0"/>
+			<Chan Version="1" Chan="2" DMode="11" DWidth="1" DError="1" LnType="0" Ax="0" AxMax="10" RateAxMax="10" AxType="1" ChType="1" DefDMode="11" BackOv="0"/>
 			<XInfo Left="-0.10000000149011612" Right="0.6999999985098839" CurFr="0" DCStart="XLow()" DCEnd="XHigh()" XAxSmall="5" CRBack="0" VCLabMode="3" HCLabMode="3" VCCount="2" HCCount="2">
 				<VCur id="0" LabMode="3" LabPos="0.2" Num="0"/>
 				<VCur id="1" Pos="0.11914660831509846" LabMode="3" LabPos="0.2" Num="1"/>
-				<HCur id="1" Pos="0.25" OldPos="0.2556747696924626" LabMode="3" LabPos="0.2" Num="1"/>
-				<HCur id="2" Pos="-0.25" OldPos="-0.2253070826937782" LabMode="3" LabPos="0.2" Num="2"/>
+				<HCur id="1" Pos="0.25" LabMode="3" LabPos="0.2" Num="1"/>
+				<HCur id="2" Pos="-0.25" LabMode="3" LabPos="0.2" Num="2"/>
 			</XInfo>
-			<ChOrder Chans="4">
+			<ChOrder Chans="3">
 				<c id="0"/>
 				<c id="1" Chan="1"/>
 				<c id="2" Chan="2"/>
-				<c id="3" Chan="3"/>
 			</ChOrder>
 			<CursVals XZero="0" YZero="0"/>
 			<CursRegs XZero="0" YZero="0"/>
