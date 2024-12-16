@@ -8,7 +8,7 @@ global NeuroFUS
 %% Set fix parameters.
 % Warning. Power below is the globalPower we want to use along with sham
 % power which is set to 1. Trials are randomized. See line 71. 
-numTrials = 30;
+numTrials = 20;
 Power = 30000;
 SonicDuration = 500000 ; %in microseconds
 xdrCenterFreq = 500000;   % in hertz
@@ -70,7 +70,7 @@ NFDepth(NeuroFUS,Depth);
 pause(2)
 
 %% START Treatment
-for ii = 1:20
+for ii = 1:numTrials
     fprintf(['Starting trial: ' num2str(ii) ' globalPower:' num2str(globalPower)  '\n']);
     NFStart(NeuroFUS);
     pause(1)
