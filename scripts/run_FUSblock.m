@@ -75,7 +75,7 @@ for ii = 1:numTrials
     NFStart(NeuroFUS);
     pause(1)
     NFStop(NeuroFUS);
-    pause(1)
+    pause(4)
 end
 
 % Save trial order
