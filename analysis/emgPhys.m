@@ -48,7 +48,7 @@ combinedTUSevents = cellfun(@(row) vertcat(row{:}), num2cell(TUSevents, 2), 'Uni
 
 % Set a time vector and bandpass values
 t = (1:size(combinedData{1},1))/fs;
-bandpass = [10 50];
+bandpass = [2 100];
 
 %% Plot average measurements from trials
 % Set figures
