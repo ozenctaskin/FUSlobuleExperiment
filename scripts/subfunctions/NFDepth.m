@@ -10,8 +10,8 @@ function NFDepth(NeuroFUS,depth,utx)
 if nargin == 2
     if depth < 30
         error('Error: Depth value is too low and outside the steering range of NeuroFUS. Please enter a value more than 30mm and less than 70mm.')
-    elseif depth > 70
-        error('Error: Depth value is too high (> 70mm) and outside the steering range of NeuroFUS. Please enter a value less than 70mm.')
+    elseif depth > 80.51
+        error('Error: Depth value is too high (> 80.51mm) and outside the steering range of NeuroFUS. Please enter a value less than 80.51mm.')
     end
 elseif nargin == 3
     if depth > 10
