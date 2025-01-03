@@ -48,7 +48,7 @@ combinedTUSevents = cellfun(@(row) vertcat(row{:}), num2cell(TUSevents, 2), 'Uni
 
 % Set a time vector and bandpass values
 t = (1:size(combinedData{1},1))/fs;
-bandpass = [2 100];
+bandpass = [5 100];
 
 %% Plot average measurements from trials
 % Set figures
@@ -65,6 +65,9 @@ title(ax2, 'Oscillatory');
 colors = [[0.9290 0.6940 0.1250], 'r'];
 sgtitle(['Trial average'])
 
+% Time frequency cell for comparison later
+TFA = {};
+
 % Loop through the real and sham data and plot components
 for ii = 1:size(combinedData,1)
     data = [];
@@ -78,6 +81,21 @@ for ii = 1:size(combinedData,1)
     cfg.length    = trialLength{1}; % freqency resolution = 1/2^floor(log2(cfg.length*0.9))
     cfg.overlap   = 0;
     data          = ft_redefinetrial(cfg, data);
+
+    % Time freq
+    cfg              = [];
+    cfg.output       = 'pow';
+    cfg.channel      = 'EMG';
+    cfg.method       = 'mtmconvol';
+    cfg.taper        = 'hanning';
+    cfg.foi          = 10:0.5:100;                         
+    cfg.t_ftimwin    = ones(length(cfg.foi),1).*0.2;  
+    cfg.toi          = 0:0.01:0.8;     
+    cfg.pad          = 'nextpow2';
+    cfg.keeptrials   = 'no';
+    cfg.tapsmofrq  = 0.4 *cfg.foi;
+    TFRhann = ft_freqanalysis(cfg, data);
+    TFA{ii} = TFRhann;
 
     % compute the fractal and original spectra
     cfg               = [];
@@ -101,6 +119,18 @@ for ii = 1:size(combinedData,1)
 end
 legend(ax1, {'Real', 'Sham'});
 legend(ax2, {'Real', 'Sham'});
+
+% Plot TFA difference real - sham
+cfg = [];
+cfg.parameter = 'powspctrm'; % The parameter to operate on
+cfg.operation = 'x1 - x2';  % Subtraction operation
+TFRdiff = ft_math(cfg, TFA{1}, TFA{2});
+cfg = [];
+% cfg.zlim = 'maxabs';
+cfg.channel = 'EMG';
+cfg.showlabels = 'yes';
+cfg.trials = 'all';
+ft_singleplotTFR(cfg, TFRdiff);
 
 %% Just analyze the real data, compare FUS section to baseline
 for ii = 1:size(combinedTUSevents,1)
