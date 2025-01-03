@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CEDResources>
 	<Sample>
-		<!--Sampling configuration saved to C:\Ozzy\lobuleExperiment\scripts\runTMS.sgcx on Wednesday, November 27, 2024 8:36:59 PM-->
+		<!--Sampling configuration saved to Z:\Ozzy_Taskin\lobuleExperiment\FUSlobuleExperiment\scripts\run_TMS.sgcx on Thursday, January 02, 2025 5:02:57 PM-->
 		<SampCtl t="71" b="0" l="-1" r="2"/>
 		<PulseDlg t="467" b="793" l="838" r="1394"/>
 		<General SampType="1" NumPorts="2" ADCRange="5" IdealRate="5000" ActualRate="5000" Points="4000" XCUnits="Pts">
@@ -25,7 +25,7 @@
 			</DACs>
 		</Outputs>
 		<States StaNum="3" DigIMask="255" StaOrder="1" StaIdleEnd="10"/>
-		<Auto AutoName="X_%d%m%y_" AutoPath="C:\Ozzy\lobuleExperiment\data" LimFrames="1" MaxFrames="30" MaxSize="0" MaxTime="0"/>
+		<Auto AutoName="X_%d%m%y_" AutoPath="C:\Ozzy\lobuleExperiment\data" LimFrames="1" MaxFrames="15" MaxSize="0" MaxTime="0"/>
 		<Pulses States="1">
 			<State id="0" Repeats="1">
 				<PulseList id="0">
