@@ -19,60 +19,74 @@ if ~iscell(shamStim)
     shamStim = {shamStim};
 end
 
+% Determine the maximum length between realStim and shamStim
+maxLen = max(numel(realStim), numel(shamStim));
+
+% Add a single NaN to whichever is shorter
+if numel(realStim) < maxLen
+    realStim{maxLen} = [NaN];
+end
+if numel(shamStim) < maxLen
+    shamStim{maxLen} = [NaN];
+end
+
 % Combine cells
 dataAll = [realStim; shamStim];
 dataLabel = ['real'; 'sham'];
 trialLength = {};
 TUSevents = {};
+dataLoaded = {};
 
 % Loop through cell items and load the data in
 [rowCount, colCount] = size(dataAll);
 for row = 1:rowCount
     for col = 1:colCount
-        loadedDataItem = load(dataAll{row, col});
-        fields = fieldnames(loadedDataItem);
-        trialLength{row, col} = size(loadedDataItem.(fields{2}).values(:,1,:), 1) / fs;
-        dataAll{row, col} = reshape(loadedDataItem.(fields{2}).values(:,1,:), [], 1);
-        TUSevents{row, col} = reshape(loadedDataItem.(fields{2}).values(:,2,:), [], 1);
+        if ~isnan(dataAll{row, col})
+            loadedDataItem = load(dataAll{row, col});
+            fields = fieldnames(loadedDataItem);
+            trialLength{row, col} = size(loadedDataItem.(fields{2}).values(:,1,:), 1) / fs;
+            dataLoaded{row, col} = reshape(loadedDataItem.(fields{2}).values(:,1,:), [], 1);
+            TUSevents{row, col} = reshape(loadedDataItem.(fields{2}).values(:,2,:), [], 1);
+        end
     end
 end
 
 % If trial lengths are not equal, throw an error
-if ~all(cellfun(@(x) isequal(x, trialLength{1,1}), trialLength(:)))
+nonEmptyCells = ~cellfun(@isempty, trialLength);
+if ~all(cellfun(@(x) isequal(x, trialLength{1,1}), trialLength(nonEmptyCells)))
     error('Your trials are not in equal length. This is not supported')
 end
 
-% Append real with real and sham with sham
-combinedData = cellfun(@(row) vertcat(row{:}), num2cell(dataAll, 2), 'UniformOutput', false);
+% Append real with real and sham with sham. Drop the placeholder NaN
+combinedData = cellfun(@(row) vertcat(row{:}), num2cell(dataLoaded, 2), 'UniformOutput', false);
 combinedTUSevents = cellfun(@(row) vertcat(row{:}), num2cell(TUSevents, 2), 'UniformOutput', false);
 
-% %%% DELET THIS
-combinedData{1} = combinedData{1}(1:100000);
-combinedData{2} = combinedData{2}(1:100000);
-combinedTUSevents{1} = combinedTUSevents{1}(1:100000);
-combinedTUSevents{2} = combinedTUSevents{2}(1:100000);
-
 % Set a time vector and bandpass values
-t = (1:size(combinedData{1},1))/fs;
 bandpass = [20 150];
 
 %% Plot average measurements from trials
 % Set figures
-ax1 = subplot(1,3,1);
-ax2 = subplot(1,3,2);
-ax3 = subplot(1,3,3);
+fig = figure();
+set(fig, 'Position', [100, 100, 825, 450]);
+ax1 = subplot(1,4,1);
+ax2 = subplot(1,4,2);
+ax3 = subplot(1,4,3);
+ax4 = subplot(1,4,4);
 hold(ax1, 'on');
 hold(ax2, 'on');
 hold(ax3, 'on');
-xlabel(ax1, 'Frequency'); ylabel(ax1, 'power (dB/Hz)');
-xlabel(ax2, 'Frequency'); ylabel(ax2, 'power (db/Hz)');
-xlabel(ax3, 'Condition'); ylabel(ax3, 'Exponent');
+hold(ax4, 'on');
+xlabel(ax1, 'Frequency'); ylabel(ax2, 'power (db/Hz)');
+xlabel(ax2, 'log frequency'); ylabel(ax1, 'power (dB/Hz)');
+xlabel(ax3, 'Condition'); ylabel(ax3, 'Offset');
+xlabel(ax4, 'Condition'); ylabel(ax3, 'Exponent');
 xlim(ax1, bandpass)
-xlim(ax2, bandpass)
 xlim(ax3, [0, 3])
-title(ax1, 'Non-oscillatory');
-title(ax2, 'Oscillatory');
-title(ax3, 'Exponent of non-oscillatory components');
+xlim(ax4, [0, 3])
+title(ax1, 'Oscillatory');
+title(ax2, 'Non-oscillatory');
+title(ax3, 'Offset');
+title(ax4, 'Exponent');
 colors = ['b', 'r'];
 sgtitle('Trial average')
 
@@ -81,11 +95,15 @@ TFA = {};
 
 % Loop through the real and sham data and plot components
 for ii = 1:size(combinedData,1)
+    t = (1:size(combinedData{ii},1))/fs;
     data = [];
     data.trial{1,1} = combinedData{ii}';
     data.time{1,1} = t;
     data.label{1} = 'EMG';
     data.trialinfo(1,1) = 1;
+    
+    % Notch to remove line noise
+    data.trial{1} = ft_preproc_dftfilter(data.trial{1}, fs, 60);
 
     % chunk into trial segments for long/continuous trials
     cfg           = [];
@@ -93,13 +111,18 @@ for ii = 1:size(combinedData,1)
     cfg.overlap   = 0;
     data          = ft_redefinetrial(cfg, data);
 
+    % Cleaning
+    cfg          = [];
+    cfg.method   = 'summary';
+    data   = ft_rejectvisual(cfg, data);
+
     % Time freq
     cfg              = [];
     cfg.output       = 'pow';
     cfg.channel      = 'EMG';
     cfg.method       = 'mtmconvol';
     cfg.taper        = 'hanning';
-    cfg.foi          = 10:0.5:100;                         
+    cfg.foi          = 20:0.5:150;                         
     cfg.t_ftimwin    = ones(length(cfg.foi),1).*0.2;  
     cfg.toi          = 0:0.01:0.8;     
     cfg.pad          = 'nextpow2';
@@ -129,19 +152,25 @@ for ii = 1:size(combinedData,1)
     oscillatory = ft_math(cfg, fractal, original);
 
     % display the spectra in log-log scale
-    plot(ax1, fractal.freq, log(fractal.powspctrm), colors(ii)); 
-    plot(ax2, fractal.freq, log(oscillatory.powspctrm), colors(ii));
+    plot(ax1, fractal.freq, log(oscillatory.powspctrm), colors(ii));    
+    plot(ax2, log(fractal.freq), log(fractal.powspctrm), colors(ii)); 
 
     % Plot individual trial non-oscillatory
     for trl = 1:size(fractal_trials.powspctrm,1)
         p = polyfit(log(fractal.freq), log(reshape(fractal_trials.powspctrm(trl,1,:), 1, [])), 1);
         scatter(ax3, ii, p(2), colors(ii))
+        scatter(ax4, ii, p(1), colors(ii))
     end
 
 end
 legend(ax1, {'Real', 'Sham'});
 legend(ax2, {'Real', 'Sham'});
 
+% figure()
+% ft_singleplotTFR(cfg, TFA{1});
+% figure()
+% ft_singleplotTFR(cfg, TFA{2});
+% 
 % % Plot TFA difference real - sham
 % cfg = [];
 % cfg.parameter = 'powspctrm'; % The parameter to operate on
@@ -165,14 +194,14 @@ realPart = combinedData{1}(find(combinedTUSevents{1}));
 shamPart = combinedData{1}(find(combinedTUSevents{1} == 0));
 combinedTimes = {realPart;shamPart};
 
-figure()
+fig = figure();
+set(fig, 'Position', [100, 100, 580, 450]);
 ax1 = subplot(1,2,1);
 ax2 = subplot(1,2,2);
 hold(ax1, 'on');
 hold(ax2, 'on');
-xlabel(ax1, 'Frequency'); ylabel(ax1, 'power (dB/Hz)');
+xlabel(ax1, 'log frequency'); ylabel(ax1, 'power (dB/Hz)');
 xlabel(ax2, 'Frequency'); ylabel(ax2, 'power (db/Hz)');
-xlim(ax1, bandpass)
 xlim(ax2, bandpass)
 title(ax1, 'Non-oscillatory');
 title(ax2, 'Oscillatory');
@@ -185,10 +214,10 @@ for ii = 1:size(combinedTimes,1)
     data.time{1,1} = t;
     data.label{1} = 'EMG';
     data.trialinfo(1,1) = 1;
-
+    
     % chunk into trial segments for long/continuous trials
     cfg           = [];
-    cfg.length    = trialLength{1}; % freqency resolution = 1/2^floor(log2(cfg.length*0.9))
+    cfg.length    = 0.8; % freqency resolution = 1/2^floor(log2(cfg.length*0.9))
     cfg.overlap   = 0;
     data          = ft_redefinetrial(cfg, data);
 
@@ -209,7 +238,7 @@ for ii = 1:size(combinedTimes,1)
     oscillatory = ft_math(cfg, fractal, original);
 
     % display the spectra in log-log scale
-    plot(ax1, fractal.freq, log(fractal.powspctrm), colors(ii)); 
+    plot(ax1, log(fractal.freq), log(fractal.powspctrm), colors(ii)); 
     plot(ax2, fractal.freq, log(oscillatory.powspctrm), colors(ii));
 end
 legend(ax1, {'Real', 'Sham'});
