@@ -33,7 +33,7 @@ addpath(fullfile(fileparts(filePath), 'subfunctions'))
 Depth = input('\nEnter the depth measurement from modelling for this region: ');
 
 % Check if we are doing real or sham. Set the globalPower accordingly
-condition = input('\nWhat is the condition, r or s:', 's');
+condition = input('\nWhat is the condition, r or s (Enter r for real, s for sham):', 's');
 if strcmp(condition, 'r')
     globalPower = Power;
 elseif strcmp(condition, 's')
