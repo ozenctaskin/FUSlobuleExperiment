@@ -1,8 +1,8 @@
-clear all; clc
+close all; clear all; clc
 
 % Decide if we are saving diagnostic images. Takes a while to run when set
 % to true
-setDiagnostics = true; 
+setDiagnostics = false; 
 
 % Specify subject paths. Order needs to be baseline, DN, L5, L8, V1, DN_0w,
 % DN_30w
@@ -34,9 +34,9 @@ data.HERO03 = {'/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/
 % Get fieldnames and empty cell for all subject peaks so we can do some
 % averaging at the end. Also specify order of the data entry
 subjectIDs = fieldnames(data);
-allPeaks = {};
+averagePeaks = {};
 labels = {'baseline','dentate','lobule5','lobule8','V1sham','sham0w','sham30w'};
-
+colors = {'r', 'b', [0.4660 0.6740 0.1880], 'm', 'k', [0.8500 0.3250 0.0980], [0.4940 0.1840 0.5560]};
 % Loop through sujects
 for sub = 1:length(subjectIDs)
     % Get the path of the subject from the first input and create a folder
@@ -77,15 +77,31 @@ for sub = 1:length(subjectIDs)
     subjectPeaks = cell2mat(subjectPeaks);
     % Do a box plot for the values 
     figure
-    boxplot(subjectPeaks, labels)
+    boxplot(subjectPeaks, labels, 'Symbol', '')
     ylim([0 6])
     title(subjectIDs{sub})
-    allPeaks{sub} = subjectPeaks;
+    hold on
+    % Add scatter points next to each boxplot
+    x = repmat(1:size(subjectPeaks, 2), size(subjectPeaks, 1), 1); % X-coordinates
+    x = x + 0.1 * (rand(size(x)) - 0.5); % Add a small random jitter to spread points
+    % x = x - 0.4;
+    for sct = 1:size(x,2)
+        scatter(x(:,sct), subjectPeaks(:,sct), 'filled', 'MarkerFaceAlpha', 0.6, 'MarkerFaceColor', colors{sct})
+    end
+    hold off 
+
+    averagePeaks{sub} = nanmean(subjectPeaks);
 end
 
 % Plot the subject average box plot
-mean = nanmean(cat(3, allPeaks{:}), 3);
+averagePeaks = cat(1, averagePeaks{:});
 figure
-boxplot(mean, labels)
-ylim([0 6])
-title('Average')
+hold on
+for ii = 1:size(averagePeaks,2)
+    scatter(ii, averagePeaks(:,ii), 'b', 'filled', 'c', 'MarkerFaceColor', colors{ii})
+end
+xticklabels(labels)
+xlim([0 8])
+grid on
+title('Average')    
+    
