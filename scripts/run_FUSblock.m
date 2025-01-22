@@ -10,7 +10,7 @@ global NeuroFUS
 % power which is set to 1. The script asks whether you need real or sham.
 % If sham is selected, globalPower is 1, otherwise globalPower=Power. See
 % line 34.
-numTrials = 15;
+numTrials = 20;
 Power = 30000;
 SonicDuration = 500000 ; %in microseconds
 xdrCenterFreq = 500000;   % in hertz
@@ -29,18 +29,20 @@ addpath(fullfile(fileparts(filePath), 'subfunctions'))
 %     mkdir(subjectFolder)
 % end
 
+% Check if we are doing real or sham. Set the globalPower accordingly
+condition = input('\nSelect your stimulation location \n1-DN 0w sham\n2-DN 30w sham\n3-DN\n4-V1\n5-Lobule 8\n6-Lobule 5\nEnter a number:');
+if isequal(condition, 1)
+    globalPower = 1;
+elseif ~isequal(condition, 1)
+    globalPower = Power;
+elseif ~isnumeric(condition)
+    error('Please enter the number in the beginning of the condition instead of its name');
+else
+    error('Unknown input') 
+end
+
 % Get the depth measurement for the condition
 Depth = input('\nEnter the depth measurement from modelling for this region: ');
-
-% Check if we are doing real or sham. Set the globalPower accordingly
-condition = input('\nWhat is the condition, r or s (Enter r for real, s for sham):', 's');
-if strcmp(condition, 'r')
-    globalPower = Power;
-elseif strcmp(condition, 's')
-    globalPower = 1;
-else
-    error('Enter r for real, s for sham') 
-end
 
 %% Connect to TPO
 disp('\nConnecting to TPO....');
