@@ -39,6 +39,14 @@ data.HERO04 = {'/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/
                '/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/HERO_04/clean_DN0w_220125_000.mat', ...
                '/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/HERO_04/clean_DN_flip30w_220125_000.mat'}; 
 
+data.HERO05 = {'/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/HERO_05/clean_baseline_280225_000.mat', ...
+               '/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/HERO_05/clean_DN_280225_000.mat', ...
+               '/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/HERO_05/clean_L5_280225_000.mat', ...
+               '/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/HERO_05/clean_L8_280225_000.mat', ...
+               '/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/HERO_05/clean_V1_280225_000.mat', ...
+               '/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/HERO_05/clean_sham0w_280225_000.mat', ...
+               '/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/HERO_05/clean_shamFlip_280225_000.mat'}; 
+
 % Get fieldnames and empty cell for all subject peaks so we can do some
 % averaging at the end. Also specify order of the data entry
 subjectIDs = fieldnames(data);
@@ -110,7 +118,9 @@ averageRatios = mean(ratios);
 stdRatios = std(ratios);
 
 % Define specific colors for each subject
-colors = [1 0 0; 0 1 0; 1 0.4 0.8; 1 0.5 0]; 
+colors = [1 0 0; 0 1 0; 1 0.4 0.8; 1 0.5 0; 0.2 0.4 0]; 
+
+numSubjects = 5; 
 
 % Scatter plot with unique colors for each subject
 figure
