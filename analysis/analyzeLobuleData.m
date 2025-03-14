@@ -117,29 +117,37 @@ ratios = averagePeaks ./ averagePeaks(:,1);
 averageRatios = mean(ratios);
 stdRatios = std(ratios);
 
-% Define specific colors for each subject
-colors = [1 0 0; 0 1 0; 1 0.4 0.8; 1 0.5 0; 0.2 0.4 0]; 
+% % Define specific colors for each subject
+% colors = [1 0 0; 0 1 0; 1 0.4 0.8; 1 0.5 0; 0.2 0.4 0]; 
 
 numSubjects = 5; 
 
-% Scatter plot with unique colors for each subject
+% Do a boxplot
 figure
+boxplot(averagePeaks, labels, 'Symbol', '')
 hold on
+h = findobj(gca, 'Tag', 'Box'); 
+for j = 1:length(h)
+    patch(get(h(j), 'XData'), get(h(j), 'YData'), [0.3010 0.7450 0.9330], 'FaceAlpha', 0.5); % Fill boxes with color
+end
+
+% Scatter plot with unique colors for each subject
 for ii = 1:size(averagePeaks,2) 
     for jj = 1:numSubjects 
-        scatter(ii, averagePeaks(jj,ii), 50, colors(jj,:), 'filled'); 
+        % scatter(ii, averagePeaks(jj,ii), 50, colors(jj,:), 'filled'); 
+        scatter(ii, averagePeaks(jj,ii), 50, 'k', 'filled'); 
     end
 end
 xlim([0 8]);
 ylim([0 3]);
 xticklabels(labels);
-legend(arrayfun(@(x) sprintf('HERO 0%d', x), 1:numSubjects, 'UniformOutput', false), ...
-    'Location', 'bestoutside'); % Add legend for subjects
+set(gca, 'FontSize', 20)
+ax = gca;
+ax.XAxis.FontSize = 20; % Set X-axis tick label size
+ax.YAxis.FontSize = 20; % Set Y-axis tick label size
+% legend(arrayfun(@(x) sprintf('HERO 0%d', x), 1:numSubjects, 'UniformOutput', false), ...
+%     'Location', 'bestoutside'); % Add legend for subjects
 title('Subject results - Averaged Peaks');
-
-% Do a boxplot
-boxplot(averagePeaks, labels, 'Symbol', '')
-hold off;
 
 % for ii = 1:size(averagePeaks,2)
 %     scatter(ii, averagePeaks(:,ii), 'b', 'filled', 'c', 'MarkerFaceColor', colors{ii})
