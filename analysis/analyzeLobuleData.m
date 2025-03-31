@@ -4,6 +4,7 @@ close all; clear all; clc
 % to true
 setDiagnostics = false; 
 cleaned = true;
+baselineCorrect = true;
 
 % Specify subject paths. Order needs to be baseline, DN, L5, L8, V1, DN_0w,
 % DN_30w
@@ -51,7 +52,7 @@ data.HERO05 = {'/Volumes/chenshare/Ozzy_Taskin/pilot_data/lobuleExperiment/data/
 % averaging at the end. Also specify order of the data entry
 subjectIDs = fieldnames(data);
 averagePeaks = {};
-labels = {'baseline','dentate','lobule5','lobule8','V1sham','sham0w','sham30w'};
+labels = {'baseline','dentate','lobule 5','lobule 8','sham V1','sham 0w','sham 30w'};
 colors = {'r', 'b', [0.4660 0.6740 0.1880], 'm', 'k', [0.8500 0.3250 0.0980], [0.4940 0.1840 0.5560]};
 % Loop through sujects
 for sub = 1:length(subjectIDs)
@@ -122,6 +123,13 @@ stdRatios = std(ratios);
 
 numSubjects = 5; 
 
+% Baseline correct if asked
+if baselineCorrect
+    averagePeaks = averagePeaks./averagePeaks(:,1);
+    averagePeaks(:,1) = [];
+    labels = labels(2:end);
+end
+
 % Do a boxplot
 figure
 boxplot(averagePeaks, labels, 'Symbol', '')
@@ -138,22 +146,21 @@ for ii = 1:size(averagePeaks,2)
         scatter(ii, averagePeaks(jj,ii), 50, 'k', 'filled'); 
     end
 end
-xlim([0 8]);
-ylim([0 3]);
-xticklabels(labels);
-set(gca, 'FontSize', 20)
-ax = gca;
-ax.XAxis.FontSize = 20; % Set X-axis tick label size
-ax.YAxis.FontSize = 20; % Set Y-axis tick label size
-% legend(arrayfun(@(x) sprintf('HERO 0%d', x), 1:numSubjects, 'UniformOutput', false), ...
-%     'Location', 'bestoutside'); % Add legend for subjects
-title('Subject results - Averaged Peaks');
 
-% for ii = 1:size(averagePeaks,2)
-%     scatter(ii, averagePeaks(:,ii), 'b', 'filled', 'c', 'MarkerFaceColor', colors{ii})
-% end
-% xticklabels(labels)
-% boxplot(averagePeaks, labels, 'Symbol', '')
-% xlim([0 8])
-% ylim([0 4])
-% title('Subject results - averaged peaks')
+% Set limits
+if baselineCorrect
+    ylim([0 6]);
+    xlim([0 7]);
+    ylabel('Baseline corrected MEP')
+    yline(1, 'r--', 'LineWidth', 1.5);
+else
+    ylim([0 3]);
+    xlim([0 8]);
+    ylabel('MEP amplitude (mV)')
+end
+
+xticklabels(labels);
+set(gca, 'FontSize', 25) 
+ax = gca;
+ax.Box = 'off';
+title('Subject results - Averaged Peaks');
