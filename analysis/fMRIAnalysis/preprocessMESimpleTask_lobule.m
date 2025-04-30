@@ -62,7 +62,7 @@ function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionI
     '-blip_forward_dset ' blipForward ' ' ..., 
     '-blip_reverse_dset ' blipReverse ' ' ..., 
     '-combine_method ' combineMethod ' ' ...,
-    '-echo_times 13.20 29.94 46.66 -reg_echo 2 ' ..., 
+    '-echo_times 13.20 29.94 46.66 -reg_echo 1 ' ..., 
     '-radial_correlate_blocks tcat volreg ' ...,
     '-align_unifize_epi local ' ..., 
     '-align_opts_aea -cost lpc+ZZ -giant_move -check_flip ' ...,    
