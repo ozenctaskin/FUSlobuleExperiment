@@ -62,7 +62,7 @@ function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionI
     '-blip_forward_dset ' blipForward ' ' ..., 
     '-blip_reverse_dset ' blipReverse ' ' ..., 
     '-combine_method ' combineMethod ' ' ...,
-    '-echo_times 13.20 29.94 46.66 -reg_echo 1 ' ..., 
+    '-echo_times 13.20 29.94 46.66 -reg_echo 2 ' ..., 
     '-radial_correlate_blocks tcat volreg ' ...,
     '-align_unifize_epi local ' ..., 
     '-align_opts_aea -cost lpc+ZZ -giant_move -check_flip ' ...,    
@@ -149,17 +149,38 @@ function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionI
     data = suit_map2surf(fullfile(outputFolder, 'beta.nii'));
     fig = figure();
     suit_plotflatmap(data, 'threshold', max(data)/100*10, 'cmap', hot)
-    saveas(fig, fullfile(cerebellarFolder, 'betaMap.png'))
+    saveas(fig, fullfile(cerebellarFolder, 'betaMap_10perThr.png'))
     close all
 
-    % Now plot significant t-values (p < 0.05) 
-    system(['cd ' outputFolder ';' '3dPval -prefix pvals ' func]);
-    system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix tstat_pval pvals+tlrc''[tap#0_Tstat_pval]''']);
-    data_pval = suit_map2surf(fullfile(outputFolder, 'tstat_pval.nii'));
-    data_tstat = suit_map2surf(fullfile(outputFolder, 'tstat.nii'));
-    data_tstat(find(data_pval>0.05)) = 0; % p-thresholding is not covered by suit 
-    fig = figure();
-    suit_plotflatmap(data_tstat, 'cmap', hot, 'threshold', 0.00001) % Threshold high to get rid of dark surface
-    saveas(fig, fullfile(cerebellarFolder, 'tmap_0.05.png'))
-    close all
+    % Clusterize and threshold the cerebellar activity so we get the lobule
+    % 5 and 8 activity only on separate images.
+    cerebellarMask = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'Cerebellar_fMRImask.nii.gz');
+    prefMap = fullfile(cerebellarFolder, 'ClusterMap.nii.gz');
+    prefDat = fullfile(cerebellarFolder, 'ClusterEffEst.nii.gz');
+    system(['3dClusterize -inset ' func ' -ithr 2 -idat 1 -mask ' cerebellarMask ' -NN 1 -bisided p=0.001 -clust_nvox 50 -pref_map ' prefMap ' -pref_dat ' prefDat]);
+
+    % Make separate binary masks from clustermaps and calculate internal
+    % center of mass with AFNI.
+    prefMapLoaded = MRIread(prefMap);
+    for ii = 1:max(max(max(prefMapLoaded.vol)))
+        clusterMask = fullfile(cerebellarFolder, ['ClusterMask_' num2str(ii) '.nii.gz']);
+        system(['mri_extract_label ' prefMap ' ' num2str(ii) ' ' clusterMask]);
+        [~, massRaw] = system(['3dCM -mask ' clusterMask ' -Icent ' prefMap]);
+        massRaw = strsplit(massRaw);
+        massRaw = cell2mat(cellfun(@str2double, massRaw(1:end-1), 'UniformOutput', false));
+        % Convert to LPI
+        massRaw(1) = massRaw(1)*-1; 
+        massRaw(2) = massRaw(2)*-1;
+        % Write TUS target
+        writematrix(massRaw, fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_COM.txt']));
+        % Convert to voxel grid and make plots for targeting
+        voxelGrid = round([-massRaw(1)+90 massRaw(2)+126 massRaw(3)+72] ./ 2.5); 
+        targetMask = fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_TargetMask.nii.gz']);
+        system(['fslmaths ' clusterMask ' -roi ' num2str(voxelGrid(1)) ' 1 ' num2str(voxelGrid(2)) ' 1 ' num2str(voxelGrid(3)) ' 1 0 1 -mul 3 -add ' clusterMask ' ' targetMask]);
+        data = suit_map2surf(targetMask);
+        fig = figure();
+        suit_plotflatmap(data, 'cmap', autumn)
+        saveas(fig, fullfile(cerebellarFolder, ['TUStargetPlot_Cluster_' num2str(ii) '.png']))
+        close all
+    end
 end
