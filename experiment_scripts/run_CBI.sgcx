@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CEDResources App="Signal" AppVer="803">
+	<Sample>
+		<!--Sampling configuration saved to C:\Users\t125829uhn\Desktop\9_CBI.sgcx on Tuesday, May 06, 2025 7:57:58 PM-->
+		<SampCtl t="71" b="0" l="-2" r="2" />
+		<PulseDlg t="223" b="549" l="252" r="808" />
+		<General SampType="3" ADCRange="5" States="1" IdealRate="5000" ActualRate="5000" Points="1500" XCUnits="Pts">
+			<Ports>
+				<p id="0" n="0" />
+			</Ports>
+		</General>
+		<Ports ArtEnd="0.7" ArtLimit="100" ArtPercent="0" />
+		<Peri PeriType="3" PeriDigIn="8" PeriDigHi="0" PeriAnaHi="0" PeriAnaHyst="0" />
+		<Outputs SeqPeriod="0.10000000149011612" AbsLev="1" SeqWaveRate="1000" SeqDACMask="0" SeqWave="2">
+			<DACs Count="8" Mask="3">
+				<d id="0" />
+				<d id="1" />
+				<d id="2" />
+				<d id="3" />
+				<d id="4" Scale="0.00015258800704032183" />
+				<d id="5" Scale="0.00015258800704032183" />
+				<d id="6" Scale="0.00015258800704032183" />
+				<d id="7" Scale="0.00015258800704032183" />
+			</DACs>
+		</Outputs>
+		<States DigIMask="255" StaOrder="1" StaIdleEnd="12" />
+		<Auto AutoName="SUBJ_CBI_%d%m_%H%M" AutoSave="1" AutoPath="C:\Ozzy\LobuleExperiment\" LimFrames="1" MaxFrames="24" MaxSize="0" MaxTime="0" />
+		<Pulses WrOnCyc="0" CycAtSt="1" States="3">
+			<State id="0">
+				<PulseList id="0">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="0.3" Interval="5" />
+				</PulseList>
+				<PulseList id="1">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="2">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="3">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="4">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="5">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="6">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="7">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="8">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="9">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="0.30000001192092896" Interval="5" />
+				</PulseList>
+			</State>
+			<State id="1" Label="TS">
+				<PulseList id="0">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="0.3" Interval="5" />
+					<Pulse id="1" Type="1" Before="0.19999999999999998" Length="0.001" Amp="5" />
+				</PulseList>
+				<PulseList id="1">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="2">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="3">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="4">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="5">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="6">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="7">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="8">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="9">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="0.30000001192092896" Interval="5" />
+				</PulseList>
+			</State>
+			<State id="2" Label="CBI">
+				<PulseList id="0">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="0.3" Interval="5" />
+					<Pulse id="1" Type="1" Before="0.19999999999999998" Length="0.001" Amp="5" Dig="255" />
+				</PulseList>
+				<PulseList id="1">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="2" Interval="10" />
+					<Pulse id="1" Type="1" Before="0.19499999999999998" Length="0.001" Amp="5" Dig="255" />
+				</PulseList>
+				<PulseList id="2">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="3">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="4">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="5">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="6">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="7">
+					<Pulse id="0" Type="0" Before="0.20000000298023224" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="8">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="2" Interval="10" />
+				</PulseList>
+				<PulseList id="9">
+					<Pulse id="0" Type="0" Before="0" Length="0.10000000149011612" Frame="0.30000001192092896" Interval="5" />
+				</PulseList>
+			</State>
+		</Pulses>
+		<CondPorts Count="128">
+			<c id="0" Units="V" Source="2" />
+			<c id="1" Units="V" Source="2" />
+			<c id="2" Units="V" Source="2" />
+			<c id="3" Units="V" Source="2" />
+			<c id="4" Units="V" Source="2" />
+			<c id="5" Units="V" Source="2" />
+			<c id="6" Units="V" Source="2" />
+			<c id="7" Units="V" Source="2" />
+			<c id="8" Units="V" Source="2" />
+			<c id="9" Units="V" Source="2" />
+			<c id="10" Units="V" Source="2" />
+			<c id="11" Units="V" Source="2" />
+			<c id="12" Units="V" Source="2" />
+			<c id="13" Units="V" Source="2" />
+			<c id="14" Units="V" Source="2" />
+			<c id="15" Units="V" Source="2" />
+			<c id="16" Units="V" Source="2" />
+			<c id="17" Units="V" Source="2" />
+			<c id="18" Units="V" Source="2" />
+			<c id="19" Units="V" Source="2" />
+			<c id="20" Units="V" Source="2" />
+			<c id="21" Units="V" Source="2" />
+			<c id="22" Units="V" Source="2" />
+			<c id="23" Units="V" Source="2" />
+			<c id="24" Units="V" Source="2" />
+			<c id="25" Units="V" Source="2" />
+			<c id="26" Units="V" Source="2" />
+			<c id="27" Units="V" Source="2" />
+			<c id="28" Units="V" Source="2" />
+			<c id="29" Units="V" Source="2" />
+			<c id="30" Units="V" Source="2" />
+			<c id="31" Units="V" Source="2" />
+			<c id="32" Units="V" Source="2" />
+			<c id="33" Units="V" Source="2" />
+			<c id="34" Units="V" Source="2" />
+			<c id="35" Units="V" Source="2" />
+			<c id="36" Units="V" Source="2" />
+			<c id="37" Units="V" Source="2" />
+			<c id="38" Units="V" Source="2" />
+			<c id="39" Units="V" Source="2" />
+			<c id="40" Units="V" Source="2" />
+			<c id="41" Units="V" Source="2" />
+			<c id="42" Units="V" Source="2" />
+			<c id="43" Units="V" Source="2" />
+			<c id="44" Units="V" Source="2" />
+			<c id="45" Units="V" Source="2" />
+			<c id="46" Units="V" Source="2" />
+			<c id="47" Units="V" Source="2" />
+			<c id="48" Units="V" Source="2" />
+			<c id="49" Units="V" Source="2" />
+			<c id="50" Units="V" Source="2" />
+			<c id="51" Units="V" Source="2" />
+			<c id="52" Units="V" Source="2" />
+			<c id="53" Units="V" Source="2" />
+			<c id="54" Units="V" Source="2" />
+			<c id="55" Units="V" Source="2" />
+			<c id="56" Units="V" Source="2" />
+			<c id="57" Units="V" Source="2" />
+			<c id="58" Units="V" Source="2" />
+			<c id="59" Units="V" Source="2" />
+			<c id="60" Units="V" Source="2" />
+			<c id="61" Units="V" Source="2" />
+			<c id="62" Units="V" Source="2" />
+			<c id="63" Units="V" Source="2" />
+			<c id="64" Units="V" Source="2" />
+			<c id="65" Units="V" Source="2" />
+			<c id="66" Units="V" Source="2" />
+			<c id="67" Units="V" Source="2" />
+			<c id="68" Units="V" Source="2" />
+			<c id="69" Units="V" Source="2" />
+			<c id="70" Units="V" Source="2" />
+			<c id="71" Units="V" Source="2" />
+			<c id="72" Units="V" Source="2" />
+			<c id="73" Units="V" Source="2" />
+			<c id="74" Units="V" Source="2" />
+			<c id="75" Units="V" Source="2" />
+			<c id="76" Units="V" Source="2" />
+			<c id="77" Units="V" Source="2" />
+			<c id="78" Units="V" Source="2" />
+			<c id="79" Units="V" Source="2" />
+			<c id="80" Units="V" />
+			<c id="81" Units="V" />
+			<c id="82" Units="V" />
+			<c id="83" Units="V" />
+			<c id="84" Units="V" />
+			<c id="85" Units="V" />
+			<c id="86" Units="V" />
+			<c id="87" Units="V" />
+			<c id="88" Units="V" />
+			<c id="89" Units="V" />
+			<c id="90" Units="V" />
+			<c id="91" Units="V" />
+			<c id="92" Units="V" />
+			<c id="93" Units="V" />
+			<c id="94" Units="V" />
+			<c id="95" Units="V" />
+			<c id="96" Units="V" />
+			<c id="97" Units="V" />
+			<c id="98" Units="V" />
+			<c id="99" Units="V" />
+			<c id="100" Units="V" />
+			<c id="101" Units="V" />
+			<c id="102" Units="V" />
+			<c id="103" Units="V" />
+			<c id="104" Units="V" />
+			<c id="105" Units="V" />
+			<c id="106" Units="V" />
+			<c id="107" Units="V" />
+			<c id="108" Units="V" />
+			<c id="109" Units="V" />
+			<c id="110" Units="V" />
+			<c id="111" Units="V" />
+			<c id="112" Units="V" />
+			<c id="113" Units="V" />
+			<c id="114" Units="V" />
+			<c id="115" Units="V" />
+			<c id="116" Units="V" />
+			<c id="117" Units="V" />
+			<c id="118" Units="V" />
+			<c id="119" Units="V" />
+			<c id="120" Units="V" />
+			<c id="121" Units="V" />
+			<c id="122" Units="V" />
+			<c id="123" Units="V" />
+			<c id="124" Units="V" />
+			<c id="125" Units="V" />
+			<c id="126" Units="V" />
+			<c id="127" Units="V" />
+		</CondPorts>
+		<ExtraPorts Count="4">
+			<p id="0" Name="R FDI" Opts="" />
+			<p id="1" Name="L APB" Opts="" />
+			<p id="2" Name="R FDI" Opts="" />
+			<p id="3" Name="R APB" Opts="" />
+		</ExtraPorts>
+		<AuxTel />
+		<ForceOP />
+		<Talkers />
+		<PortLabels DACCount="0" DIGCount="0" />
+		<MTAT />
+	</Sample>
+	<DocCfs>
+		<View>
+			<WPlace flags="2" showc="3" minx="-1" miny="-1" maxx="-8" maxy="-30" t="0" b="874" l="0" r="1030" />
+			<Font hgt="-12" hthou="-125" wgt="400" paf="18" fnam="Times New Roman" />
+			<Chan Version="1" Chan="0" DMode="2" DDSize="-1" DWidth="1" DError="1" LnType="0" AxMin="-1.0058488403451988" AxMax="1.0032362459546917" AdcAxMin="-1.0058488403451988" AdcAxMax="1.0032362459546917" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0" />
+			<Chan Version="1" Chan="1" DMode="2" DDSize="-1" DWidth="1" DError="1" LnType="0" Vis="0" AxMin="-0.9320712250838479" AxMax="0.9424275720292239" AdcAxMin="-0.9320712250838479" AdcAxMax="0.9424275720292239" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0" />
+			<Chan Version="1" Chan="2" DMode="2" DDSize="-1" DWidth="1" DError="1" LnType="0" Vis="0" AxMin="-0.9598119122257053" AxMax="0.9598119122257053" AdcAxMin="-0.9598119122257053" AdcAxMax="0.9598119122257053" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0" />
+			<Chan Version="1" Chan="3" DMode="2" DDSize="-1" DWidth="1" DError="1" LnType="0" Vis="0" AxMin="-0.9325034622952566" AxMax="0.942864611876315" AdcAxMin="-0.9325034622952566" AdcAxMax="0.942864611876315" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0" />
+			<Chan Version="1" Chan="4" DMode="11" DWidth="1" DOffset="1000" DError="1" LnType="0" Vis="0" Ax="0" AdcAxMax="10" RateAxMax="10" ChType="1" DefDMode="11" BackOv="0" />
+			<XInfo Right="0.29999999242136255" CurFr="0" DCStart="XLow()" DCEnd="XHigh()" DCRatio="1000" XAxSmall="5" VCLabMode="3" HCLabMode="3" VCCount="1" HCCount="8">
+				<VCur id="0" LabMode="3" LabPos="0.2" Num="0" />
+				<HCur id="1" Pos="-0.5088646347868049" LabMode="3" LabPos="0.2" Num="1" />
+				<HCur id="2" Pos="0.5062520403962978" LabMode="3" LabPos="0.2" Num="2" />
+				<HCur id="3" Pos="-0.5108115831586969" LabMode="3" LabPos="0.2" Num="3" Chan="1" />
+				<HCur id="4" Pos="0.49771385025719195" LabMode="3" LabPos="0.2" Num="4" Chan="1" />
+				<HCur id="5" Pos="0.4988269794721407" LabMode="3" LabPos="0.2" Num="5" Chan="2" />
+				<HCur id="6" Pos="-0.49882697947214066" LabMode="3" LabPos="0.2" Num="6" Chan="2" />
+				<HCur id="7" Pos="0.5206921713749608" LabMode="3" LabPos="0.2" Num="7" Chan="3" />
+				<HCur id="8" Pos="-0.5399770666110707" LabMode="3" LabPos="0.2" Num="8" Chan="3" />
+			</XInfo>
+			<ChOrder Chans="5">
+				<c id="0" />
+				<c id="1" Chan="1" />
+				<c id="2" Chan="2" />
+				<c id="3" Chan="3" />
+				<c id="4" Chan="4" />
+			</ChOrder>
+			<CursVals XZero="0" YZero="0" />
+			<CursRegs XZero="0" YZero="0" />
+			<OvDraw3d YProp="0.5" XScale="0.5" YScale="0.5" />
+		</View>
+		<ProcR Name="SetAverage" Type="0" Frms="1">
+			<SetAverage Bins="1500" Width="0.299999992" CSCod="-50" CSMsk="1" CSStr="1" />
+			<m FSCod="-1" FSSta="1" OptY="0" />
+			<u id="0" FSCod="-1" FSSta="1" Last="17" Next="17" />
+			<DocCfs>
+				<View>
+					<WPlace flags="0" showc="1" minx="-1" miny="-1" maxx="-9" maxy="-36" t="-3" b="874" l="1030" r="1396" />
+					<Font hgt="-12" hthou="-125" wgt="400" paf="18" fnam="Times New Roman" />
+					<Chan Version="1" Chan="0" DMode="2" DDSize="-1" DWidth="1" DOffset="-5" DError="1" LnType="0" AxMin="-2.1987951807228914" AxMax="2.1987951807228914" AdcAxMin="-2.1987951807228914" AdcAxMax="2.1987951807228914" RateAxMax="10" AxType="1" DefDMode="2" BackOv="0" />
+					<XInfo Right="0.29999999242136255" DCStart="XLow()" DCEnd="XHigh()" DCRatio="1000" XAxSmall="5" VCLabMode="3" HCLabMode="3" VCCount="1" HCCount="2">
+						<VCur id="0" LabMode="3" LabPos="0.2" Num="0" />
+						<HCur id="1" Pos="-0.5017763361136854" LabMode="3" LabPos="0.2" Num="1" />
+						<HCur id="2" Pos="0.49613839975285756" LabMode="3" LabPos="0.2" Num="2" />
+					</XInfo>
+					<ChOrder Chans="1">
+						<c id="0" />
+					</ChOrder>
+					<CursVals XZero="0" YZero="0" />
+					<CursRegs XZero="0" YZero="0" />
+					<OvDraw3d YProp="0.5" XScale="0.5" YScale="0.5" />
+				</View>
+			</DocCfs>
+		</ProcR>
+	</DocCfs>
+	<App>
+		<WPlace flags="2" showc="3" minx="-1" miny="-1" maxx="-1" maxy="-1" t="22" b="343" l="22" r="502" />
+	</App>
+</CEDResources>
