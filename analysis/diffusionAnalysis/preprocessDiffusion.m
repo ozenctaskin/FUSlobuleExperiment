@@ -152,8 +152,8 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     % Convert mif to nifti and separate bvac-bvals so that we can pass everything to NODDI toolbox
     upscaled_preprocessedImage_nifti = fullfile(noddiFolder, 'upscaled_clean_dwi.nii');
     mask_nifti = fullfile(noddiFolder, 'upscaled_clean_mask.nii');
-    bvecs_nifti = fullfile(noddiFolder, 'bvecs.mat');
-    bvals_nifti = fullfile(noddiFolder, 'bvals.mat');
+    bvecs_nifti = fullfile(noddiFolder, 'upscaled_clean.bvecs');
+    bvals_nifti = fullfile(noddiFolder, 'upscaled_clean.bvals');
     system(['mrconvert -export_grad_fsl ' bvecs_nifti ' ' bvals_nifti ' ' upscaled_preprocessedImage ' ' upscaled_preprocessedImage_nifti]);
     system(['mrconvert ' mask ' ' mask_nifti]);
 
@@ -163,7 +163,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     protocol = FSL2Protocol(bvals_nifti, bvecs_nifti); 
     noddi = MakeModel('WatsonSHStickTortIsoV_B0'); 
     fittedNODDI = fullfile(noddiFolder, 'NODDI_fitted.mat');
-    batch_fitting(noddiROI, protocol, noddi, fittedNODDI, 12); 
+    batch_fitting(noddiROI, protocol, noddi, fittedNODDI, 8); 
     %% Subject tractography 
     % Perform a rigid registration between preprocessed dwi and anatomical
     % and run 5ttgen tissue segmentation
