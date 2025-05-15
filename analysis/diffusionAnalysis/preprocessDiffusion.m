@@ -35,11 +35,15 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     if ~isfolder(anatProcess)
         mkdir(anatProcess)
     end  
-    subjectFod = fullfile(workdir, '07-subjectFOD_withOwnResponseFun');
+    noddiFolder = fullfile(workdir, '07-NODDI');
+    if ~isfolder(noddiFolder)
+        mkdir(noddiFolder)
+    end  
+    subjectFod = fullfile(workdir, '08-subjectFOD_withOwnResponseFun');
     if ~isfolder(subjectFod)
         mkdir(subjectFod)
     end  
-    subjectTractography = fullfile(workdir, '08-subjectTractography');
+    subjectTractography = fullfile(workdir, '09-subjectTractography');
     if ~isfolder(subjectTractography)
         mkdir(subjectTractography)
     end  
@@ -135,6 +139,32 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     % system(['dwi2tensor -mask ' maskDilated ' ' upscaled_preprocessedImage ' ' dt]);
     % system(['tensor2metric -mask ' maskDilated ' -fa ' fa ' -adc ' md ' -ad ' ad ' -rd ' rd ' ' dt]);
 
+    % Calculate subject FOD image with own response function. Not to be
+    % used for fixel based analysis as we need a group FOD. Use dilated
+    % mask. For normalization, use the undilated mask.
+    wmFOD = fullfile(subjectFod, 'wm.mif'); wmFOD_norm = fullfile(subjectFod, 'wm_norm.mif');
+    gmFOD = fullfile(subjectFod, 'gm.mif'); gmFOD_norm = fullfile(subjectFod, 'gm_norm.mif');
+    csfFOD = fullfile(subjectFod, 'csf.mif'); csfFOD_norm = fullfile(subjectFod, 'csf_norm.mif');
+    % system(['dwi2fod msmt_csd ' upscaled_preprocessedImage ' ' wmResponse ' ' wmFOD ' ' gmResponse ' ' gmFOD ' ' csfResponse ' ' csfFOD ' -nthreads 12 -mask ' maskDilated]);
+    % system(['mtnormalise ' wmFOD ' ' wmFOD_norm ' ' gmFOD ' ' gmFOD_norm ' ' csfFOD ' ' csfFOD_norm ' -mask ' mask]);
+
+    %% NODDI
+    % Convert mif to nifti and separate bvac-bvals so that we can pass everything to NODDI toolbox
+    upscaled_preprocessedImage_nifti = fullfile(noddiFolder, 'upscaled_clean_dwi.nii');
+    mask_nifti = fullfile(noddiFolder, 'upscaled_clean_mask.nii');
+    bvecs_nifti = fullfile(noddiFolder, 'bvecs.mat');
+    bvals_nifti = fullfile(noddiFolder, 'bvals.mat');
+    system(['mrconvert -export_grad_fsl ' bvecs_nifti ' ' bvals_nifti ' ' upscaled_preprocessedImage ' ' upscaled_preprocessedImage_nifti]);
+    system(['mrconvert ' mask ' ' mask_nifti]);
+
+    % Convert data for fitting
+    noddiROI = fullfile(noddiFolder, 'NODDI_ROI.mat');
+    CreateROI(upscaled_preprocessedImage_nifti, mask_nifti, noddiROI);
+    protocol = FSL2Protocol(bvals_nifti, bvecs_nifti); 
+    noddi = MakeModel('WatsonSHStickTortIsoV_B0'); 
+    fittedNODDI = fullfile(noddiFolder, 'NODDI_fitted.mat');
+    batch_fitting(noddiROI, protocol, noddi, fittedNODDI, 12); 
+    %% Subject tractography 
     % Perform a rigid registration between preprocessed dwi and anatomical
     % and run 5ttgen tissue segmentation
     anatomical = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmiso_T1w.nii.gz']);
@@ -149,22 +179,13 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     tissueSegments = fullfile(anatProcess, 'segmented5Tissues.mif');
     % system(['5ttgen fsl ' registeredAnatomical ' ' tissueSegments ' -nthreads 12']); % ADD T2 here as well
 
-    % Calculate subject FOD image with own response function. Not to be
-    % used for fixel based analysis as we need a group FOD. Use dilated
-    % mask. For normalization, use the undilated mask.
-    wmFOD = fullfile(subjectFod, 'wm.mif'); wmFOD_norm = fullfile(subjectFod, 'wm_norm.mif');
-    gmFOD = fullfile(subjectFod, 'gm.mif'); gmFOD_norm = fullfile(subjectFod, 'gm_norm.mif');
-    csfFOD = fullfile(subjectFod, 'csf.mif'); csfFOD_norm = fullfile(subjectFod, 'csf_norm.mif');
-    % system(['dwi2fod msmt_csd ' upscaled_preprocessedImage ' ' wmResponse ' ' wmFOD ' ' gmResponse ' ' gmFOD ' ' csfResponse ' ' csfFOD ' -nthreads 12 -mask ' maskDilated]);
-    % system(['mtnormalise ' wmFOD ' ' wmFOD_norm ' ' gmFOD ' ' gmFOD_norm ' ' csfFOD ' ' csfFOD_norm ' -mask ' mask]);
-
     % Calculate whole brain tractography and SIFT. We might want to go up 
     % to 100 million streamlines. ADDD BIAS CORRECTION
     % NECESSARY for SIFT!
     seedGM = fullfile(subjectTractography, 'seedGM.mif');
     wholeBrainTracts = fullfile(subjectTractography, 'wholeBrainTracts.tck');
     wholeBrainTracts_SIFTED = fullfile(subjectTractography, 'wholeBrainTracts_SIFTED.tck');
-    system(['5tt2gmwmi ' tissueSegments ' ' seedGM]);
-    system(['tckgen -act ' tissueSegments ' -algorithm  Tensor_Prob -minlength 100 -select 5000 -nthreads 12 -seed_gmwmi ' seedGM ' ' upscaled_preprocessedImage ' ' wholeBrainTracts]);
-    system(['tcksift ' wholeBrainTracts ' ' wmFOD_norm ' ' wholeBrainTracts_SIFTED]);
+    % system(['5tt2gmwmi ' tissueSegments ' ' seedGM]);
+    % system(['tckgen -act ' tissueSegments ' -algorithm  Tensor_Prob -minlength 100 -select 5000 -nthreads 12 -seed_gmwmi ' seedGM ' ' upscaled_preprocessedImage ' ' wholeBrainTracts]);
+    % system(['tcksift ' wholeBrainTracts ' ' wmFOD_norm ' ' wholeBrainTracts_SIFTED]);
 end
