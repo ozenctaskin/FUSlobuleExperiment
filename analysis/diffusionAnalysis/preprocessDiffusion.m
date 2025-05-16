@@ -5,48 +5,19 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     if ~isfolder(analysisFolder)
         mkdir(analysisFolder)
     end
-
     % Create a subdirectory workdirs 
-    workdir = fullfile(analysisFolder, 'intermediateFiles');
-    if ~isfolder(workdir)
-        mkdir(workdir)
+    intermediateFiles = fullfile(analysisFolder, 'intermediateFiles');
+    if ~isfolder(intermediateFiles)
+        mkdir(intermediateFiles)
     end   
-    mifFolder = fullfile(workdir, '01-mifConverted');
-    if ~isfolder(mifFolder)
-        mkdir(mifFolder)
+    preprocessedResults = fullfile(analysisFolder, 'preprocessed');
+    if ~isfolder(preprocessedResults)
+        mkdir(preprocessedResults)
     end  
-    denoisedFolder = fullfile(workdir, '02-denoised');
-    if ~isfolder(denoisedFolder)
-        mkdir(denoisedFolder)
-    end  
-    dirCombined = fullfile(workdir, '03-dirCombined');
-    if ~isfolder(dirCombined)
-        mkdir(dirCombined)
-    end  
-    preprocessedFolder = fullfile(workdir, '04-preprocessed');
-    if ~isfolder(preprocessedFolder)
-        mkdir(preprocessedFolder)
-    end  
-    dtiFolder = fullfile(workdir, '05-dti');
-    if ~isfolder(dtiFolder)
-        mkdir(dtiFolder)
-    end  
-    anatProcess = fullfile(workdir, '06-anat');
-    if ~isfolder(anatProcess)
-        mkdir(anatProcess)
-    end  
-    noddiFolder = fullfile(workdir, '07-NODDI');
-    if ~isfolder(noddiFolder)
-        mkdir(noddiFolder)
-    end  
-    subjectFod = fullfile(workdir, '08-subjectFOD_withOwnResponseFun');
-    if ~isfolder(subjectFod)
-        mkdir(subjectFod)
-    end  
-    subjectTractography = fullfile(workdir, '09-subjectTractography');
-    if ~isfolder(subjectTractography)
-        mkdir(subjectTractography)
-    end  
+    registrationsFolder = fullfile(preprocessedResults, 'registrations');
+     if ~isfolder(registrationsFolder)
+        mkdir(registrationsFolder)
+    end     
 
     % Get the input names
     dwiFolder = fullfile(dataFolder, subjectID, sessionID, 'dwi');
@@ -79,113 +50,78 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
         [path, name, ext] = fileparts(data{ii});
 
         % Convert data to mif adding bvecs and bvals to headers
-        mif = fullfile(mifFolder, replace(name, '.nii', '.mif'));
-        % system(['mrconvert -fslgrad ' bvecs{ii} ' ' bvals{ii} ' ' data{ii} ' ' mif]);
+        mif = fullfile(intermediateFiles, replace(name, '.nii', '.mif'));
+        system(['mrconvert -fslgrad ' bvecs{ii} ' ' bvals{ii} ' ' data{ii} ' ' mif]);
 
         % Do denoising with MP-PCA, and calculate residuals
-        denoised = fullfile(denoisedFolder, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-denoised_dir-'}));
-        noise = fullfile(denoisedFolder, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-noise_dir-'}));
-        residuals = fullfile(denoisedFolder, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-residuals_dir-'}));
-        % system(['dwidenoise ' mif ' ' denoised ' -noise ' noise ' -nthreads 12']);
-        % system(['mrcalc ' mif ' ' denoised ' -subtract ' residuals]);
+        denoised = fullfile(intermediateFiles, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-denoised_dir-'}));
+        noise = fullfile(intermediateFiles, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-noise_dir-'}));
+        residuals = fullfile(intermediateFiles, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-residuals_dir-'}));
+        system(['dwidenoise ' mif ' ' denoised ' -noise ' noise ' -nthreads 12']);
+        system(['mrcalc ' mif ' ' denoised ' -subtract ' residuals]);
 
         % Perform gibbs ringing correction
         unringed = strrep(denoised, 'rec-denoised', 'rec-denoisedUnringed');
-        % system(['mrdegibbs ' denoised ' ' unringed ' -axes 0,1 -nthreads 12'])
+        system(['mrdegibbs ' denoised ' ' unringed ' -axes 0,1 -nthreads 12'])
 
         % Append paths to MP denoised cell
         dataMPdenoised{ii} = unringed;
     end
 
     % Combine 99 and 98 directions; AP with AP, PA with PA
-    APdiff = fullfile(dirCombined, 'AP_all_data.mif'); 
-    PAdiff = fullfile(dirCombined, 'PA_all_data.mif');
-    % system(['dwicat ' dataMPdenoised{1} ' ' dataMPdenoised{3} ' ' APdiff]);
-    % system(['dwicat ' dataMPdenoised{2} ' ' dataMPdenoised{4} ' ' PAdiff]);
+    APdiff = fullfile(intermediateFiles, 'combinedAP.mif'); 
+    PAdiff = fullfile(intermediateFiles, 'combinedPA.mif');
+    system(['dwicat ' dataMPdenoised{1} ' ' dataMPdenoised{3} ' ' APdiff]);
+    system(['dwicat ' dataMPdenoised{2} ' ' dataMPdenoised{4} ' ' PAdiff]);
 
     % Concatanate AP-PA pairs
-    combined = fullfile(dirCombined, 'combinedDWI.mif'); 
-    % system(['mrcat ' APdiff ' ' PAdiff ' ' combined ' -axis 3']);
+    combinedDWI = fullfile(intermediateFiles, 'combinedDWI.mif'); 
+    system(['mrcat ' APdiff ' ' PAdiff ' ' combinedDWI ' -axis 3']);
     
-    % Pass it to preprocessing, %% CUDA VERSION NOT WORKING FOR SOME REASON - FIX!! 
-    preprocessedImage = fullfile(preprocessedFolder, 'clean_dwi.mif');
-    % system(['dwifslpreproc ' combined ' ' preprocessedImage ' -pe_dir AP -rpe_all -readout_time 0.0959097 -eddy_options " --nthr=12 " -nthreads 12 -topup_options " --nthr=12 " ']);
+    % Pass it to preprocessing
+    fslCorrectedDWI = fullfile(intermediateFiles, 'fslCorrectedDWI.mif');
+    cleanDWI = fullfile(preprocessedResults, 'cleanDWI.mif');
+    system(['dwifslpreproc ' combinedDWI ' ' fslCorrectedDWI ' -pe_dir AP -rpe_all -readout_time 0.0959097 -nthreads 12 -topup_options " --nthr=12 " ']);
+    system(['dwibiascorrect ants ' fslCorrectedDWI ' ' cleanDWI]);
 
     % Calculate multi-shell, multi-tissue response function. Happens before
     % upscaling.
-    wmResponse = fullfile(preprocessedFolder, 'wm_response.txt');
-    gmResponse = fullfile(preprocessedFolder, 'gm_response.txt');
-    csfResponse = fullfile(preprocessedFolder, 'csf_response.txt');    
-    voxels = fullfile(preprocessedFolder, 'voxels.mif');
-    % system(['dwi2response dhollander -nthreads 12 ' preprocessedImage ' ' wmResponse ' ' gmResponse ' ' csfResponse ' -voxels ' voxels]);
+    wmResponse = fullfile(preprocessedResults, 'wmResponse.txt');
+    gmResponse = fullfile(preprocessedResults, 'gmResponse.txt');
+    csfResponse = fullfile(preprocessedResults, 'csfResponse.txt');    
+    responseVoxelSelection = fullfile(intermediateFiles, 'responseVoxelSelection.mif');
+    system(['dwi2response dhollander -nthreads 12 ' cleanDWI ' ' wmResponse ' ' gmResponse ' ' csfResponse ' -voxels ' responseVoxelSelection]);
 
     % Now upscale the cleaned image
-    upscaled_preprocessedImage = fullfile(preprocessedFolder, 'upscaled_clean_dwi.mif');
-    % system(['mrgrid ' preprocessedImage ' regrid -vox 1.25 ' upscaled_preprocessedImage])
+    upscaledCleanDWI = fullfile(preprocessedResults, 'upscaledCleanDWI.mif');
+    system(['mrgrid ' cleanDWI ' regrid -vox 1.25 ' upscaledCleanDWI])
     
     % Create a whole brain mask from upscaled images. Provide a dilated
     % version as well since it's good for maps.
-    mask = fullfile(preprocessedFolder, 'upscaled_clean_mask.mif');
-    maskDilated = fullfile(preprocessedFolder, 'upscaled_clean_mask_dilated.mif');
-    % system(['dwi2mask ' upscaled_preprocessedImage ' ' mask]);
-    % system(['maskfilter ' mask ' dilate -npass 2 ' maskDilated]);
+    mask = fullfile(preprocessedResults, 'mask.mif');
+    upscaledMask = fullfile(preprocessedResults, 'upscaledMask.mif');
+    upscaledMaskDilated = fullfile(preprocessedResults, 'upscaledMaskDilated.mif');
+    system(['dwi2mask ' cleanDWI ' ' mask]);
+    system(['dwi2mask ' upscaledCleanDWI ' ' upscaledMask]);
+    system(['maskfilter ' upscaledMask ' dilate -npass 2 ' upscaledMaskDilated]);
 
-    % Run DTI. Calculate metrics from the upscaled dilated mask
-    dt = fullfile(dtiFolder, 'dt.mif');
-    fa = fullfile(dtiFolder, 'fa.mif');
-    md = fullfile(dtiFolder, 'md.mif');
-    ad = fullfile(dtiFolder, 'ad.mif');
-    rd = fullfile(dtiFolder, 'rd.mif');
-    % system(['dwi2tensor -mask ' maskDilated ' ' upscaled_preprocessedImage ' ' dt]);
-    % system(['tensor2metric -mask ' maskDilated ' -fa ' fa ' -adc ' md ' -ad ' ad ' -rd ' rd ' ' dt]);
-
-    % Calculate subject FOD image with own response function. Not to be
-    % used for fixel based analysis as we need a group FOD. Use dilated
-    % mask. For normalization, use the undilated mask.
-    wmFOD = fullfile(subjectFod, 'wm.mif'); wmFOD_norm = fullfile(subjectFod, 'wm_norm.mif');
-    gmFOD = fullfile(subjectFod, 'gm.mif'); gmFOD_norm = fullfile(subjectFod, 'gm_norm.mif');
-    csfFOD = fullfile(subjectFod, 'csf.mif'); csfFOD_norm = fullfile(subjectFod, 'csf_norm.mif');
-    % system(['dwi2fod msmt_csd ' upscaled_preprocessedImage ' ' wmResponse ' ' wmFOD ' ' gmResponse ' ' gmFOD ' ' csfResponse ' ' csfFOD ' -nthreads 12 -mask ' maskDilated]);
-    % system(['mtnormalise ' wmFOD ' ' wmFOD_norm ' ' gmFOD ' ' gmFOD_norm ' ' csfFOD ' ' csfFOD_norm ' -mask ' mask]);
-
-    %% NODDI
-    % Convert mif to nifti and separate bvac-bvals so that we can pass everything to NODDI toolbox
-    upscaled_preprocessedImage_nifti = fullfile(noddiFolder, 'upscaled_clean_dwi.nii');
-    mask_nifti = fullfile(noddiFolder, 'upscaled_clean_mask.nii');
-    bvecs_nifti = fullfile(noddiFolder, 'upscaled_clean.bvecs');
-    bvals_nifti = fullfile(noddiFolder, 'upscaled_clean.bvals');
-    system(['mrconvert -export_grad_fsl ' bvecs_nifti ' ' bvals_nifti ' ' upscaled_preprocessedImage ' ' upscaled_preprocessedImage_nifti]);
-    system(['mrconvert ' mask ' ' mask_nifti]);
-
-    % Convert data for fitting
-    noddiROI = fullfile(noddiFolder, 'NODDI_ROI.mat');
-    CreateROI(upscaled_preprocessedImage_nifti, mask_nifti, noddiROI);
-    protocol = FSL2Protocol(bvals_nifti, bvecs_nifti); 
-    noddi = MakeModel('WatsonSHStickTortIsoV_B0'); 
-    fittedNODDI = fullfile(noddiFolder, 'NODDI_fitted.mat');
-    batch_fitting(noddiROI, protocol, noddi, fittedNODDI, 8); 
-    %% Subject tractography 
     % Perform a rigid registration between preprocessed dwi and anatomical
     % and run 5ttgen tissue segmentation
-    anatomical = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmiso_T1w.nii.gz']);
-    singleVolDWI = fullfile(anatProcess, 'singleVolDWI.nii.gz');
-    % system(['mrconvert ' upscaled_preprocessedImage ' -coord 3 0 -axes 0,1,2 ' singleVolDWI]);
-    % system(['antsRegistrationSyN.sh -m ' singleVolDWI ' -f ' anatomical ' -t r -n 12 -o ' fullfile(anatProcess, 'dwi2anat')]);
-
-    registeredAnatomical = fullfile(anatProcess, 'anatInDWI.nii.gz');
-    genericAffine = fullfile(anatProcess, 'dwi2anat0GenericAffine.mat');
-    % system(['antsApplyTransforms -i ' anatomical ' -r ' anatomical ' -o ' registeredAnatomical ' -t [ ' genericAffine ',1 ]']);
+    T1Image = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmiso_T1w.nii.gz']);
+    T2Image = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmiso_T2w.nii.gz']);
     
-    tissueSegments = fullfile(anatProcess, 'segmented5Tissues.mif');
-    % system(['5ttgen fsl ' registeredAnatomical ' ' tissueSegments ' -nthreads 12']); % ADD T2 here as well
+    singleVolDWI = fullfile(intermediateFiles, 'singleVolDWI.nii.gz');
+    system(['mrconvert ' upscaledCleanDWI ' -coord 3 0 -axes 0,1,2 ' singleVolDWI]);
+    system(['antsRegistrationSyN.sh -m ' singleVolDWI ' -f ' T1Image ' -t r -n 12 -o ' fullfile(registrationsFolder, 'dwi2T1')]);
+    system(['antsRegistrationSyN.sh -m ' singleVolDWI ' -f ' T2Image ' -t r -n 12 -o ' fullfile(registrationsFolder, 'dwi2T2')]);
 
-    % Calculate whole brain tractography and SIFT. We might want to go up 
-    % to 100 million streamlines. ADDD BIAS CORRECTION
-    % NECESSARY for SIFT!
-    seedGM = fullfile(subjectTractography, 'seedGM.mif');
-    wholeBrainTracts = fullfile(subjectTractography, 'wholeBrainTracts.tck');
-    wholeBrainTracts_SIFTED = fullfile(subjectTractography, 'wholeBrainTracts_SIFTED.tck');
-    % system(['5tt2gmwmi ' tissueSegments ' ' seedGM]);
-    % system(['tckgen -act ' tissueSegments ' -algorithm  Tensor_Prob -minlength 100 -select 5000 -nthreads 12 -seed_gmwmi ' seedGM ' ' upscaled_preprocessedImage ' ' wholeBrainTracts]);
-    % system(['tcksift ' wholeBrainTracts ' ' wmFOD_norm ' ' wholeBrainTracts_SIFTED]);
+    T1InDWI = fullfile(preprocessedResults, 'T1InDWI.nii.gz');
+    T2InDWI = fullfile(preprocessedResults, 'T2InDWI.nii.gz');
+    genericAffineT1 = fullfile(registrationsFolder, 'dwi2T10GenericAffine.mat');
+    genericAffineT2 = fullfile(registrationsFolder, 'dwi2T20GenericAffine.mat');
+    system(['antsApplyTransforms -i ' T1Image ' -r ' T1Image ' -o ' T1InDWI ' -t [ ' genericAffineT1 ',1 ]']);
+    system(['antsApplyTransforms -i ' T2Image ' -r ' T2Image ' -o ' T2InDWI ' -t [ ' genericAffineT2 ',1 ]']);
+    
+    tissueSegments = fullfile(preprocessedResults, 'segmented5Tissues.mif');
+    system(['5ttgen fsl ' T1InDWI ' ' tissueSegments ' -nthreads 12 -t2 ' T2InDWI]);
 end
