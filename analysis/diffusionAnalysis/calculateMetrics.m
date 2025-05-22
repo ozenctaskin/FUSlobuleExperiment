@@ -33,7 +33,8 @@ function calculateMetrics(dataFolder, subjectID, sessionID)
     ak = fullfile(metricFolder, 'ak.mif');
     rk = fullfile(metricFolder, 'rk.mif');
     system(['dwi2tensor -mask ' upscaledMaskDilated ' -dkt ' dkt ' ' upscaledCleanDWI ' ' dt]);
-    system(['tensor2metric -mask ' upscaledMaskDilated ' -fa ' fa ' -adc ' md ' -ad ' ad ' -rd ' rd ' -mk ' mk ' -ak ' ak ' -rk ' rk ' -dkt ' dkt ' ' dt]);
+    system(['tensor2metric -mask ' upscaledMaskDilated ' -fa ' fa ' -adc ' md ' -ad ' ad ' -rd ' rd ' ' dt]);
+    % system(['tensor2metric -mask ' upscaledMaskDilated ' -mk ' mk ' -ak ' ak ' -rk ' rk ' ' dkt]);
 
     %% NODDI
     % Convert mif to nifti and separate bvac-bvals so that we can pass
