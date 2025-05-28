@@ -1,6 +1,6 @@
-function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionID, stim, anatomicalPath, MNITemplate, blur, combineMethod, inputWarp)
+function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, combineMethod)
 
-    % ADD PATH TO SUIT!! 
+    % ADD PATH TO SPM,SUIT,Freesurfer matlab library, and fieldtrip
     %
     %
     % IMPORTANT!!!! This script won't run if you do not start MATLAB from 
@@ -11,7 +11,7 @@ function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionI
     % your $PATH variables and uses its own paths, so afni functions can't 
     % be found.
     %
-    % Note: This function is for task-fMRI preprocessing only.
+    % Note: This function is for task-fMRI preprocessing only and spe.
     %
     % This script performs preprocessing on multi-echo images with AFNI. 
     % Use it if you want to analyze every run separately. This is
@@ -29,24 +29,31 @@ function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionI
     %   stim: .txt file in which your stimulus onset is located. Currently
     %   only a single condition is supported by this matlab script (finger
     %   tap vs. rest). 
-    %   anatomicalPath: Path to anatomical image you want to process
-    %   MNITemplate: You can find one in $FSLDIR/data/standard. use 1mm MNI
-    %   use the _brain one. 
     %   blur: Whether to use blur or not. Number of NA.
     %   combineMethod: Echo combination method, check afni_proc.py for 
     %   details
-    %   inputWarp: path to input warp. If you are processing data from the
-    %   same subject and session, no need to run the warp a second time. So
-    %   specify the output of the first run as an input here. 
-    
+
+    %% MRI preprocessing - AFNI
+
     % Set up variables we will use 
+    T1path = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmiso_T1w.nii.gz']);
+    T2path = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmiso_T2w.nii.gz']);
     blipForward = fullfile(dataFolder, subjectID, sessionID, 'func', [subjectID '_' sessionID '_task-fingerTap_dir-PA_run-1_echo-1_part-mag_bold.nii.gz']);
     blipReverse = fullfile(dataFolder, subjectID, sessionID, 'fmap', [subjectID '_' sessionID '_acq-e1_dir-AP_epi.nii.gz']);
     funcDatasetRun1 = fullfile(dataFolder, subjectID, sessionID, 'func', [subjectID '_' sessionID '_task-fingerTap_dir-PA_run-1_echo-*_part-mag_bold.nii.gz']);
     funcDatasetRun2 = fullfile(dataFolder, subjectID, sessionID, 'func', [subjectID '_' sessionID '_task-fingerTap_dir-PA_run-2_echo-*_part-mag_bold.nii.gz']);
 
+    % We need to deoblique the T1 image so that our output AFNI processing
+    % can be used directly across softwares. Do this without
+    % interpolation. And no need to do it for EPI as afni_proc will take
+    % care of this
+    T1pathDeobliqued = strrep(T1path, 'btoMPRAGE2x11mmiso_T1w', 'btoMPRAGE2x11mmisoDEOBLIQUED_T1w');
+    T2pathDeobliqued = strrep(T2path, 'btoSPACET22x2CAIPI1mmiso_T2w', 'btoSPACET22x2CAIPI1mmisoDEOBLIQUED_T2w');
+    system(['cd ' fullfile(dataFolder, subjectID, sessionID, 'anat') '; 3dcopy ' [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmiso_T1w.nii.gz'] ' _tmp_dset; 3drefit -oblique_recenter _tmp_dset+orig; 3drefit -deoblique _tmp_dset+orig; 3dcopy _tmp_dset+orig ' T1pathDeobliqued '; rm _tmp*']);
+    system(['cd ' fullfile(dataFolder, subjectID, sessionID, 'anat') '; 3dcopy ' [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmiso_T2w.nii.gz'] ' _tmp_dset; 3drefit -oblique_recenter _tmp_dset+orig; 3drefit -deoblique _tmp_dset+orig; 3dcopy _tmp_dset+orig ' T2pathDeobliqued '; rm _tmp*']);
+
     % Insert slice timing info from json to nifti
-    fprintf('\nAdding slice time information to data. Do not stop the script now or your MRi images get corrupted.\n');
+    fprintf('\nAdding slice time information to data. Do not stop the script now or your MRI images get corrupted.\n');
     system(['abids_tool.py -add_slice_times -input ' funcDatasetRun1]);
     system(['abids_tool.py -add_slice_times -input ' funcDatasetRun2]);
 
@@ -55,7 +62,7 @@ function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionI
     % info to the main body
     afni_line = ['cd ' fullfile(dataFolder, subjectID, sessionID) ';' 'afni_proc.py ' ...,
     '-subj_id ' subjectID ' ' ...,
-    '-copy_anat ' anatomicalPath ' '  ...,  
+    '-copy_anat ' T1pathDeobliqued ' '  ...,  
     '-anat_has_skull yes ' ..., 
     '-dsets_me_run ' funcDatasetRun1 ' ' ..., 
     '-dsets_me_run ' funcDatasetRun2 ' ' ...,          
@@ -66,12 +73,8 @@ function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionI
     '-radial_correlate_blocks tcat volreg ' ...,
     '-align_unifize_epi local ' ..., 
     '-align_opts_aea -cost lpc+ZZ -giant_move -check_flip ' ...,    
-    '-tlrc_base ' MNITemplate ' ' ..., 
-    '-tlrc_NL_warp ' ...,
-    '-tlrc_no_ss ' ...,
     '-volreg_align_to MIN_OUTLIER ' ...,
     '-volreg_align_e2a ' ..., 
-    '-volreg_tlrc_warp ' ...,
     '-volreg_compute_tsnr yes ' ..., 
     '-mask_epi_anat yes ' ...,
     '-regress_stim_times ' stim ' ' ...,          
@@ -93,14 +96,9 @@ function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionI
     
     % If blur is specified, add it to the function. 
     if ~strcmp(blur, 'NA')
-        afni_line = [afni_line ' -blur_size ' blur ' -blur_in_mask yes -blocks despike tshift align tlrc volreg mask combine blur scale regress'];
+        afni_line = [afni_line ' -blur_size ' blur ' -blur_in_mask yes -blocks despike tshift align volreg mask combine blur scale regress'];
     else
-        afni_line = [afni_line ' -blocks despike tshift align tlrc volreg mask combine scale regress'];
-    end
-    
-    % Get input warp if supplied
-    if ~strcmp(inputWarp, 'NA')
-        afni_line = [afni_line ' -tlrc_NL_warped_dsets ' inputWarp{1} ' ' inputWarp{2} ' ' inputWarp{3}];
+        afni_line = [afni_line ' -blocks despike tshift align volreg mask combine scale regress'];
     end
 
     % Run the afni line
@@ -126,61 +124,5 @@ function warpSet = preprocessMESimpleTask_lobule(dataFolder, subjectID, sessionI
 
     % Run preprocessing 
     system(['cd ' fullfile(dataFolder, subjectID, sessionID) '; ' 'tcsh -xef ' procScript ' 2>&1 | tee ' outputReport]);
-
-    % Convert func and anat results to nifti 
-    outputFolder = fullfile(dataFolder, subjectID, sessionID, [subjectID '.results']);
-    func = fullfile(outputFolder, ['stats.' subjectID '_REML+tlrc']);
-    anat = fullfile(outputFolder, ['anat_final.' subjectID '+tlrc.HEAD']);
-    system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix beta ' func '''[tap#0_Coef]''']);
-    system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix tstat ' func '''[tap#0_Tstat]''']);
-    system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix fstat ' func '''[tap_Fstat]''']);
-    system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix final_anat ' anat]);
-
-    % Return final anat and warps to be used for hte next run
-    warpSet = {fullfile(outputFolder,'final_anat.nii'), ...
-               fullfile(outputFolder,'anat.un.aff.Xat.1D'), ...
-               fullfile(outputFolder,'anat.un.aff.qw_WARP.nii')};
-
-    % Plot the full flattened cerebellar beta activation with 10% threshold
-    cerebellarFolder = fullfile(outputFolder, 'cerebellarTarget');
-    if ~isfolder(cerebellarFolder)
-        mkdir(cerebellarFolder)
-    end
-    data = suit_map2surf(fullfile(outputFolder, 'beta.nii'));
-    fig = figure();
-    suit_plotflatmap(data, 'threshold', max(data)/100*10, 'cmap', hot)
-    saveas(fig, fullfile(cerebellarFolder, 'betaMap_10perThr.png'))
-    close all
-
-    % Clusterize and threshold the cerebellar activity so we get the lobule
-    % 5 and 8 activity only on separate images.
-    cerebellarMask = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'Cerebellar_fMRImask.nii.gz');
-    prefMap = fullfile(cerebellarFolder, 'ClusterMap.nii.gz');
-    prefDat = fullfile(cerebellarFolder, 'ClusterEffEst.nii.gz');
-    system(['3dClusterize -inset ' func ' -ithr 2 -idat 1 -mask ' cerebellarMask ' -NN 1 -bisided p=0.001 -clust_nvox 50 -pref_map ' prefMap ' -pref_dat ' prefDat]);
-
-    % Make separate binary masks from clustermaps and calculate internal
-    % center of mass with AFNI.
-    prefMapLoaded = MRIread(prefMap);
-    for ii = 1:max(max(max(prefMapLoaded.vol)))
-        clusterMask = fullfile(cerebellarFolder, ['ClusterMask_' num2str(ii) '.nii.gz']);
-        system(['mri_extract_label ' prefMap ' ' num2str(ii) ' ' clusterMask]);
-        [~, massRaw] = system(['3dCM -mask ' clusterMask ' -Icent ' prefMap]);
-        massRaw = strsplit(massRaw);
-        massRaw = cell2mat(cellfun(@str2double, massRaw(1:end-1), 'UniformOutput', false));
-        % Convert to LPI
-        massRaw(1) = massRaw(1)*-1; 
-        massRaw(2) = massRaw(2)*-1;
-        % Write TUS target
-        writematrix(massRaw, fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_COM.txt']));
-        % Convert to voxel grid and make plots for targeting
-        voxelGrid = round([-massRaw(1)+90 massRaw(2)+126 massRaw(3)+72] ./ 2.5); 
-        targetMask = fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_TargetMask.nii.gz']);
-        system(['fslmaths ' clusterMask ' -roi ' num2str(voxelGrid(1)) ' 1 ' num2str(voxelGrid(2)) ' 1 ' num2str(voxelGrid(3)) ' 1 0 1 -mul 3 -add ' clusterMask ' ' targetMask]);
-        data = suit_map2surf(targetMask);
-        fig = figure();
-        suit_plotflatmap(data, 'cmap', autumn)
-        saveas(fig, fullfile(cerebellarFolder, ['TUStargetPlot_Cluster_' num2str(ii) '.png']))
-        close all
-    end
+    
 end
