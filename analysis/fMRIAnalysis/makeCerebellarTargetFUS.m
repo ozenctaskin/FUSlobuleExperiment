@@ -5,9 +5,12 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     addpath(genpath('/home/chenlab-linux/Documents/MATLAB/toolboxes/freesurferMatlabLibrary'));
     addpath(genpath('/home/chenlab-linux/Documents/MATLAB/toolboxes/fieldtrip/external/afni'));
 
-    % Get the de-obliques anatomical images
+    % Get the de-obliques anatomical images and atlases
     T1pathDeobliqued = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmisoDEOBLIQUED_T1w.nii.gz']);
     T2pathDeobliqued = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmisoDEOBLIQUED_T2w.nii.gz']);
+    spm_Dir= fileparts(which('spm'));
+    atlasNettekoven = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'atl-NettekovenAsym32_space-SUIT_dseg.nii');
+    atlasDiedrichsen = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'atl-Anatom_space-SUIT_dseg.nii');
 
     %% Cerebellar processing - SUIT
 
@@ -42,7 +45,7 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
 
     % Register T2 to T1 and setup SUIT anatomy cell
     system(['antsRegistrationSyN.sh -m ' T2 ' -f ' T1 ' -t r -n 12 -o ' fullfile(workdir,'T2registered')]);
-    system(['gzip -d ' fullfile(workdir,'T2registeredWarped.nii.gz')]);
+    system(['gunzip ' fullfile(workdir,'T2registeredWarped.nii.gz') ' -f']);
     T2 = fullfile(workdir, 'T2registeredWarped.nii');
     anatomy = {T1, T2};
     [filePath, fileName, ~] = fileparts(anatomy{1});
@@ -54,20 +57,30 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     job.subjND.isolation = {fullfile(filePath, ['c_' fileName '_pcereb.nii'])};
     suit_normalize_dartel(job)
     
-    % Map Nettekoven32 atlas and cerebellar mask to subject fMRI space
-    spm_Dir= fileparts(which('spm'));
-    atlas = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'atl-NettekovenAsym32_space-SUIT_dseg.nii');
+    % Copy atlases into workdir, and update the path 
+    system(['cp ' atlasNettekoven ' ' workdir]);
+    system(['cp ' atlasDiedrichsen ' ' workdir]);
+    atlasNettekoven = fullfile(workdir, 'atl-NettekovenAsym32_space-SUIT_dseg.nii');
+    atlasDiedrichsen = fullfile(workdir, 'atl-Anatom_space-SUIT_dseg.nii');
+
+    % Map Nettekoven32/Diedrichsen atlas and cerebellar mask to subject
+    % fMRI space. We'll map Diedrichsen atlas directly to anatomical
+    % coordinates as we don't use it for any fMRI business
     job = [];
     job.Affine = {fullfile(filePath, ['Affine_' fileName '_seg1.mat'])};
     job.flowfield = {fullfile(filePath, ['u_a_' fileName '_seg1.nii'])};
-    job.resample = {atlas};
+    job.resample = {atlasNettekoven};
     job.ref = {beta};
-    suit_reslice_dartel_inv(job)  
+    suit_reslice_dartel_inv(job);  
     job.resample = {[spm_Dir '/toolbox/suit/templates/maskSUIT.nii']};
-    suit_reslice_dartel_inv(job)  
+    suit_reslice_dartel_inv(job);  
+    job.resample = {atlasDiedrichsen};
+    job.ref = {T1};
+    suit_reslice_dartel_inv(job);  
     cerebellarMaskResampled = fullfile(filePath, ['iw_maskSUIT_u_a_' fileName '_seg1.nii']);
-    atlasResampled = fullfile(filePath, ['iw_atl-NettekovenAsym32_space-SUIT_dseg_u_a_' fileName '_seg1.nii']);
-    
+    atlasNettekovenResampled = fullfile(filePath, ['iw_atl-NettekovenAsym32_space-SUIT_dseg_u_a_' fileName '_seg1.nii']);
+    atlasDiedrichsenResampled = fullfile(filePath, ['iw_atl-Anatom_space-SUIT_dseg_u_a_' fileName '_seg1.nii']);
+
     % Get the left/right motor regions from the Nettekoven atlas
     if strcmp(handedness, 'right')
         motorAtlas = fullfile(workdir, 'M3R.nii'); % Number 19 is the right hemi
@@ -76,8 +89,29 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
         motorAtlas = fullfile(workdir, 'M3L.nii'); % Number 3 is the left hemi
         atlasIndex = '3';
     end
-    system(['mri_extract_label ' atlasResampled ' ' atlasIndex ' ' motorAtlas]);
+    system(['mri_extract_label ' atlasNettekovenResampled ' ' atlasIndex ' ' motorAtlas]);
     system(['mri_binarize --i ' motorAtlas ' --match 128 --o ' motorAtlas]);
+
+    % Get the dentate mask and center of mass coordinates
+    if strcmp(handedness, 'right')
+        dentateMask = fullfile(workdir, 'dentateMaskRight.nii'); % idx is 30
+        atlasIndex = '30';
+    elseif strcmp(handedness, 'left')
+        dentateMask = fullfile(workdir, 'dentateMaskLeft.nii'); % idx is 29
+        atlasIndex = '29';
+    end
+    system(['fslmaths ' atlasDiedrichsenResampled ' -uthr ' atlasIndex ' -thr ' atlasIndex ' -bin ' dentateMask]);
+    system(['gunzip ' dentateMask ' -f']);
+    [~, massDentate] = system(['fslstats ' dentateMask ' -C ']);
+    massDentate_vox = strsplit(massDentate);
+    massDentate_vox = round(cell2mat(cellfun(@str2double, massDentate_vox(1:end-1), 'UniformOutput', false)));
+    [~, massDentate] = system(['fslstats ' dentateMask ' -c ']);
+    massDentate_mm = strsplit(massDentate);
+    massDentate_mm = round(cell2mat(cellfun(@str2double, massDentate_mm(1:end-1), 'UniformOutput', false)));    
+    writematrix(massDentate_mm, fullfile(cerebellarFolder, 'DentateCoordinatesCOM.txt'));
+    dentateTargetMask = fullfile(cerebellarFolder, 'dentateTargetMask.nii.gz');
+    system(['fslmaths ' dentateMask ' -roi ' num2str(massDentate_vox(1)) ' 1 ' num2str(massDentate_vox(2)) ' 1 ' num2str(massDentate_vox(3)) ' 1 0 1 -mul 3 -add ' dentateMask ' ' dentateTargetMask]);
+    system(['gunzip ' dentateTargetMask ' -f']);
 
     % Make a cerebellar flatmap plot for the beta values
     job = [];
