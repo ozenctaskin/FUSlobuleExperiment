@@ -10,7 +10,8 @@ data = load(dataPath, [filename, '_wave_data']);
 data = data.([filename, '_wave_data']);
 
 % Specify data topography (in frames not time). CBI pulse has different
-% timeline, specified below. 
+% timeline. Take the conditioning pulse as the artifact start. Happens at 
+% frames 975.
 samplingRate = 5000; 
 if contains(filename, 'CBI')
     artifactStart = 975;
@@ -19,7 +20,9 @@ else
 end
 
 % Calculate the number of frames that correspond to 100ms based on sampling
+% and set a 10 microVolt threshold for RMS
 hundredMs = samplingRate * 0.1; 
+RMSthreshold = 0.01; % 10 microVolt in milliVolt 
 
 % Create an empty struct to save the indices of to-be-deleted trials 
 droppedTrials = [];
@@ -47,7 +50,7 @@ for ii = 1:size(data.values,3)
         text(xLimits(2), yLimits(2), 'Warning: multiple peaks', 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top','Color', 'red');
     end  
     % Check that RMS of 100ms prior artifact is not bigger than 10microV
-    if rms(dat(artifactStart-hundredMs:artifactStart)) > 0.01
+    if rms(dat(artifactStart-hundredMs:artifactStart)) > RMSthreshold
         text(xLimits(2), yLimits(2) - 0.1*(yLimits(2) - yLimits(1)), 'Warning: RMS baseline > 10microV', ...
         'HorizontalAlignment', 'right', 'VerticalAlignment', 'top', ...
         'Color', 'red');
