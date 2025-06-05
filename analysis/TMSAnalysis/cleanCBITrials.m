@@ -9,6 +9,18 @@ function droppedTrials = cleanCBITrials(dataPath)
 data = load(dataPath, [filename, '_wave_data']);
 data = data.([filename, '_wave_data']);
 
+% Specify data topography (in frames not time). CBI pulse has different
+% timeline, specified below. 
+samplingRate = 5000; 
+if contains(filename, 'CBI')
+    artifactStart = 975;
+else
+    artifactStart = 2750;
+end
+
+% Calculate the number of frames that correspond to 100ms based on sampling
+hundredMs = samplingRate * 0.1; 
+
 % Create an empty struct to save the indices of to-be-deleted trials 
 droppedTrials = [];
 
@@ -18,11 +30,30 @@ for ii = 1:size(data.values,3)
     dat = data.values(:,1,ii);
     plot(dat)
     hold on
-    ylim([-0.6 0.6])
-    plot([0:2752], ones(length([0:2752]))*0.05, 'r')
-    plot([0:2752], ones(length([0:2752]))*-0.05, 'r')
-    hold off
+    ylim([-1 1])
+    plot(artifactStart-hundredMs:artifactStart, ones(length(artifactStart-hundredMs:artifactStart))*0.05, 'r')
+    plot(artifactStart-hundredMs:artifactStart, ones(length(artifactStart-hundredMs:artifactStart))*-0.05, 'r')
+    maxIdx = find(dat(artifactStart+50:end) == max(dat(artifactStart+50:end)));
+    minIdx = find(dat(artifactStart+50:end) == min(dat(artifactStart+50:end)));
+    plot((artifactStart+50 + maxIdx-1), max(dat(artifactStart+50:end)), 'r*')
+    plot((artifactStart+50 + minIdx-1), min(dat(artifactStart+50:end)), 'r*')
+    % Get axis limits
+    xLimits = xlim;
+    yLimits = ylim;
 
+    % Check if there are more than 2 peaks. Plot a warning. 
+    if length(maxIdx) > 1 || length(minIdx) > 1
+        % Add text to the top right corner
+        text(xLimits(2), yLimits(2), 'Warning: multiple peaks', 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top','Color', 'red');
+    end  
+    % Check that RMS of 100ms prior artifact is not bigger than 10microV
+    if rms(dat(artifactStart-hundredMs:artifactStart)) > 0.01
+        text(xLimits(2), yLimits(2) - 0.1*(yLimits(2) - yLimits(1)), 'Warning: RMS baseline > 10microV', ...
+        'HorizontalAlignment', 'right', 'VerticalAlignment', 'top', ...
+        'Color', 'red');
+    end
+    hold off
+    
     decision = input(['Drop trial number ' num2str(ii) '/' num2str(size(data.values,3)) ' enter: y/n: \n'], 's');
     if strcmp(decision, 'y')
         droppedTrials = [droppedTrials, ii];
