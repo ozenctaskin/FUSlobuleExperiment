@@ -1,8 +1,5 @@
 function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, combineMethod)
 
-    % ADD PATH TO SPM,SUIT,Freesurfer matlab library, and fieldtrip
-    %
-    %
     % IMPORTANT!!!! This script won't run if you do not start MATLAB from 
     % your terminal. If you are on linux, run "matlab" on your terminal. 
     % If you are on mac, run "open /Applications/MATLAB_R2023b.app" 
@@ -11,15 +8,7 @@ function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, 
     % your $PATH variables and uses its own paths, so afni functions can't 
     % be found.
     %
-    % Note: This function is for task-fMRI preprocessing only and spe.
-    %
-    % This script performs preprocessing on multi-echo images with AFNI. 
-    % Use it if you want to analyze every run separately. This is
-    % applicable for instance if you take the subject out of the scanner in
-    % the middle of the scan and therefore have multiple fieldmap images. 
-    % In the results folder look for final_func.nii and final_anat.nii
-    % files. These are your preprocessed final output converted to NIFTI 
-    % format. 
+    % Note: This function is for task-fMRI preprocessing only.
     %
     %   dataFolder: BIDS folder where your subjects are located
     %   subjectID: Name of the subject folder located in dataFolder. e.g

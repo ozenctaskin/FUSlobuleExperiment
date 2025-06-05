@@ -1,4 +1,22 @@
 function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster, handedness)
+    
+    % This function takes the output of preprocessCerebellarFMRI function
+    % and produces cerebellar targets for sonication. Cluster analysis is
+    % performed and overlap of the clusters in the cerebellum and the
+    % cerebellar atlas is calculated to constrain the stimulation location.
+    % 
+    %   dataFolder: BIDS folder where your subjects are located.
+    %   subjectID: Name of the subject folder located in dataFolder. e.g
+    %              sub-01.
+    %   sessionID: Name of the session folder located in subject folder e.g
+    %              ses-01. 
+    %   outputCluster: Is number of clusters (targets) to produce from
+    %                  larger to smaller. For finger tapping targets, 
+    %                  setting this to 3 essentially captures both lobule 5
+    %                  and 8. If you set this to 'all', then all detected
+    %                  clusters are produced.
+    %   handedness: Whether the subject is left or right handed. Decides
+    %               which hemisphere atlas is used in the function.
 
     % Add path to functions we will use
     addpath(genpath('/home/chenlab-linux/Documents/MATLAB/toolboxes/spm12'));
