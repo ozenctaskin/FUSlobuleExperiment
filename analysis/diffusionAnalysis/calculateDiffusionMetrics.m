@@ -1,4 +1,4 @@
-function calculateMetrics(dataFolder, subjectID, sessionID)
+function calculateDiffusionMetrics(dataFolder, subjectID, sessionID)
    
     % Create the output directory 
     analysisFolder = fullfile(dataFolder, subjectID, sessionID, [subjectID '.diffusionResults']);
