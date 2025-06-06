@@ -6,8 +6,13 @@ function droppedTrials = cleanCBITrials(dataPath)
 
 % Load data
 [filepath, filename, extension] = fileparts(dataPath);
-data = load(dataPath, [filename, '_wave_data']);
-data = data.([filename, '_wave_data']);
+if strcmp(filename(1), '0') || strcmp(filename(1), '3')
+    data = load(dataPath, ['V', filename, '_wave_data']);
+    data = data.(['V', filename, '_wave_data']);    
+else    
+    data = load(dataPath, [filename, '_wave_data']);
+    data = data.([filename, '_wave_data']);
+end
 
 % Specify data topography (in frames not time). CBI pulse has different
 % timeline. Take the conditioning pulse as the artifact start. Happens at 
