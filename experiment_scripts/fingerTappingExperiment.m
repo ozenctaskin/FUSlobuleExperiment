@@ -35,7 +35,8 @@ Depth = input('\nEnter the depth measurement from modelling for this region: ');
 
 %% Connect to TPO
 disp('\nConnecting to TPO....');
-NFOpen('/dev/tty.usbmodem11401',1,1);
+ports = serialportlist;
+NFOpen(ports(end),1,1);
 
 % Push variables to device
 NFGlobalFrequency(NeuroFUS,xdrCenterFreq)
