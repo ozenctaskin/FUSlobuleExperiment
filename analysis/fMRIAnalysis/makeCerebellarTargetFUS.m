@@ -153,6 +153,21 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     prefDat = fullfile(cerebellarFolder, 'ClusterEffEst.nii.gz');
     system(['3dClusterize -inset ' func ' -ithr 2 -idat 1 -mask ' cerebellarMaskResampled ' -NN 1 -bisided p=0.001 -clust_nvox ' nVox ' -pref_map ' prefMap ' -pref_dat ' prefDat]);
 
+    % Make a surface plot from prefDat
+    prefdatGziped = fullfile(workdir, 'ClusterEffEst.nii');
+    system(['gunzip -c ' prefDat ' > ' prefdatGziped]);
+    job = [];
+    job.subj.resample = {prefdatGziped};
+    job.subj.affineTr = {fullfile(filePath, ['Affine_' fileName '_seg1.mat'])};
+    job.subj.flowfield = {fullfile(filePath, ['u_a_' fileName '_seg1.nii'])};
+    job.subj.mask = fullfile(filePath, ['iw_maskSUIT_u_a_' fileName '_seg1.nii']);
+    suit_reslice_dartel(job)
+    clusterResampled = fullfile(workdir, 'wdClusterEffEst.nii');
+    fig = figure();
+    suit_plotflatmap(suit_map2surf(clusterResampled), 'cmap', hot);
+    saveas(fig, fullfile(cerebellarFolder, 'ClusterMap.png'));
+    close all 
+
     % Make separate binary masks from clustermaps and calculate internal
     % center of mass with AFNI. Output number of clusters based on the
     % outputCluster variable. 
@@ -210,10 +225,10 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
         
         % Map masked target data to SUIT space
         peakTargetMaskSUIT = fullfile(workdir, ['wdCluster_' num2str(ii) '_peakTargetMask.nii']);
-        peakTargetMotorMaskSUIT = fullfile(workdir, ['wdCluster_' num2str(ii) '_peakMotorTargetMask.nii']);
+        peakMotorTargetMaskSUIT = fullfile(workdir, ['wdCluster_' num2str(ii) '_peakMotorTargetMask.nii']);
         job = [];
         job.interp = 0;
-        job.vox = [2.5, 2.5, 2.5];
+        % job.vox = [2.5, 2.5, 2.5];
         job.subj.resample = {peakTargetMask};
         job.subj.mask = {peakTargetMask};
         job.subj.affineTr = {fullfile(filePath, ['Affine_' fileName '_seg1.mat'])};
@@ -222,7 +237,7 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
         suit_reslice_dartel(job);
         job.subj.resample = {peakMotorTargetMask};
         job.subj.mask = {peakMotorTargetMask};
-        job.subj.outname = {peakTargetMotorMaskSUIT};
+        job.subj.outname = {peakMotorTargetMaskSUIT};
         suit_reslice_dartel(job);
         
         % Plot diagnostic target plots
@@ -231,9 +246,10 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
         suit_plotflatmap(data, 'cmap', autumn);
         saveas(fig, fullfile(cerebellarFolder, ['TUStargetPlot_Peak_' num2str(ii) '.png']));
         close all
-        data = suit_map2surf(peakTargetMotorMaskSUIT);
+        data = suit_map2surf(peakMotorTargetMaskSUIT);
         fig = figure();
         suit_plotflatmap(data, 'cmap', autumn);
         saveas(fig, fullfile(cerebellarFolder, ['TUStargetPlot_PeakMotor_' num2str(ii) '.png']));
         close all
     end
+end
