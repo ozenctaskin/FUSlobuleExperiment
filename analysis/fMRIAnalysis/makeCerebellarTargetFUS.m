@@ -252,4 +252,19 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
         saveas(fig, fullfile(cerebellarFolder, ['TUStargetPlot_PeakMotor_' num2str(ii) '.png']));
         close all
     end
+
+    % Plot the motor atlas
+    motorAtlasPlot = fullfile(workdir, ['wdNettekovenPlot.nii']);
+    job = [];
+    job.interp = 0;
+    job.subj.resample = {motorAtlas};
+    job.subj.mask = {motorAtlas};
+    job.subj.affineTr = {fullfile(filePath, ['Affine_' fileName '_seg1.mat'])};
+    job.subj.flowfield = {fullfile(filePath, ['u_a_' fileName '_seg1.nii'])};
+    job.subj.outname = {motorAtlasPlot};
+    suit_reslice_dartel(job);
+    data = suit_map2surf(motorAtlasPlot);
+    fig = figure();
+    suit_plotflatmap(data, 'cmap', autumn);
+    saveas(fig, fullfile(cerebellarFolder, ['MotorAtlasSurface.png']));
 end
