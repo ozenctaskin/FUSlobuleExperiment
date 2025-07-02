@@ -265,6 +265,8 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     suit_reslice_dartel(job);
     data = suit_map2surf(motorAtlasPlot);
     fig = figure();
-    suit_plotflatmap(data, 'cmap', autumn);
+    data(isnan(data)) = 0;
+    suit_plotflatmap(data, 'cmap', autumn, 'threshold', 0.1);
     saveas(fig, fullfile(cerebellarFolder, ['MotorAtlasSurface.png']));
+    close all
 end
