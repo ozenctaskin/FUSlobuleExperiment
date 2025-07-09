@@ -4,8 +4,8 @@ close all; clear all; clc
 setDiagnostics = false; % Saves diagnostic images in the data folder
 baselineCorrect = true; % Corrects baseline
 grandBaseline = true;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
-useClean = true;        % Use the clean data for analysis. Need to run cleanCBITrials first
-plotSubject = false;    % Plots all trials for all subjects in separate figure.
+useClean = false;        % Use the clean data for analysis. Need to run cleanCBITrials first
+plotSubject = true;    % Plots all trials for all subjects in separate figure.
 
 % Specify subject paths. Order needs to be baseline, DN, L5, L8, V1, 0w,
 % 30wFlip
@@ -62,6 +62,16 @@ data.L001 =   {fullfile(dataFolder, 'L001_ses2', 'EMG', 'baseline_300525_000.mat
                fullfile(dataFolder, 'L001_ses2', 'EMG', 'CBI55_3005_1737_000.mat')}; 
                % DROPPED fullfile(dataFolder, 'L001_ses2', 'EMG', 'CBI60_3005_1731_000.mat' 
 
+data.L004 =   {fullfile(dataFolder, 'L004', 'EMG', 'baseline_030725_000.mat'), ...
+               fullfile(dataFolder, 'L004', 'EMG', 'dentate_030725_000.mat'), ...
+               fullfile(dataFolder, 'L004', 'EMG', 'L5p2_030725_000.mat'), ...
+               fullfile(dataFolder, 'L004', 'EMG', 'L8_030725_000.mat'), ...
+               fullfile(dataFolder, 'L004', 'EMG', 'V1_030725_000.mat'), ...
+               fullfile(dataFolder, 'L004', 'EMG', 'V0w_030725_000.mat'), ...
+               fullfile(dataFolder, 'L004', 'EMG', 'Flip_030725_000.mat'), ...
+               fullfile(dataFolder, 'L004', 'EMG', 'CBI_55_0307_1656_000.mat'), ...
+               fullfile(dataFolder, 'L004', 'EMG', 'CBI_55_0307_1656_000.mat')};
+
 
 % Get fieldnames and empty cell for all subject peaks so we can do some
 % averaging at the end. Also specify order of the data entry
@@ -82,7 +92,11 @@ for sub = 1:length(subjectIDs)
         end
     end
     % Load data into cells
-    data.(subjectIDs{sub}) = cellfun(@(p) fullfile(fileparts(p), ['clean_' extractAfter(p, [filesep 'EMG' filesep])]), data.(subjectIDs{sub}), 'UniformOutput', false);
+    if useClean
+        data.(subjectIDs{sub}) = cellfun(@(p) fullfile(fileparts(p), ['clean_' extractAfter(p, [filesep 'EMG' filesep])]), data.(subjectIDs{sub}), 'UniformOutput', false);
+    else
+        data.(subjectIDs{sub}) = cellfun(@(p) fullfile(fileparts(p), [extractAfter(p, [filesep 'EMG' filesep])]), data.(subjectIDs{sub}), 'UniformOutput', false);
+    end        
     dataLoaded = cellfun(@(p) load_wave_data(p, useClean), data.(subjectIDs{sub}), 'UniformOutput', false);
     % Get an empty cell for subject peaks
     subjectPeaks = {};
