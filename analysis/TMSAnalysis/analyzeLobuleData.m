@@ -2,7 +2,7 @@ close all; clear all; clc
 
 % Decide what this function will do when run
 setDiagnostics = false; % Saves diagnostic images in the data folder
-baselineCorrect = false; % Corrects baseline
+baselineCorrect = true; % Corrects baseline
 grandBaseline = true;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
 useClean = true;        % Use the clean data for analysis. Need to run cleanCBITrials first
 plotSubject = true;    % Plots all trials for all subjects in separate figure.
@@ -234,10 +234,12 @@ for j = 1:length(h)
     patch(get(h(j), 'XData'), get(h(j), 'YData'), [0.3010 0.7450 0.9330], 'FaceAlpha', 0.5); % Fill boxes with color
 end
 
-% Scatter plot
+% Scatter plot with jitter
+jitterAmount = 0.05;  % You can increase this if needed
 for ii = 1:size(subjectMat,2) 
     for jj = 1:numel(fieldnames(data))  
-        scatter(ii, subjectMat(jj,ii), 50, 'k', 'filled'); 
+        xJittered = ii + (rand()*2 - 1) * jitterAmount;  % adds uniform jitter between -jitterAmount and +jitterAmount
+        scatter(xJittered, subjectMat(jj,ii), 50, 'k', 'filled'); 
     end
 end
 
