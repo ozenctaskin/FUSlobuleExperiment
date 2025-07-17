@@ -1,9 +1,9 @@
 close all; clear all; clc
 
 % Decide what this function will do when run
-setDiagnostics = true; % Saves diagnostic images in the data folder
-baselineCorrect = true; % Corrects baseline
-grandBaseline = false;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
+setDiagnostics = false; % Saves diagnostic images in the data folder
+baselineCorrect = false; % Corrects baseline
+grandBaseline = true;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
 useClean = true;        % Use the clean data for analysis. Need to run cleanCBITrials first
 plotSubject = true;    % Plots all trials for all subjects in separate figure.
 
@@ -262,13 +262,17 @@ ax.Box = 'off';
 title('Subject results - Averaged Peaks');
 
 % Save a sheet for future anayses. Only save if grandBaseline is used.
-if baselineCorrect && grandBaseline 
+if baselineCorrect
     sheetLabels = [{'subject'}, labels];
     subjects = fieldnames(data);
     % Create table
     T = array2table(subjectMat, 'VariableNames', sheetLabels(2:end));
     T = addvars(T, subjects, 'Before', 1, 'NewVariableNames', sheetLabels{1});
-    writetable(T, fullfile(dataFolder, 'subject_results.xlsx'))
+    if ~grandBaseline
+        writetable(T, fullfile(dataFolder, 'subject_results_individualBaseline.xlsx'))
+    else
+        writetable(T, fullfile(dataFolder, 'subject_results_grandBaseline.xlsx'))
+    end
 end
 
 % Helper function to load data in without sub variable names
