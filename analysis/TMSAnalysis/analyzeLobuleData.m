@@ -51,6 +51,7 @@ plotSubject = true;    % Plots all trials for all subjects in separate figure.
 %                fullfile(dataFolder, 'HERO_05', 'clean_shamFlip_280225_000.mat')}; 
 
 dataFolder = '/Volumes/chenshare/Ozzy_Taskin/Experiments/TUSLobuleExperiment_And_CBIDiffusion/Data';
+
 data.L001 =   {fullfile(dataFolder, 'L001_ses2', 'EMG', 'baseline_300525_000.mat'), ...
                fullfile(dataFolder, 'L001_ses2', 'EMG', 'DN_300525_000.mat'), ...
                fullfile(dataFolder, 'L001_ses2', 'EMG', 'L5_300525_000.mat'), ...
@@ -71,7 +72,16 @@ data.L002 =   {fullfile(dataFolder, 'L002', 'EMG', 'Baseline_110725_000.mat'), .
                fullfile(dataFolder, 'L002', 'EMG', 'Flip_110725_000.mat'), ...
                fullfile(dataFolder, 'L002', 'EMG', 'SUBJ_CBI65_1107_1501_000.mat'), ...
                fullfile(dataFolder, 'L002', 'EMG', 'SUBJ_CBI55_1107_1513_000.mat')}; 
-               % DROPPED fullfile(dataFolder, 'L001_ses2', 'EMG', 'CBI60_3005_1731_000.mat' 
+
+data.L003 =   {fullfile(dataFolder, 'L003', 'EMG', 'baseline_220725_000.mat'), ...
+               fullfile(dataFolder, 'L003', 'EMG', 'DN_220725_000.mat'), ...
+               fullfile(dataFolder, 'L003', 'EMG', 'L5_220725_000.mat'), ...
+               fullfile(dataFolder, 'L003', 'EMG', 'L8_220725_000.mat'), ...
+               fullfile(dataFolder, 'L003', 'EMG', 'V1_220725_000.mat'), ...
+               fullfile(dataFolder, 'L003', 'EMG', 'V0wL8_220725_000.mat'), ...
+               fullfile(dataFolder, 'L003', 'EMG', 'L5Flip_220725_000.mat'), ...
+               fullfile(dataFolder, 'L003', 'EMG', 'SUBJ_CBI65_2207_1621_000.mat'), ...
+               fullfile(dataFolder, 'L003', 'EMG', 'SUBJ_CBI55_2207_1621_000.mat')}; 
 
 data.L004 =   {fullfile(dataFolder, 'L004', 'EMG', 'baseline_030725_000.mat'), ...
                fullfile(dataFolder, 'L004', 'EMG', 'dentate_030725_000.mat'), ...
@@ -80,7 +90,7 @@ data.L004 =   {fullfile(dataFolder, 'L004', 'EMG', 'baseline_030725_000.mat'), .
                fullfile(dataFolder, 'L004', 'EMG', 'V1_030725_000.mat'), ...
                fullfile(dataFolder, 'L004', 'EMG', 'V0w_030725_000.mat'), ...
                fullfile(dataFolder, 'L004', 'EMG', 'Flip_030725_000.mat'), ...
-               fullfile(dataFolder, 'L004', 'EMG', 'CBI_55_0307_1656_000.mat'), ...
+               fullfile(dataFolder, 'L004', 'EMG', 'NA'), ...
                fullfile(dataFolder, 'L004', 'EMG', 'CBI_55_0307_1656_000.mat')};
 
 
@@ -279,16 +289,23 @@ end
 
 % Helper function to load data in without sub variable names
 function data = load_wave_data(filename, useClean)
-    vars = whos('-file', filename);
-    if useClean
-        idx = find(contains({vars.name}, 'data'), 1);
+    testName = string(split(filename, '/')); testName = testName{end};
+    if ~strcmp(testName, 'NA') && ~strcmp(testName, 'clean_NA')
+        vars = whos('-file', filename);
+        if useClean
+            idx = find(contains({vars.name}, 'data'), 1);
+        else
+            idx = find(contains({vars.name}, '_wave_data'), 1);
+        end
+        if isempty(idx)
+            error(['No variable with "_wave_data" in file: ' filename]);
+        end
+        varname = vars(idx).name;
+        tmp = load(filename, varname);
+        data = tmp.(varname);
     else
-        idx = find(contains({vars.name}, '_wave_data'), 1);
+        data.frameinfo.state = ones(20,1);
+        data.frameinfo.state(11:end) = 2;
+        data.values = nan(4000,2,20);
     end
-    if isempty(idx)
-        error(['No variable with "_wave_data" in file: ' filename]);
-    end
-    varname = vars(idx).name;
-    tmp = load(filename, varname);
-    data = tmp.(varname);
 end
