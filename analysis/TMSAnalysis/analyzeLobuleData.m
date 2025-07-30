@@ -95,7 +95,7 @@ data.L004 =   {fullfile(dataFolder, 'L004', 'EMG', 'baseline_030725_000.mat'), .
 
 
 % Get fieldnames and empty cell for all subject peaks so we can do some
-% averaging at the end. Also specify order of the data entry
+% averaging at the end.
 subjectIDs = fieldnames(data);
 allSubjectPeaks = {};
 % Set labels and colors. WARNING the word baseline needs to be used for
@@ -195,6 +195,13 @@ for sub = 1:length(subjectIDs)
     end
     allSubjectPeaks{sub} = subjectPeaks;
 end
+
+% Plot lobule 5 and 8 increase
+figure
+plot(nanmean(cell2mat(cellfun(@(x) x(:,3), allSubjectPeaks, 'UniformOutput', false)), 2))
+hold on
+plot(nanmean(cell2mat(cellfun(@(x) x(:,4), allSubjectPeaks, 'UniformOutput', false)), 2))
+legend('Lobule 5 Temporal', 'Lobule 8 Temporal')
 
 % Loop through all subject peak calculations and do averaging. Also do
 % baseline correction if requested
