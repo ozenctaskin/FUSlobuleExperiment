@@ -16,9 +16,7 @@ function calculateDiffusionMetrics(dataFolder, subjectID, sessionID)
     end
 
     % Get the files we need
-    cleanDWI = fullfile(preprocessedResults, 'cleanDWI.mif');
     upscaledCleanDWI = fullfile(preprocessedResults, 'upscaledCleanDWI.mif');
-    mask = fullfile(preprocessedResults, 'mask.mif');
     upscaledMask = fullfile(preprocessedResults, 'upscaledMask.mif');
     upscaledMaskDilated = fullfile(preprocessedResults, 'upscaledMaskDilated.mif');
 
@@ -29,31 +27,30 @@ function calculateDiffusionMetrics(dataFolder, subjectID, sessionID)
     md = fullfile(metricFolder, 'md.mif');
     ad = fullfile(metricFolder, 'ad.mif');
     rd = fullfile(metricFolder, 'rd.mif');
-    mk = fullfile(metricFolder, 'mk.mif');
-    ak = fullfile(metricFolder, 'ak.mif');
-    rk = fullfile(metricFolder, 'rk.mif');
     system(['dwi2tensor -mask ' upscaledMaskDilated ' -dkt ' dkt ' ' upscaledCleanDWI ' ' dt]);
     system(['tensor2metric -mask ' upscaledMaskDilated ' -fa ' fa ' -adc ' md ' -ad ' ad ' -rd ' rd ' ' dt]);
+    
+    % Check these metrics out too
     % system(['tensor2metric -mask ' upscaledMaskDilated ' -mk ' mk ' -ak ' ak ' -rk ' rk ' ' dkt]);
 
     %% NODDI
     % Convert mif to nifti and separate bvac-bvals so that we can pass
-    % everything to NODDI. Don't use the upscale as it takes too long
-    cleanDWInifti = fullfile(intermediateFiles, 'cleanDWI.nii');
-    maskNifti = fullfile(intermediateFiles, 'mask.nii');
-    bvecsNifti = fullfile(intermediateFiles, 'combined.bvecs');
-    bvalsNifti = fullfile(intermediateFiles, 'combined.bvals');
-    system(['mrconvert -export_grad_fsl ' bvecsNifti ' ' bvalsNifti ' ' cleanDWI ' ' cleanDWInifti]);
-    system(['mrconvert ' mask ' ' maskNifti]);
+    % everything to NODDI.
+    upscaledCleanDWI_nifti = fullfile(intermediateFiles, 'upscaledCleanDWI.nii');
+    upscaledMask_nifti = fullfile(intermediateFiles, 'upscaledMask.nii');
+    bvecsNifti = fullfile(intermediateFiles, 'upscaledCleanDWI.bvecs');
+    bvalsNifti = fullfile(intermediateFiles, 'upscaledCleanDWI.bvals');
+    system(['mrconvert -export_grad_fsl ' bvecsNifti ' ' bvalsNifti ' ' upscaledCleanDWI ' ' upscaledCleanDWI_nifti]);
+    system(['mrconvert ' upscaledMask ' ' upscaledMask_nifti]);
 
     % Convert data for fitting
     noddiROI = fullfile(intermediateFiles, 'NODDI_ROI.mat');
-    CreateROI(cleanDWInifti, maskNifti, noddiROI);
+    CreateROI(upscaledCleanDWI_nifti, upscaledMask_nifti, noddiROI);
     protocol = FSL2Protocol(bvalsNifti, bvecsNifti); 
-    noddi = MakeModel('WatsonSHStickTortIsoV_B0'); 
+    model = MakeModel('WatsonSHStickTortIsoV_B0'); 
     fittedNODDI = fullfile(preprocessedResults, 'NODDI_fitted.mat');
-    batch_fitting(noddiROI, protocol, noddi, fittedNODDI, 8); 
-    SaveParamsAsNIfTI(fittedNODDI, noddiROI, maskNifti, fullfile(metricFolder,'noddi'))
+    batch_fitting(noddiROI, protocol, model, fittedNODDI, 8); 
+    SaveParamsAsNIfTI(fittedNODDI, noddiROI, upscaledMask_nifti, fullfile(metricFolder,'noddi'))
 
     % Calculate whole brain tractography and SIFT. We might want to go up 
     % to 100 million streamlines. ADDD BIAS CORRECTION
