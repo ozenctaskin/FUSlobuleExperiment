@@ -38,9 +38,13 @@ function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, 
     % care of this
     T1pathDeobliqued = strrep(T1path, 'btoMPRAGE2x11mmiso_T1w', 'btoMPRAGE2x11mmisoDEOBLIQUED_T1w');
     T2pathDeobliqued = strrep(T2path, 'btoSPACET22x2CAIPI1mmiso_T2w', 'btoSPACET22x2CAIPI1mmisoDEOBLIQUED_T2w');
-    system(['cd ' fullfile(dataFolder, subjectID, sessionID, 'anat') '; 3dcopy ' [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmiso_T1w.nii.gz'] ' _tmp_dset; 3drefit -oblique_recenter _tmp_dset+orig; 3drefit -deoblique _tmp_dset+orig; 3dcopy _tmp_dset+orig ' T1pathDeobliqued '; rm _tmp*']);
-    system(['cd ' fullfile(dataFolder, subjectID, sessionID, 'anat') '; 3dcopy ' [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmiso_T2w.nii.gz'] ' _tmp_dset; 3drefit -oblique_recenter _tmp_dset+orig; 3drefit -deoblique _tmp_dset+orig; 3dcopy _tmp_dset+orig ' T2pathDeobliqued '; rm _tmp*']);
-
+    if ~isfile(T1pathDeobliqued)
+        system(['cd ' fullfile(dataFolder, subjectID, sessionID, 'anat') '; 3dcopy ' [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmiso_T1w.nii.gz'] ' _tmp_dset; 3drefit -oblique_recenter _tmp_dset+orig; 3drefit -deoblique _tmp_dset+orig; 3dcopy _tmp_dset+orig ' T1pathDeobliqued '; rm _tmp*']);
+    end
+    if ~isfile(T2pathDeobliqued)
+        system(['cd ' fullfile(dataFolder, subjectID, sessionID, 'anat') '; 3dcopy ' [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmiso_T2w.nii.gz'] ' _tmp_dset; 3drefit -oblique_recenter _tmp_dset+orig; 3drefit -deoblique _tmp_dset+orig; 3dcopy _tmp_dset+orig ' T2pathDeobliqued '; rm _tmp*']);
+    end
+    
     % Insert slice timing info from json to nifti
     fprintf('\nAdding slice time information to data. Do not stop the script now or your MRI images get corrupted.\n');
     system(['abids_tool.py -add_slice_times -input ' funcDatasetRun1]);
