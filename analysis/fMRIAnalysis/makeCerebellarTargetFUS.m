@@ -96,7 +96,11 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     job.ref = {T1};
     suit_reslice_dartel_inv(job);  
     cerebellarMaskResampled = fullfile(filePath, ['iw_maskSUIT_u_a_' fileName '_seg1.nii']);
-    atlasNettekovenResampled = fullfile(filePath, ['iw_atl-NettekovenAsym32_space-SUIT_dseg_u_a_' fileName '_seg1.nii']);
+    if strcmp(handedness, 'right')
+        atlasNettekovenResampled = fullfile(filePath, ['iw_atl-NettekovenAsym32_space-SUIT_dseg_u_a_' fileName '_seg1.nii']);
+    elseif strcmp(handedness, 'left')
+        atlasNettekovenResampled = fullfile(filePath, ['iw_atl-NettekovenSym32_space-SUIT_dseg_u_a_' fileName '_seg1.nii']);
+    end
     atlasDiedrichsenResampled = fullfile(filePath, ['iw_atl-Anatom_space-SUIT_dseg_u_a_' fileName '_seg1.nii']);
 
     % Get the left/right motor regions from the Nettekoven atlas
