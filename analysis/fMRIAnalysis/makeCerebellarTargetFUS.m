@@ -52,7 +52,7 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     func = fullfile(outputFolder, ['stats.' subjectID '_REML+orig']);
     system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix ' fullfile(workdir,'beta') ' ' func '''[tap#0_Coef]''']);
     system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix ' fullfile(workdir,'tstat') ' ' func '''[tap#0_Tstat]''']);
-    system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix ' fullfile(workdir,'tstat') ' ' func '''[tap_Fstat]''']);
+    system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix ' fullfile(workdir,'fstat') ' ' func '''[tap_Fstat]''']);
     beta = fullfile(workdir, 'beta.nii');
 
     % Bias correct T1 and T2 and move them into the workdir
