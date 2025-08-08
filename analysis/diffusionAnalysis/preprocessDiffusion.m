@@ -57,7 +57,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
         denoised = fullfile(intermediateFiles, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-denoised_dir-'}));
         noise = fullfile(intermediateFiles, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-noise_dir-'}));
         residuals = fullfile(intermediateFiles, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-residuals_dir-'}));
-        system(['dwidenoise ' mif ' ' denoised ' -noise ' noise ' -nthreads 12']);
+        system(['dwidenoise ' mif ' ' denoised ' -noise ' noise ' -nthreads 5']);
         system(['mrcalc ' mif ' ' denoised ' -subtract ' residuals]);
 
         % Perform gibbs ringing correction
