@@ -27,7 +27,11 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     T1pathDeobliqued = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmisoDEOBLIQUED_T1w.nii.gz']);
     T2pathDeobliqued = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmisoDEOBLIQUED_T2w.nii.gz']);
     spm_Dir= fileparts(which('spm'));
-    atlasNettekoven = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'atl-NettekovenAsym32_space-SUIT_dseg.nii');
+    if strcmp(handedness, 'right')
+        atlasNettekoven = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'atl-NettekovenAsym32_space-SUIT_dseg.nii');
+    elseif strcmp(handedness, 'left')
+        atlasNettekoven = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'atl-NettekovenSym32_space-SUIT_dseg.nii');        
+    end
     atlasDiedrichsen = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'atl-Anatom_space-SUIT_dseg.nii');
 
     %% Cerebellar processing - SUIT
@@ -78,7 +82,11 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     % Copy atlases into workdir, and update the path 
     system(['cp ' atlasNettekoven ' ' workdir]);
     system(['cp ' atlasDiedrichsen ' ' workdir]);
-    atlasNettekoven = fullfile(workdir, 'atl-NettekovenAsym32_space-SUIT_dseg.nii');
+    if strcmp(handedness, 'right')
+        atlasNettekoven = fullfile(workdir, 'atl-NettekovenAsym32_space-SUIT_dseg.nii');
+    elseif strcmp(handedness, 'left')
+        atlasNettekoven = fullfile(workdir, 'atl-NettekovenSym32_space-SUIT_dseg.nii');
+    end
     atlasDiedrichsen = fullfile(workdir, 'atl-Anatom_space-SUIT_dseg.nii');
 
     % Map Nettekoven32/Diedrichsen atlas and cerebellar mask to subject
