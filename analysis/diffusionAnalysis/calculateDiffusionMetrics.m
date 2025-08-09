@@ -52,14 +52,4 @@ function calculateDiffusionMetrics(dataFolder, subjectID, sessionID)
     batch_fitting(noddiROI, protocol, model, fittedNODDI, 8); 
     SaveParamsAsNIfTI(fittedNODDI, noddiROI, upscaledMask_nifti, fullfile(metricFolder,'noddi'))
 
-    % Calculate whole brain tractography and SIFT. We might want to go up 
-    % to 100 million streamlines. ADDD BIAS CORRECTION
-    % NECESSARY for SIFT!, CHECK OUT -seed_dynamic with tckgen
-    % seedGM = fullfile(subjectTractography, 'seedGM.mif');
-    % wholeBrainTracts = fullfile(subjectTractography, 'wholeBrainTracts.tck');
-    % wholeBrainTracts_SIFTED = fullfile(subjectTractography, 'wholeBrainTracts_SIFTED.tck');
-    % system(['5tt2gmwmi ' tissueSegments ' ' seedGM]);
-    % system(['tckgen -act ' tissueSegments ' -algorithm  Tensor_Prob -minlength 100 -select 5000 -nthreads 12 -seed_gmwmi ' seedGM ' ' upscaled_preprocessedImage ' ' wholeBrainTracts]);
-    % system(['tcksift ' wholeBrainTracts ' ' wmFOD_norm ' ' wholeBrainTracts_SIFTED]);
-
 end
