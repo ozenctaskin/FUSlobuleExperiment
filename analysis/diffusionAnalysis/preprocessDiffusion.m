@@ -125,8 +125,5 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     T2InDWI = fullfile(preprocessedResults, 'T2InDWI.nii.gz');
     system(['antsApplyTransforms -i ' T1Image ' -r ' T1Image ' -o ' T1InDWI ' -t [ ' DWItoT1Affine ',1 ]']);
     system(['antsApplyTransforms -i ' T2Image ' -r ' T1Image ' -o ' T2InDWI ' -t [ ' DWItoT1Affine ',1 ]' ' -t [ ' T2inT1Affine ',0 ]']);
-    
-    % Do a 5ttgen segmentation
-    tissueSegments = fullfile(preprocessedResults, 'segmented5Tissues.mif');
-    system(['5ttgen fsl ' T1InDWI ' ' tissueSegments ' -nthreads 12 -t2 ' T2InDWI]);
+   
 end
