@@ -97,7 +97,8 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     system(['mrgrid ' cleanDWI ' regrid -vox 1.25 ' upscaledCleanDWI])
 
     % Create a whole brain mask from upscaled images. Provide a dilated
-    % version as well since it's good for maps.
+    % version as well since it's good for maps. The standard version will
+    % be relevant for mtnormalise as that is sensitive to non brain voxels.
     mask = fullfile(preprocessedResults, 'mask.mif');
     upscaledMask = fullfile(preprocessedResults, 'upscaledMask.mif');
     upscaledMaskDilated = fullfile(preprocessedResults, 'upscaledMaskDilated.mif');
