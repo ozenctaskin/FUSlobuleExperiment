@@ -25,16 +25,22 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     csfFOD_norm = fullfile(subjectTractographyFolder, 'subject_csfFOD_norm.mif');    
     system(['mtnormalise ' wmFOD ' ' wmFOD_norm ' ' gmFOD ' ' gmFOD_norm ' ' csfFOD ' ' csfFOD_norm ' -mask ' upscaledMask]);
 
-    % Get gray matter seed
+    % Get gray matter seed. We use the dynamic seeding option, but generate 
+    % this in case we change mind
     gmwmiMask = fullfile(subjectTractographyFolder, 'gmwmiMask.mif');
     system(['5tt2gmwmi ' tsegments ' ' gmwmiMask]);
 
     % Run tractography. 100 million tracks
-    tractogram = fullfile(subjectTractographyFolder, 'tractogram_100M.tck');
-    system(['tckgen -act ' tsegments ' -backtrack -seed_gmwmi ' gmwmiMask ' -nthreads 10 -select 100000000 ' wmFOD_norm ' ' tractogram]);
+    tractogram = fullfile(subjectTractographyFolder, 'tractogram_10M.tck');
+    if ~isfile(tractogram)
+        system(['tckgen -act ' tsegments ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 10 -select 10M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
+    end
 
     % SIFT
-    tractogram_sifted = fullfile(subjectTractographyFolder, 'tractogram_100M_SIFTED.tck');
-    system(['tcksift -nthreads 10 ' tractogram ' ' wmFOD_norm ' ' tractogram_sifted]);
-
+    siftWeights = fullfile(subjectTractographyFolder, 'sift_weights.txt');
+    siftMu = fullfile(subjectTractographyFolder, 'sift_mu.txt');
+    siftCoeffs = fullfile(subjectTractographyFolder, 'sift_coeffs.txt');
+    if ~isfile(tractogram)
+        system(['tcksift2 -nthreads 10 -act ' tsegments ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
+    end
 end
