@@ -30,5 +30,7 @@ function prepareROI(dataFolder, subjectID, sessionID)
     % inconsistencies due to any interpolation.
     norm_T1 = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], [subjectID, '_freesurfer'], 'mri', 'norm.mgz');
     subjectNodes_gmFixed = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'subjectNodes_gmFixed.mif');
-    system(['labelsgmfix ' subjectNodes ' ' norm_T1 ' ' fsdefault_trix ' ' subjectNodes_gmFixed ' -premasked']);
+    if ~isfile(subjectNodes_gmFixed)
+        system(['labelsgmfix ' subjectNodes ' ' norm_T1 ' ' fsdefault_trix ' ' subjectNodes_gmFixed ' -premasked']);
+    end
 end
