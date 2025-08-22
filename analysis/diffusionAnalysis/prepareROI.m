@@ -19,7 +19,7 @@ function prepareROI(dataFolder, subjectID, sessionID)
     % Convert freesurfer labels
     aparc_aseg = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], [subjectID, '_freesurfer'], 'mri', 'aparc+aseg.mgz');
     colorLUT = fullfile(getenv('FREESURFER_HOME'), 'FreeSurferColorLUT.txt');
-    fsdefault_trix = '/home/chenlab-linux/mrtrix3/share/mrtrix3/labelconvert/fs_default.txt';
+    fsdefault_trix = '/home/chenlab-linux/Documents/MATLAB/projects/FUSlobuleExperiment/analysis/diffusionAnalysis/atlas_conversion/fs_default_modified.txt';
     subjectNodes = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'subjectNodes.mif');
     if ~isfile(subjectNodes)
         system(['labelconvert ' aparc_aseg ' ' colorLUT ' ' fsdefault_trix ' ' subjectNodes])
@@ -33,4 +33,6 @@ function prepareROI(dataFolder, subjectID, sessionID)
     if ~isfile(subjectNodes_gmFixed)
         system(['labelsgmfix ' subjectNodes ' ' norm_T1 ' ' fsdefault_trix ' ' subjectNodes_gmFixed ' -premasked']);
     end
+
+    
 end
