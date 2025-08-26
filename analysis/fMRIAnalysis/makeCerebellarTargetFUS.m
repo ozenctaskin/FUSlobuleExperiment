@@ -17,6 +17,11 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     %                  clusters are produced.
     %   handedness: Whether the subject is left or right handed. Decides
     %               which hemisphere atlas is used in the function.
+    %   parcellateAntPost: We further parcelate clusters with anterior 
+    %                      and posterior portions of the Nettekoven atlas 
+    %   `                  if asked. This is done if the cluster for the
+    %                      anterior and posterior portions of the 
+    %                      cerebellum are continious.
 
     % Add path to functions we will use
     addpath(genpath('/home/chenlab-linux/Documents/MATLAB/toolboxes/spm12'));
@@ -33,6 +38,15 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
         atlasNettekoven = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'atl-NettekovenSym32_space-SUIT_dseg.nii');        
     end
     atlasDiedrichsen = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'atl-Anatom_space-SUIT_dseg.nii');
+
+    % Get left right separation atlases 
+    if strcmp(handedness, 'right')
+        anteriorCerebellum = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'anteriorCerebellumMask_right.nii');
+        posteriorCerebellum = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'posteriorCerebellumMask_right.nii');
+    elseif strcmp(handedness, 'left')
+        anteriorCerebellum = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'anteriorCerebellumMask_left.nii');
+        posteriorCerebellum = fullfile(fileparts(matlab.desktop.editor.getActiveFilename), 'atlas', 'posteriorCerebellumMask_left.nii');
+    end 
 
     %% Cerebellar processing - SUIT
 
@@ -98,6 +112,10 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     job.resample = {atlasNettekoven};
     job.ref = {beta};
     suit_reslice_dartel_inv(job);  
+    job.resample = {anteriorCerebellum};
+    suit_reslice_dartel_inv(job);
+    job.resample = {posteriorCerebellum};
+    suit_reslice_dartel_inv(job);
     job.resample = {[spm_Dir '/toolbox/suit/templates/maskSUIT.nii']};
     suit_reslice_dartel_inv(job);  
     job.resample = {atlasDiedrichsen};
@@ -110,6 +128,13 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
         atlasNettekovenResampled = fullfile(filePath, ['iw_atl-NettekovenSym32_space-SUIT_dseg_u_a_' fileName '_seg1.nii']);
     end
     atlasDiedrichsenResampled = fullfile(filePath, ['iw_atl-Anatom_space-SUIT_dseg_u_a_' fileName '_seg1.nii']);
+    if strcmp(handedness, 'right')
+        anteriorCerebellumResampled = fullfile(filePath, ['iw_anteriorCerebellumMask_right_u_a_' fileName '_seg1.nii']);
+        posteriorCerebellumResampled = fullfile(filePath, ['iw_posteriorCerebellumMask_right_u_a_' fileName '_seg1.nii']);
+    else
+        anteriorCerebellumResampled = fullfile(filePath, ['iw_anteriorCerebellumMask_left_u_a_' fileName '_seg1.nii']);
+        posteriorCerebellumResampled = fullfile(filePath, ['iw_posteriorCerebellumMask_left_u_a_' fileName '_seg1.nii']);
+    end
 
     % Get the left/right motor regions from the Nettekoven atlas
     if strcmp(handedness, 'right')
@@ -198,71 +223,90 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
         clusterData = fullfile(workdir, ['ClusterData_' num2str(ii) '.nii.gz']);
         system(['fslmaths ' prefDat ' -mas ' clusterMask ' ' clusterData]);
 
-        % Now mask the data with the overlap of clusterMask and Nettekoven
-        % motor mask 
-        clusterMaskMotor = fullfile(workdir, ['ClusterMaskMotor_' num2str(ii) '.nii.gz']);
-        system(['fslmaths ' clusterMask ' -mul ' motorAtlas ' ' clusterMaskMotor]);
-        clusterDataMotor = fullfile(workdir, ['ClusterDataMotor_' num2str(ii) '.nii.gz']);
-        system(['fslmaths ' prefDat ' -mas ' clusterMaskMotor ' ' clusterDataMotor]);
-        
-        % calculate the peak activation in cluster data
-        [~, peakCluster] = system(['fslstats ' clusterData ' -x ']);
-        peakCluster_vox = strsplit(peakCluster);
-        peakCluster_vox = round(cell2mat(cellfun(@str2double, peakCluster_vox(1:end-1), 'UniformOutput', false)));
-        [~, peakCluster_mm] = system(['echo ' peakCluster(1:end-2) '| img2stdcoord -img ' clusterData ' -std ' clusterData ' -vox']);
-        peakCluster_mm = strsplit(peakCluster_mm);
-        peakCluster_mm = round(cell2mat(cellfun(@str2double, peakCluster_mm(1:end-1), 'UniformOutput', false)));
+        for side = 1:3
+            if isequal(side,1)
+                extension = 'fullCluster';
+                clusterData_working = clusterData;
+                clusterMask_working = clusterMask;
+            elseif isequal(side,2)
+                extension = 'anterior';
+                clusterData_working = fullfile(workdir, ['ClusterData_' num2str(ii) '_' extension '.nii.gz']);
+                system(['fslmaths ' clusterData ' -mul ' anteriorCerebellumResampled ' -nan ' clusterData_working]);
+                clusterMask_working = fullfile(workdir, ['ClusterMask_' num2str(ii) '_' extension '.nii.gz']);
+                system(['fslmaths ' clusterMask ' -mul ' anteriorCerebellumResampled ' -nan ' clusterMask_working]);
+            elseif isequal(side,3)
+                extension = 'posterior';
+                clusterData_working = fullfile(workdir, ['ClusterData_' num2str(ii) '_' extension '.nii.gz']);
+                system(['fslmaths ' clusterData ' -mul ' posteriorCerebellumResampled ' -nan ' clusterData_working]);  
+                clusterMask_working = fullfile(workdir, ['ClusterMask_' num2str(ii) '_' extension '.nii.gz']);
+                system(['fslmaths ' clusterMask ' -mul ' posteriorCerebellumResampled ' -nan ' clusterMask_working]);                
+            end            
 
-        % Calculate the peak coordinates in Nettekoven atlas, convert to mm
-        [~, peakMotor] = system(['fslstats ' clusterDataMotor ' -x']);
-        peakMotor_vox = strsplit(peakMotor);
-        peakMotor_vox = round(cell2mat(cellfun(@str2double, peakMotor_vox(1:end-1), 'UniformOutput', false)));
-        [~, peakMotor_mm] = system(['echo ' peakMotor(1:end-2) '| img2stdcoord -img ' clusterDataMotor ' -std ' clusterDataMotor ' -vox']);
-        peakMotor_mm = strsplit(peakMotor_mm);
-        peakMotor_mm = round(cell2mat(cellfun(@str2double, peakMotor_mm(1:end-1), 'UniformOutput', false)));
-
-        % Write TUS targets into a text file in mm.
-        writematrix(peakCluster_mm, fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_peakCluster.txt']));
-        writematrix(peakMotor_mm, fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_peakMotor.txt']));
-        
-        % Make target masks and plot 
-        peakTargetMask = fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_peakTargetMask.nii.gz']);
-        peakMotorTargetMask = fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_peakMotorTargetMask.nii.gz']);
-        system(['fslmaths ' clusterMask ' -roi ' num2str(peakCluster_vox(1)) ' 1 ' num2str(peakCluster_vox(2)) ' 1 ' num2str(peakCluster_vox(3)) ' 1 0 1 -mul 3 -add ' clusterMask ' ' peakTargetMask]);
-        system(['fslmaths ' clusterMaskMotor ' -roi ' num2str(peakMotor_vox(1)) ' 1 ' num2str(peakMotor_vox(2)) ' 1 ' num2str(peakMotor_vox(3)) ' 1 0 1 -mul 3 -add ' clusterMaskMotor ' ' peakMotorTargetMask]);
-        system(['gunzip ' peakTargetMask ' -f']);
-        system(['gunzip ' peakMotorTargetMask ' -f']);
-        peakTargetMask = strrep(peakTargetMask, '.gz', '');
-        peakMotorTargetMask = strrep(peakMotorTargetMask, '.gz', '');
-        
-        % Map masked target data to SUIT space
-        peakTargetMaskSUIT = fullfile(workdir, ['wdCluster_' num2str(ii) '_peakTargetMask.nii']);
-        peakMotorTargetMaskSUIT = fullfile(workdir, ['wdCluster_' num2str(ii) '_peakMotorTargetMask.nii']);
-        job = [];
-        job.interp = 0;
-        % job.vox = [2.5, 2.5, 2.5];
-        job.subj.resample = {peakTargetMask};
-        job.subj.mask = {peakTargetMask};
-        job.subj.affineTr = {fullfile(filePath, ['Affine_' fileName '_seg1.mat'])};
-        job.subj.flowfield = {fullfile(filePath, ['u_a_' fileName '_seg1.nii'])};
-        job.subj.outname = {peakTargetMaskSUIT};
-        suit_reslice_dartel(job);
-        job.subj.resample = {peakMotorTargetMask};
-        job.subj.mask = {peakMotorTargetMask};
-        job.subj.outname = {peakMotorTargetMaskSUIT};
-        suit_reslice_dartel(job);
-        
-        % Plot diagnostic target plots
-        data = suit_map2surf(peakTargetMaskSUIT);
-        fig = figure();
-        suit_plotflatmap(data, 'cmap', autumn);
-        saveas(fig, fullfile(cerebellarFolder, ['TUStargetPlot_Peak_' num2str(ii) '.png']));
-        close all
-        data = suit_map2surf(peakMotorTargetMaskSUIT);
-        fig = figure();
-        suit_plotflatmap(data, 'cmap', autumn);
-        saveas(fig, fullfile(cerebellarFolder, ['TUStargetPlot_PeakMotor_' num2str(ii) '.png']));
-        close all
+            % Mask cluster with Nettekoven
+            clusterMaskMotor = fullfile(workdir, ['ClusterMaskMotor_' num2str(ii) '_' extension '.nii.gz']);
+            system(['fslmaths ' clusterMask_working ' -mul ' motorAtlas ' ' clusterMaskMotor]);
+            clusterDataMotor = fullfile(workdir, ['ClusterDataMotor_' num2str(ii) '_' extension '.nii.gz']);
+            system(['fslmaths ' prefDat ' -mas ' clusterMaskMotor ' ' clusterDataMotor]);
+            
+            % calculate the peak activation in cluster data
+            [~, peakCluster] = system(['fslstats ' clusterData_working ' -x ']);
+            peakCluster_vox = strsplit(peakCluster);
+            peakCluster_vox = round(cell2mat(cellfun(@str2double, peakCluster_vox(1:end-1), 'UniformOutput', false)));
+            [~, peakCluster_mm] = system(['echo ' peakCluster(1:end-2) '| img2stdcoord -img ' clusterData_working ' -std ' clusterData_working ' -vox']);
+            peakCluster_mm = strsplit(peakCluster_mm);
+            peakCluster_mm = round(cell2mat(cellfun(@str2double, peakCluster_mm(1:end-1), 'UniformOutput', false)));
+    
+            % Calculate the peak coordinates in Nettekoven atlas, convert to mm
+            [~, peakMotor] = system(['fslstats ' clusterDataMotor ' -x']);
+            peakMotor_vox = strsplit(peakMotor);
+            peakMotor_vox = round(cell2mat(cellfun(@str2double, peakMotor_vox(1:end-1), 'UniformOutput', false)));
+            [~, peakMotor_mm] = system(['echo ' peakMotor(1:end-2) '| img2stdcoord -img ' clusterDataMotor ' -std ' clusterDataMotor ' -vox']);
+            peakMotor_mm = strsplit(peakMotor_mm);
+            peakMotor_mm = round(cell2mat(cellfun(@str2double, peakMotor_mm(1:end-1), 'UniformOutput', false)));
+    
+            % Write TUS targets into a text file in mm.
+            writematrix(peakCluster_mm, fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_' extension '_peakCluster.txt']));
+            writematrix(peakMotor_mm, fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_' extension '_peakMotor.txt']));
+            
+            % Make target masks and plot 
+            peakTargetMask = fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_' extension '_peakTargetMask.nii.gz']);
+            peakMotorTargetMask = fullfile(cerebellarFolder, ['Cluster_' num2str(ii) '_' extension '_peakMotorTargetMask.nii.gz']);
+            system(['fslmaths ' clusterMask_working ' -roi ' num2str(peakCluster_vox(1)) ' 1 ' num2str(peakCluster_vox(2)) ' 1 ' num2str(peakCluster_vox(3)) ' 1 0 1 -mul 3 -add ' clusterMask_working ' ' peakTargetMask]);
+            system(['fslmaths ' clusterMaskMotor ' -roi ' num2str(peakMotor_vox(1)) ' 1 ' num2str(peakMotor_vox(2)) ' 1 ' num2str(peakMotor_vox(3)) ' 1 0 1 -mul 3 -add ' clusterMaskMotor ' ' peakMotorTargetMask]);
+            system(['gunzip ' peakTargetMask ' -f']);
+            system(['gunzip ' peakMotorTargetMask ' -f']);
+            peakTargetMask = strrep(peakTargetMask, '.gz', '');
+            peakMotorTargetMask = strrep(peakMotorTargetMask, '.gz', '');
+            
+            % Map masked target data to SUIT space
+            peakTargetMaskSUIT = fullfile(workdir, ['wdCluster_' num2str(ii) '_' extension '_peakTargetMask.nii']);
+            peakMotorTargetMaskSUIT = fullfile(workdir, ['wdCluster_' num2str(ii) '_' extension '_peakMotorTargetMask.nii']);
+            job = [];
+            job.interp = 0;
+            % job.vox = [2.5, 2.5, 2.5];
+            job.subj.resample = {peakTargetMask};
+            job.subj.mask = {peakTargetMask};
+            job.subj.affineTr = {fullfile(filePath, ['Affine_' fileName '_seg1.mat'])};
+            job.subj.flowfield = {fullfile(filePath, ['u_a_' fileName '_seg1.nii'])};
+            job.subj.outname = {peakTargetMaskSUIT};
+            suit_reslice_dartel(job);
+            job.subj.resample = {peakMotorTargetMask};
+            job.subj.mask = {peakMotorTargetMask};
+            job.subj.outname = {peakMotorTargetMaskSUIT};
+            suit_reslice_dartel(job);
+            
+            % Plot diagnostic target plots
+            data = suit_map2surf(peakTargetMaskSUIT);
+            fig = figure();
+            suit_plotflatmap(data, 'cmap', autumn);
+            saveas(fig, fullfile(cerebellarFolder, ['TUStargetPlot_Peak_' num2str(ii) '_' extension '.png']));
+            close all
+            data = suit_map2surf(peakMotorTargetMaskSUIT);
+            fig = figure();
+            suit_plotflatmap(data, 'cmap', autumn);
+            saveas(fig, fullfile(cerebellarFolder, ['TUStargetPlot_PeakMotor_' num2str(ii) '_' extension '.png']));
+            close all
+        end
     end
 
     % Plot the motor atlas
@@ -281,4 +325,5 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     suit_plotflatmap(data, 'cmap', autumn, 'threshold', 0.1);
     saveas(fig, fullfile(cerebellarFolder, ['MotorAtlasSurface.png']));
     close all
+
 end
