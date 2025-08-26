@@ -16,7 +16,7 @@ function prepareROI(dataFolder, subjectID, sessionID)
         system(['5ttgen hsvs -nthreads 10 -white_stem ' surfDir ' ' tsegments]);
     end
 
-    % Convert freesurfer labels
+    % Convert freesurfer labels, exclude putamen, caudate, and pallidum
     aparc_aseg = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], [subjectID, '_freesurfer'], 'mri', 'aparc+aseg.mgz');
     colorLUT = fullfile(getenv('FREESURFER_HOME'), 'FreeSurferColorLUT.txt');
     fsdefault_trix = '/home/chenlab-linux/Documents/MATLAB/projects/FUSlobuleExperiment/analysis/diffusionAnalysis/atlas_conversion/fs_default_modified.txt';
@@ -27,12 +27,24 @@ function prepareROI(dataFolder, subjectID, sessionID)
 
     % Replace subcortical regions with fsl fast regions. Give norm.mgz as
     % the input as this is used in the hsvs processing to avoid any
-    % inconsistencies due to any interpolation.
+    % inconsistencies due to any interpolation. We removed basal ganglia
+    % before so this is just thalamus
     norm_T1 = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], [subjectID, '_freesurfer'], 'mri', 'norm.mgz');
     subjectNodes_gmFixed = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'subjectNodes_gmFixed.mif');
     if ~isfile(subjectNodes_gmFixed)
         system(['labelsgmfix ' subjectNodes ' ' norm_T1 ' ' fsdefault_trix ' ' subjectNodes_gmFixed ' -premasked']);
     end
 
-    
+    % Register to CITI168 to get subcortical regions in
+    citiAtlas = '/home/chenlab-linux/Documents/MATLAB/projects/FUSlobuleExperiment/analysis/diffusionAnalysis/CIT168_atlas/CIT168_T1w_head_700um.nii.gz';
+    labels = '/home/chenlab-linux/Documents/MATLAB/projects/FUSlobuleExperiment/analysis/diffusionAnalysis/CIT168_atlas/labels.nii.gz';
+    registeredLabels = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'registrations', 'registeredSubcorticalLabels.nii.gz');
+    genericAffine = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'registrations', 'T1dwi2CIT1680GenericAffine.mat');
+    inverseWarp = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'registrations', 'T1dwi2CIT1681InverseWarp.nii.gz');
+    if ~isfile(genericAffine)
+        system(['antsRegistrationSyN.sh -m ' norm_T1 ' -f ' citiAtlas ' -n 10 -o ' fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'registrations', 'T1dwi2CIT168')]);
+    end
+    if ~isfile(registeredLabels)
+        system(['antsApplyTransforms -i ' labels ' -r ' norm_T1 ' -o ' registeredLabels ' -n NearestNeighbor -t ' inverseWarp ' -t [ ' genericAffine ' ,1 ]']);
+    end
 end
