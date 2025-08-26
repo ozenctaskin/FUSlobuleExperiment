@@ -52,69 +52,67 @@
 33    L.TTG   ctx-lh-transversetemporal       150 150 200 255
 34    L.IN    ctx-lh-insula                   255 192 32  255
 
-35    L.CER   Left-Cerebellum-Cortex          230 148 34  255
+35    L.TH    Left-Thalamus                   0   118 14  255
+35    L.TH    Left-Thalamus-Proper            0   118 14  255
+36    L.HI    Left-Hippocampus                220 216 20  255
+37    L.AM    Left-Amygdala                   103 255 255 255
+38    L.AC    Left-Accumbens-area             255 165 0   255
 
-36    L.TH    Left-Thalamus                   0   118 14  255
-36    L.TH    Left-Thalamus-Proper            0   118 14  255
-37    L.HI    Left-Hippocampus                220 216 20  255
-38    L.AM    Left-Amygdala                   103 255 255 255
-39    L.AC    Left-Accumbens-area             255 165 0   255
+39    R.TH    Right-Thalamus                  0   118 14  255
+39    R.TH    Right-Thalamus-Proper           0   118 14  255
+40    R.HI    Right-Hippocampus               220 216 20  255
+41    R.AM    Right-Amygdala                  103 255 255 255
+42    R.AC    Right-Accumbens-area            255 165 0   255
 
-40    R.TH    Right-Thalamus                  0   118 14  255
-40    R.TH    Right-Thalamus-Proper           0   118 14  255
-41    R.HI    Right-Hippocampus               220 216 20  255
-42    R.AM    Right-Amygdala                  103 255 255 255
-43    R.AC    Right-Accumbens-area            255 165 0   255
+43    R.BSTS  ctx-rh-bankssts                 25  100 40  255
+44    R.CACG  ctx-rh-caudalanteriorcingulate  125 100 160 255
+45    R.CMFG  ctx-rh-caudalmiddlefrontal      100 25  0   255
+46    R.CU    ctx-rh-cuneus                   220 20  100 255
+47    R.EC    ctx-rh-entorhinal               220 20  10  255
+48    R.FG    ctx-rh-fusiform                 180 220 140 255
+49    R.IPG   ctx-rh-inferiorparietal         220 60  220 255
+50    R.ITG   ctx-rh-inferiortemporal         180 40  120 255
+51    R.ICG   ctx-rh-isthmuscingulate         140 20  140 255
+52    R.LOG   ctx-rh-lateraloccipital         20  30  140 255
+53    R.LOFG  ctx-rh-lateralorbitofrontal     35  75  50  255
+54    R.LG    ctx-rh-lingual                  225 140 140 255
+55    R.MOFG  ctx-rh-medialorbitofrontal      200 35  75  255
+56    R.MTG   ctx-rh-middletemporal           160 100 50  255
+57    R.PHIG  ctx-rh-parahippocampal          20  220 60  255
+58    R.PaCG  ctx-rh-paracentral              60  220 60  255
+59    R.POP   ctx-rh-parsopercularis          220 180 140 255
+60    R.POR   ctx-rh-parsorbitalis            20  100 50  255
+61    R.PTR   ctx-rh-parstriangularis         220 60  20  255
+62    R.PCAL  ctx-rh-pericalcarine            120 100 60  255
+63    R.PoCG  ctx-rh-postcentral              220 20  20  255
+64    R.PCG   ctx-rh-posteriorcingulate       220 180 220 255
+65    R.PrCG  ctx-rh-precentral               60  20  220 255
+66    R.PCU   ctx-rh-precuneus                160 140 180 255
+67    R.RACG  ctx-rh-rostralanteriorcingulate 80  20  140 255
+68    R.RMFG  ctx-rh-rostralmiddlefrontal     75  50  125 255
+69    R.SFG   ctx-rh-superiorfrontal          20  220 160 255
+70    R.SPG   ctx-rh-superiorparietal         20  180 140 255
+71    R.STG   ctx-rh-superiortemporal         140 220 220 255
+72    R.SMG   ctx-rh-supramarginal            80  160 20  255
+73    R.FP    ctx-rh-frontalpole              100 0   100 255
+74    R.TP    ctx-rh-temporalpole             70  70  70  255
+75    R.TTG   ctx-rh-transversetemporal       150 150 200 255
+76    R.IN    ctx-rh-insula                   255 192 32  255
 
-44    R.BSTS  ctx-rh-bankssts                 25  100 40  255
-45    R.CACG  ctx-rh-caudalanteriorcingulate  125 100 160 255
-46    R.CMFG  ctx-rh-caudalmiddlefrontal      100 25  0   255
-47    R.CU    ctx-rh-cuneus                   220 20  100 255
-48    R.EC    ctx-rh-entorhinal               220 20  10  255
-49    R.FG    ctx-rh-fusiform                 180 220 140 255
-50    R.IPG   ctx-rh-inferiorparietal         220 60  220 255
-51    R.ITG   ctx-rh-inferiortemporal         180 40  120 255
-52    R.ICG   ctx-rh-isthmuscingulate         140 20  140 255
-53    R.LOG   ctx-rh-lateraloccipital         20  30  140 255
-54    R.LOFG  ctx-rh-lateralorbitofrontal     35  75  50  255
-55    R.LG    ctx-rh-lingual                  225 140 140 255
-56    R.MOFG  ctx-rh-medialorbitofrontal      200 35  75  255
-57    R.MTG   ctx-rh-middletemporal           160 100 50  255
-58    R.PHIG  ctx-rh-parahippocampal          20  220 60  255
-59    R.PaCG  ctx-rh-paracentral              60  220 60  255
-60    R.POP   ctx-rh-parsopercularis          220 180 140 255
-61    R.POR   ctx-rh-parsorbitalis            20  100 50  255
-62    R.PTR   ctx-rh-parstriangularis         220 60  20  255
-63    R.PCAL  ctx-rh-pericalcarine            120 100 60  255
-64    R.PoCG  ctx-rh-postcentral              220 20  20  255
-65    R.PCG   ctx-rh-posteriorcingulate       220 180 220 255
-66    R.PrCG  ctx-rh-precentral               60  20  220 255
-67    R.PCU   ctx-rh-precuneus                160 140 180 255
-68    R.RACG  ctx-rh-rostralanteriorcingulate 80  20  140 255
-69    R.RMFG  ctx-rh-rostralmiddlefrontal     75  50  125 255
-70    R.SFG   ctx-rh-superiorfrontal          20  220 160 255
-71    R.SPG   ctx-rh-superiorparietal         20  180 140 255
-72    R.STG   ctx-rh-superiortemporal         140 220 220 255
-73    R.SMG   ctx-rh-supramarginal            80  160 20  255
-74    R.FP    ctx-rh-frontalpole              100 0   100 255
-75    R.TP    ctx-rh-temporalpole             70  70  70  255
-76    R.TTG   ctx-rh-transversetemporal       150 150 200 255
-77    R.IN    ctx-rh-insula                   255 192 32  255
+77    L.CD    Left-caudate
+78    L.GPe   Left-globus-pallidus-externus
+79    L.GPi   Left-globus-pallidus-internus
+80    L.Put   Left-putamen
+81    L.RN    Left-red-nucleus
+82    L.SNc   Left-substantia-nigra-compacta
+83    L.SNr   Left-substantia-nigra-reticulata
+84    L.STN   Left-subthalamic-nucleus
 
-78    L.CD    Left-caudate
-79    L.GPe   Left-globus-pallidus-externus
-80    L.GPi   Left-globus-pallidus-internus
-81    L.Put   Left-putamen
-82    L.RN    Left-red-nucleus
-83    L.SNc   Left-substantia-nigra-compacta
-84    L.SNr   Left-substantia-nigra-reticulata
-85    L.STN   Left-subthalamic-nucleus
-
-86    R.CD    Right-caudate
-87    R.GPe   Right-globus-pallidus-externus
-88    R.GPi   Right-globus-pallidus-internus
-89    R.Put   Right-putamen
-90    R.RN    Right-red-nucleus
-91    R.SNc   Right-substantia-nigra-compacta
-92    R.SNr   Right-substantia-nigra-reticulata
-93    R.STN   Right-subthalamic-nucleus
+85    R.CD    Right-caudate
+86    R.GPe   Right-globus-pallidus-externus
+87    R.GPi   Right-globus-pallidus-internus
+88    R.Put   Right-putamen
+89    R.RN    Right-red-nucleus
+90    R.SNc   Right-substantia-nigra-compacta
+91    R.SNr   Right-substantia-nigra-reticulata
+92    R.STN   Right-subthalamic-nucleus
