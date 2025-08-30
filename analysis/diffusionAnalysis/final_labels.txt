@@ -114,3 +114,42 @@
 88    R.SNc   Right-substantia-nigra-compacta
 89    R.SNr   Right-substantia-nigra-reticulata
 90    R.STN   Right-subthalamic-nucleus
+
+91    L.M1
+92    L.M2
+93    L.M3
+94    L.M4
+95    L.A1
+96    L.A2
+97    L.A3
+98    L.D1
+99    L.D2
+100   L.D3
+101   L.D4
+102   L.S1
+103   L.S2
+104   L.S3
+105   L.S4
+106   L.S5
+107   R.M1
+108   R.M2
+109   R.M3
+110   R.M4
+111   R.A1
+112   R.A2
+113   R.A3
+114   R.D1
+115   R.D2
+116   R.D3
+117   R.D4
+118   R.S1
+119   R.S2
+120   R.S3
+121   R.S4
+122   R.S5
+123   L.Dentate
+124   R.Dentate
+125   L.Interposed
+126   R.Interposed
+127   L.Fastigial
+128   R.Fastigial 
