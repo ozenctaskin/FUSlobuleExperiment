@@ -16,8 +16,8 @@ function cleanCBITrials(folderPath, autoclean)
     % Set measurement variables
     samplingRate = 5000; 
     hundredMs = samplingRate * 0.1; 
-    RMSthreshold_TUS = 0.01; % 10 microVolts in milliVolt 
-    RMSthreshold_TMS = 0.02; % 20 microVolt in milliVolt 
+    RMSthreshold_TUS = 0.05; % 50 microVolts in milliVolt 
+    RMSthreshold_TMS = 0.05; % 50 microVolt in milliVolt 
 
     for ii = 1:length(fullPaths)
     
