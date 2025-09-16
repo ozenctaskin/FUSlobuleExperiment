@@ -2,20 +2,17 @@ function calculateDiffusionMetrics(dataFolder, subjectID, sessionID)
    
     % Create the output directory 
     analysisFolder = fullfile(dataFolder, subjectID, sessionID, [subjectID '.diffusionResults']);
-    preprocessedResults = fullfile(analysisFolder, 'preprocessed');
-    intermediateFiles = fullfile(analysisFolder, 'intermediateFiles');
     metricFolder = fullfile(analysisFolder, 'diffusionMetrics');
+    intermediateFiles = fullfile(metricFolder, 'intermediateFiles');
     if ~isfolder(metricFolder)
-        mkdir(metricFolder)
-    end
-    if ~isfolder(preprocessedResults)
-        mkdir(preprocessedResults)
+        mkdir(metricFolder);
     end
     if ~isfolder(intermediateFiles)
-        mkdir(intermediateFiles)
+        mkdir(intermediateFiles);
     end
 
     % Get the files we need
+    preprocessedResults = fullfile(analysisFolder, 'preprocessed');
     upscaledCleanDWI = fullfile(preprocessedResults, 'upscaledCleanDWI.mif');
     upscaledMask = fullfile(preprocessedResults, 'upscaledMask.mif');
     upscaledMaskDilated = fullfile(preprocessedResults, 'upscaledMaskDilated.mif');
@@ -48,7 +45,7 @@ function calculateDiffusionMetrics(dataFolder, subjectID, sessionID)
     CreateROI(upscaledCleanDWI_nifti, upscaledMask_nifti, noddiROI);
     protocol = FSL2Protocol(bvalsNifti, bvecsNifti); 
     model = MakeModel('WatsonSHStickTortIsoV_B0'); 
-    fittedNODDI = fullfile(preprocessedResults, 'NODDI_fitted.mat');
+    fittedNODDI = fullfile(intermediateFiles, 'NODDI_fitted.mat');
     batch_fitting(noddiROI, protocol, model, fittedNODDI, 8); 
     SaveParamsAsNIfTI(fittedNODDI, noddiROI, upscaledMask_nifti, fullfile(metricFolder,'noddi'))
 
