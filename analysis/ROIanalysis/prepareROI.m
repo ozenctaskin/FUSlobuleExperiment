@@ -6,10 +6,12 @@ function prepareROI(dataFolder, subjectID, sessionID)
     suit_defaults();
     spm('Defaults','fMRI');
     spm_jobman('initcfg');
+    currentPath = fileparts(matlab.desktop.editor.getActiveFilename);
 
-    % Main paths
-    T1Image = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmisoDEOBLIQUED_T1w.nii.gz']);
-    T2Image = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmisoDEOBLIQUED_T2w.nii.gz']);
+    % Get T1 and registered T2 from the functional analysis folder
+    cerebellarWorkdir = fullfile(dataFolder, subjectID, sessionID, [subjectID '.results'], 'cerebellarTarget', 'workdir');
+    T1Image = fullfile(cerebellarWorkdir, 'T1.nii');
+    T2Image = fullfile(cerebellarWorkdir, 'T2registeredWarped.nii');
 
     % Create folders
     ROIfolder = fullfile(dataFolder, subjectID, sessionID, [subjectID '.ROI']);
@@ -36,7 +38,7 @@ function prepareROI(dataFolder, subjectID, sessionID)
     % Convert freesurfer labels, exclude putamen, caudate, and pallidum
     aparc_aseg = fullfile(surfDir, 'mri', 'aparc+aseg.mgz');
     colorLUT = fullfile(getenv('FREESURFER_HOME'), 'FreeSurferColorLUT.txt');
-    fsdefault_trix = '/home/chenlab-linux/Documents/MATLAB/projects/FUSlobuleExperiment/analysis/diffusionAnalysis/atlas_conversion/fs_default_modified.txt';
+    fsdefault_trix = fullfile(currentPath, 'atlas_conversion', 'fs_default_modified.txt');
     subjectNodes = fullfile(intermediateFiles, 'subjectNodes.mif');
     if ~isfile(subjectNodes)
         system(['labelconvert ' aparc_aseg ' ' colorLUT ' ' fsdefault_trix ' ' subjectNodes])
@@ -55,8 +57,8 @@ function prepareROI(dataFolder, subjectID, sessionID)
     % Register to CITI168 to get subcortical regions. Use nu.mgz as we need
     % the skull for the registration.
     nu_T1 = fullfile(surfDir, 'mri', 'nu.mgz');
-    citiAtlas = '/home/chenlab-linux/Documents/MATLAB/projects/FUSlobuleExperiment/analysis/diffusionAnalysis/CIT168_atlas/CIT168_T1w_head_700um.nii.gz';
-    labels = '/home/chenlab-linux/Documents/MATLAB/projects/FUSlobuleExperiment/analysis/diffusionAnalysis/CIT168_atlas/labels.nii.gz';
+    citiAtlas = fullfile(currentPath, 'CIT168_atlas', 'CIT168_T1w_head_700um.nii.gz');
+    labels = fullfile(currentPath, 'CIT168_atlas', 'labels.nii.gz');
     registeredLabels = fullfile(intermediateFiles, 'registeredSubcorticalLabels.nii.gz');
     genericAffine = fullfile(intermediateFiles, 'T1dwi2CIT1680GenericAffine.mat');
     inverseWarp = fullfile(intermediateFiles, 'T1dwi2CIT1681InverseWarp.nii.gz');
@@ -69,38 +71,56 @@ function prepareROI(dataFolder, subjectID, sessionID)
 
     % Add these regions to aparc+aseg parcellations and handle overlapping
     % thalamus - caudate
-    finalLabels = fullfile(intermediateFiles, 'labels.mif');
+    subjectNodes_subcortAdded = fullfile(intermediateFiles, 'labels.mif');
+    if ~isfile(subjectNodes_subcortAdded)
+        system(['mrcalc ' subjectNodes_gmFixed ' ' registeredLabels ' -add ' subjectNodes_subcortAdded]);
+        system(['mrcalc ' subjectNodes_subcortAdded ' 113 35 -replace ' subjectNodes_subcortAdded ' -force']);
+        system(['mrcalc ' subjectNodes_subcortAdded ' 124 38 -replace ' subjectNodes_subcortAdded ' -force']);
+    end
+
+    % Convert the labels to nifti and map back to native space from
+    % freesurfer space
+    subjectNodes_subcortAdded_nifti = fullfile(intermediateFiles, 'labels.nii.gz');
+    if ~isfile(subjectNodes_subcortAdded_nifti)
+        system(['mrconvert ' subjectNodes_subcortAdded ' ' subjectNodes_subcortAdded_nifti]);
+    end
+    rawAvg = fullfile(surfDir, 'mri', 'rawavg.mgz');
+    subjectNodes_subcortAdded_native = fullfile(intermediateFiles, 'labels_native.nii.gz');
+    if ~isfile(subjectNodes_subcortAdded_native)
+        system(['mri_label2vol --seg ' subjectNodes_subcortAdded_nifti ' --temp ' rawAvg ' --o ' subjectNodes_subcortAdded_native ' --regheader ' aparc_aseg]);
+    end
+
+    % Register cerebellar structures to anatomy. Use calculations we make
+    % during the functional analysis
+    cerebellarParc = fullfile(intermediateFiles, 'combinedAtlas.nii');
+    cerebellarAffine = fullfile(intermediateFiles, 'Affine_T1_seg1.mat');
+    cerebellarFlow = fullfile(intermediateFiles, 'u_a_T1_seg1.nii');
+    system(['cp ' fullfile(currentPath, 'cerebellarAtlas_DiedrichsenNettekoven', 'combinedAtlas.nii') ' ' intermediateFiles]);
+    system(['cp ' fullfile(cerebellarWorkdir, 'Affine_T1_seg1.mat') ' ' intermediateFiles]);
+    system(['cp ' fullfile(cerebellarWorkdir, 'u_a_T1_seg1.nii') ' ' intermediateFiles]);
+
+    cerebellarParc_native = fullfile(intermediateFiles, 'iw_combinedAtlas_u_a_T1_seg1.nii');
+    if ~isfile(cerebellarParc_native)
+        job = [];
+        job.Affine = {cerebellarAffine};
+        job.flowfield = {cerebellarFlow};
+        job.resample = {cerebellarParc};
+        job.ref = {T1Image};
+        suit_reslice_dartel_inv(job);
+    end
+    system(['mrcalc -force ' cerebellarParc_native ' -finite ' cerebellarParc_native ' 0.0 -if ' cerebellarParc_native]);
+
+    % Mask the cerebellar cortex with a cerebellar mask so that
+    % we don't have any overlap between cortical and cerebellar regions
+    cerebellumMask = fullfile(intermediateFiles, 'cerebellarMask.nii.gz');
+    system(['mri_extract_label ' aparc_aseg ' 7 8 46 47 ' cerebellumMask]);
+    system(['fslmaths ' cerebellumMask ' -thr 1 -bin ' cerebellumMask]);
+    system(['mrcalc -force ' cerebellarParc_native ' ' cerebellumMask ' -mult ' cerebellarParc_native]);
+
+    % Add cerebellar parcellations to the final label set
+    finalLabels = fullfile(ROIfolder, 'finalLabels.nii.gz');
     if ~isfile(finalLabels)
-        system(['mrcalc ' subjectNodes_gmFixed ' ' registeredLabels ' -add ' finalLabels]);
-        system(['mrcalc ' finalLabels ' 113 35 -replace ' finalLabels ' -force']);
-        system(['mrcalc ' finalLabels ' 124 38 -replace ' finalLabels ' -force']);
+        system(['mrcalc ' subjectNodes_subcortAdded_native ' ' cerebellarParc_native ' -add ' finalLabels]);
     end
 
-    % Register cerebellar structures to anatomy.
-    cerebellarParc = '/home/chenlab-linux/Documents/MATLAB/projects/FUSlobuleExperiment/analysis/diffusionAnalysis/cerebellarAtlas_DiedrichsenNettekoven/combinedAtlas.nii';
-    extractedT1 = fullfile(intermediateFiles, 'T1InDWI.nii');
-    extractedT2 = fullfile(intermediateFiles, 'T2InDWI.nii');
-    if ~isfile(extractedT1)
-        system(['gunzip -c ' T1w ' > ' extractedT1]);
-    end
-    if ~isfile(extractedT2)
-        system(['gunzip -c ' T2w ' > ' extractedT2]);
-    end
-
-    anatomy = {extractedT1, extractedT2};
-    [filePath, fileName, ~] = fileparts(anatomy{1});
-    job.subjND.gray = {fullfile(filePath, [fileName '_seg1.nii'])};
-    job.subjND.white = {fullfile(filePath, [fileName '_seg2.nii'])};
-    job.subjND.isolation = {fullfile(filePath, ['c_' fileName '_pcereb.nii'])};
-    if ~isfile(job.subjND.gray{1}) || ~isfile(job.subjND.white{1}) || ~isfile(job.subjND.isolation{1})
-        suit_isolate_seg(anatomy);
-    end
-    suit_normalize_dartel(job);
-
-    job = [];
-    job.Affine = {fullfile(filePath, ['Affine_' fileName '_seg1.mat'])};
-    job.flowfield = {fullfile(filePath, ['u_a_' fileName '_seg1.nii'])};
-    job.resample = {cerebellarParc};
-    job.ref = {extractedT1};
-    suit_reslice_dartel_inv(job);
 end
