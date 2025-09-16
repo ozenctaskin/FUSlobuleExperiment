@@ -115,41 +115,17 @@
 89    R.SNr   Right-substantia-nigra-reticulata
 90    R.STN   Right-subthalamic-nucleus
 
-91    L.M1
-92    L.M2
-93    L.M3
-94    L.M4
-95    L.A1
-96    L.A2
-97    L.A3
-98    L.D1
-99    L.D2
-100   L.D3
-101   L.D4
-102   L.S1
-103   L.S2
-104   L.S3
-105   L.S4
-106   L.S5
-107   R.M1
-108   R.M2
-109   R.M3
-110   R.M4
-111   R.A1
-112   R.A2
-113   R.A3
-114   R.D1
-115   R.D2
-116   R.D3
-117   R.D4
-118   R.S1
-119   R.S2
-120   R.S3
-121   R.S4
-122   R.S5
-123   L.Dentate
-124   R.Dentate
-125   L.Interposed
-126   R.Interposed
-127   L.Fastigial
-128   R.Fastigial 
+91    L.DN    Left_dentate
+92    L.FTG   Left_fastigial
+93    L.INT   Left_interposed
+94    L.M3A   Left_motorCerebellum_anterior
+95    L.M3P   Left_motorCerebellum_posterior
+
+96    R.DN    Right_dentate
+97    R.FTG   Right_fastigial
+98    R.INT   Right_interposed
+99    R.M3A   Right_motorCerebellum_anterior
+100   R.M3P   Right_motorCerebellum_posterior
+
+
+
