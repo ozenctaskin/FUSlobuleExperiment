@@ -6,14 +6,14 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
         mkdir(analysisFolder)
     end
     % Create a subdirectory workdirs 
-    intermediateFiles = fullfile(analysisFolder, 'intermediateFiles');
-    if ~isfolder(intermediateFiles)
-        mkdir(intermediateFiles)
-    end   
     preprocessedResults = fullfile(analysisFolder, 'preprocessed');
     if ~isfolder(preprocessedResults)
         mkdir(preprocessedResults)
     end  
+    intermediateFiles = fullfile(preprocessedResults, 'intermediateFiles');
+    if ~isfolder(intermediateFiles)
+        mkdir(intermediateFiles)
+    end   
     registrationsFolder = fullfile(preprocessedResults, 'registrations');
      if ~isfolder(registrationsFolder)
         mkdir(registrationsFolder)
