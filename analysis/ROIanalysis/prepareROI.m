@@ -30,7 +30,7 @@ function prepareROI(dataFolder, subjectID, sessionID)
     end
 
     % Run 5ttgen
-    tsegments = fullfile(ROIfolder, 'segmented5Tissues.mif');
+    tsegments = fullfile(intermediateFiles, 'segmented5Tissues.mif');
     if ~isfile(tsegments)
         system(['5ttgen hsvs -nthreads 10 -white_stem ' surfDir ' ' tsegments]);
     end
@@ -123,4 +123,23 @@ function prepareROI(dataFolder, subjectID, sessionID)
         system(['mrcalc ' subjectNodes_subcortAdded_native ' ' cerebellarParc_native ' -add ' finalLabels]);
     end
 
+    % Convert 5-tissue segments to native anatomical space  
+    tsegments_nifti = fullfile(intermediateFiles, 'segmented5Tissues.nii.gz');
+    system(['mrconvert ' tsegments ' ' tsegments_nifti]);
+    tsegments_natived = fullfile(intermediateFiles, 'segmented5Tissues_native.nii.gz');
+    system(['mri_vol2vol --mov ' tsegments_nifti ' --targ ' rawAvg ' --o ' tsegments_natived ' --regheader --no-save-reg']);
+
+    % Add cerebellar nuclei to the 5t gray matter mask and threshold to get
+    % rid of the overlapping regions use 5ttedit
+    cerebellarNuclei = fullfile(intermediateFiles, 'cerebellarNuclei.nii.gz');
+    system(['mri_extract_label ' finalLabels ' 91 92 93 96 97 98 ' cerebellarNuclei]);
+    system(['fslmaths ' cerebellarNuclei ' -thr 1 -bin ' cerebellarNuclei]);
+    
+    cerebellarGrayMatter = fullfile(intermediateFiles, 'cerebellarGM.nii.gz');
+    system(['fslroi ' tsegments_natived ' ' cerebellarGrayMatter ' 1 1']);
+    system(['fslmaths ' cerebellarGrayMatter ' -add ' cerebellarNuclei ' ' cerebellarGrayMatter]);
+    system(['mrcalc -force ' cerebellarGrayMatter ' 1 -min ' cerebellarGrayMatter]);
+
+    finalSegmentations = fullfile(ROIfolder, 'segmented5Tissues_native_final.nii.gz');
+    system(['5ttedit -force -sgm ' cerebellarGrayMatter ' ' tsegments_natived ' ' finalSegmentations]);
 end
