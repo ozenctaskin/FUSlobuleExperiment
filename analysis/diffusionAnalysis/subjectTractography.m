@@ -44,7 +44,7 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     % Run tractography. 10 million tracks
     tractogram = fullfile(subjectTractographyFolder, 'tractogram_10M.tck');
     if ~isfile(tractogram)
-        system(['tckgen -act ' tsegments ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 10 -select 10M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
+        system(['tckgen -act ' tsegments_registered ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 10 -select 10M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
     end
 
     % SIFT2
@@ -52,6 +52,6 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     siftMu = fullfile(subjectTractographyFolder, 'sift_mu.txt');
     siftCoeffs = fullfile(subjectTractographyFolder, 'sift_coeffs.txt');
     if ~isfile(tractogram)
-        system(['tcksift2 -nthreads 10 -act ' tsegments ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
+        system(['tcksift2 -nthreads 10 -act ' tsegments_registered ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
     end
 end
