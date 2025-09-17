@@ -106,12 +106,10 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     system(['dwi2mask ' upscaledCleanDWI ' ' upscaledMask]);
     system(['maskfilter ' upscaledMask ' dilate -npass 2 ' upscaledMaskDilated]);
 
-    % Register T1 to T2. Use DEOBLIQUED
-    T1Image = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmisoDEOBLIQUED_T1w.nii.gz']);
-    T2Image = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmisoDEOBLIQUED_T2w.nii.gz']);
-    system(['antsRegistrationSyN.sh -m ' T2Image ' -f ' T1Image ' -t r -n 12 -o ' fullfile(registrationsFolder, 'T2inT1')]);
-    T2inT1 = fullfile(registrationsFolder, 'T2inT1Warped.nii.gz');
-    T2inT1Affine = fullfile(registrationsFolder, 'T2inT10GenericAffine.mat');
+    % Register T1 to T2. Use DEOBLIQUED bias corrected version from the
+    % cerebellar workdir
+    cerebellarWorkdir = fullfile(dataFolder, subjectID, sessionID, [subjectID '.results'], 'cerebellarTarget', 'workdir');
+    T1Image = fullfile(cerebellarWorkdir, 'T1.nii');
 
     % Register first volume of DWI to T1 image
     singleVolDWI = fullfile(intermediateFiles, 'singleVolDWI.nii.gz');
@@ -123,8 +121,6 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     % the DWI space. For T2, also add the affine matrix from T1-T2
     % registration
     T1InDWI = fullfile(preprocessedResults, 'T1InDWI.nii.gz');
-    T2InDWI = fullfile(preprocessedResults, 'T2InDWI.nii.gz');
     system(['antsApplyTransforms -i ' T1Image ' -r ' T1Image ' -o ' T1InDWI ' -t [ ' DWItoT1Affine ',1 ]']);
-    system(['antsApplyTransforms -i ' T2Image ' -r ' T1Image ' -o ' T2InDWI ' -t [ ' DWItoT1Affine ',1 ]' ' -t [ ' T2inT1Affine ',0 ]']);
    
 end
