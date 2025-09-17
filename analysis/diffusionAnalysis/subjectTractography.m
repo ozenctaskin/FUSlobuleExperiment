@@ -1,17 +1,33 @@
 function subjectTractography(dataFolder, subjectID, sessionID)
 
-    subjectTractographyFolder = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'subjectTractography');
+    % Create the output folder
+    analysisFolder = fullfile(dataFolder, subjectID, sessionID, [subjectID '.diffusionResults']);
+    subjectTractographyFolder = fullfile(analysisFolder, 'subjectTractography');
+    intermediateFiles = fullfile(subjectTractographyFolder, 'intermediateFiles');
     if ~isfolder(subjectTractographyFolder)
         mkdir(subjectTractographyFolder)
     end
+    if ~isfolder(intermediateFiles)
+        mkdir(intermediateFiles)
+    end
 
-    upscaledCleanDWI = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'upscaledCleanDWI.mif');
-    upscaledMask = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'upscaledMask.mif');
-    upscaledMaskDilated = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'upscaledMaskDilated.mif');
-    wmResponse = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'wmResponse.txt');
-    gmResponse = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'gmResponse.txt');
-    csfResponse = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'csfResponse.txt');
-    tsegments = fullfile(dataFolder, subjectID, sessionID, [subjectID, '.diffusionResults'], 'preprocessed', 'segmented5Tissues.mif');
+    % Get the cleaned diffusion images and response functions
+    preprocessedResults = fullfile(analysisFolder, 'preprocessed');
+    upscaledCleanDWI = fullfile(preprocessedResults, 'upscaledCleanDWI.mif');
+    upscaledMask = fullfile(preprocessedResults, 'upscaledMask.mif');
+    upscaledMaskDilated = fullfile(preprocessedResults, 'upscaledMaskDilated.mif');
+    wmResponse = fullfile(dataFolder, 'wmAverageResponse.txt');
+    gmResponse = fullfile(dataFolder, 'gmAverageResponse.txt');
+    csfResponse = fullfile(dataFolder, 'csfAverageResponse.txt');
+
+    % Register 5-tissue segments to DWI
+    ROIfolder = fullfile(dataFolder, subjectID, sessionID, [subjectID '.ROI']);
+    tsegments_native = fullfile(ROIfolder, 'segmented5Tissues_native_final.nii.gz');
+    upscaledCleanDWI_single = fullfile(intermediateFiles, 'upscaledCleanDWI_single.nii.gz');
+    system(['mrconvert ' upscaledCleanDWI ' -coord 3 0 ' upscaledCleanDWI_single]);
+    DWItoT1affine = fullfile(preprocessedResults, 'registrations', 'dwi2T10GenericAffine.mat');
+    tsegments_registered = fullfile(intermediateFiles, 'segmented5Tissues_in_DWI.nii.gz');
+    system(['antsApplyTransforms -e 3 -i ' tsegments_native ' -r ' upscaledCleanDWI_single ' -t [ ' DWItoT1affine ',1 ] -o ' tsegments_registered]);
 
     % Create FOD
     wmFOD = fullfile(subjectTractographyFolder, 'subject_wmFOD.mif');
@@ -25,18 +41,13 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     csfFOD_norm = fullfile(subjectTractographyFolder, 'subject_csfFOD_norm.mif');    
     system(['mtnormalise ' wmFOD ' ' wmFOD_norm ' ' gmFOD ' ' gmFOD_norm ' ' csfFOD ' ' csfFOD_norm ' -mask ' upscaledMask]);
 
-    % Get gray matter seed. We use the dynamic seeding option, but generate 
-    % this in case we change mind
-    gmwmiMask = fullfile(subjectTractographyFolder, 'gmwmiMask.mif');
-    system(['5tt2gmwmi ' tsegments ' ' gmwmiMask]);
-
-    % Run tractography. 100 million tracks
+    % Run tractography. 10 million tracks
     tractogram = fullfile(subjectTractographyFolder, 'tractogram_10M.tck');
     if ~isfile(tractogram)
         system(['tckgen -act ' tsegments ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 10 -select 10M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
     end
 
-    % SIFT
+    % SIFT2
     siftWeights = fullfile(subjectTractographyFolder, 'sift_weights.txt');
     siftMu = fullfile(subjectTractographyFolder, 'sift_mu.txt');
     siftCoeffs = fullfile(subjectTractographyFolder, 'sift_coeffs.txt');
