@@ -62,7 +62,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
 
         % Perform gibbs ringing correction
         unringed = strrep(denoised, 'rec-denoised', 'rec-denoisedUnringed');
-        system(['mrdegibbs ' denoised ' ' unringed ' -axes 0,1 -nthreads 12'])
+        system(['mrdegibbs ' denoised ' ' unringed ' -axes 0,1 -nthreads 12']);
 
         % Append paths to MP denoised cell
         dataMPdenoised{ii} = unringed;
@@ -80,9 +80,14 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
 
     % Pass it to FSL preprocessing and ants bias correction
     fslCorrectedDWI = fullfile(intermediateFiles, 'fslCorrectedDWI.mif');
+    eddyQC = fullfile(intermediateFiles, 'eddyQC');
+    if ~isfolder(eddyQC)
+        mkdir(eddyQC)
+    end
     cleanDWI = fullfile(preprocessedResults, 'cleanDWI.mif');
-    system(['dwifslpreproc ' combinedDWI ' ' fslCorrectedDWI ' -pe_dir AP -rpe_all -readout_time 0.0959097 -nthreads 12 -topup_options " --nthr=12 " -eddy_options " --slm=linear "']);
-    system(['dwibiascorrect ants ' fslCorrectedDWI ' ' cleanDWI]);
+    system(['dwifslpreproc ' combinedDWI ' ' fslCorrectedDWI ' -pe_dir AP -rpe_all -readout_time 0.0959097 -eddyqc_all ' eddyQC ' -nthreads 12 -topup_options " --nthr=12 " -eddy_options " --slm=linear --repol "']);
+    bias = fullfile(intermediateFiles, 'biasfield.mif');
+    system(['dwibiascorrect ants ' fslCorrectedDWI ' ' cleanDWI ' -bias ' bias]);
 
     % Calculate multi-shell, multi-tissue response function. Happens before
     % upscaling.
@@ -94,7 +99,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
 
     % Now upscale the cleaned image
     upscaledCleanDWI = fullfile(preprocessedResults, 'upscaledCleanDWI.mif');
-    system(['mrgrid ' cleanDWI ' regrid -vox 1.25 ' upscaledCleanDWI])
+    system(['mrgrid ' cleanDWI ' regrid -vox 1.25 ' upscaledCleanDWI]);
 
     % Create a whole brain mask from upscaled images. Provide a dilated
     % version as well since it's good for maps. The standard version will
