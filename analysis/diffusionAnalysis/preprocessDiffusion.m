@@ -81,7 +81,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     % Pass it to FSL preprocessing and ants bias correction
     fslCorrectedDWI = fullfile(intermediateFiles, 'fslCorrectedDWI.mif');
     cleanDWI = fullfile(preprocessedResults, 'cleanDWI.mif');
-    system(['dwifslpreproc ' combinedDWI ' ' fslCorrectedDWI ' -pe_dir AP -rpe_all -readout_time 0.0959097 -nthreads 12 -topup_options " --nthr=12 " ']);
+    system(['dwifslpreproc ' combinedDWI ' ' fslCorrectedDWI ' -pe_dir AP -rpe_all -readout_time 0.0959097 -nthreads 12 -topup_options " --nthr=12 " -eddy_options " --slm=linear "']);
     system(['dwibiascorrect ants ' fslCorrectedDWI ' ' cleanDWI]);
 
     % Calculate multi-shell, multi-tissue response function. Happens before
