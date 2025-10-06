@@ -3,7 +3,7 @@ close all; clear all; clc
 % Decide what this function will do when run
 setDiagnostics = false; % Saves diagnostic images in the data folder
 baselineCorrect = true; % Corrects baseline
-grandBaseline = false;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
+grandBaseline = true;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
 useClean = false;        % Use the clean data for analysis. Need to run cleanCBITrials first
 plotSubject = false;    % Plots all trials for all subjects in separate figure.
 
@@ -225,12 +225,25 @@ for sub = 1:length(subjectIDs)
     allSubjectPeaks{sub} = subjectPeaks;
 end
 
-% Plot lobule 5 and 8 increase
-figure
-plot(nanmean(cell2mat(cellfun(@(x) x(:,3), allSubjectPeaks, 'UniformOutput', false)), 2))
-hold on
-plot(nanmean(cell2mat(cellfun(@(x) x(:,4), allSubjectPeaks, 'UniformOutput', false)), 2))
-legend('Lobule 5 Temporal', 'Lobule 8 Temporal')
+% Plot dentate, lobule 5 and 8 increase
+figure;
+title('Subject average peak2peak change with each trial')
+subplot(1,3,1)
+plot(nanmean(cell2mat(cellfun(@(x) x(:,2), allSubjectPeaks, 'UniformOutput', false)), 2), 'b')
+legend('Dentate Temporal')
+xlabel('Trials')
+ylabel('Dentate peak2paek')
+subplot(1,3,2)
+plot(nanmean(cell2mat(cellfun(@(x) x(:,3), allSubjectPeaks, 'UniformOutput', false)), 2), 'r')
+legend('Lobule 5 Temporal')
+xlabel('Trials')
+ylabel('Lobule 5 peak2paek')
+subplot(1,3,3)
+plot(nanmean(cell2mat(cellfun(@(x) x(:,4), allSubjectPeaks, 'UniformOutput', false)), 2), 'g')
+legend('Lobule 8 Temporal')
+xlabel('Trials')
+ylabel('Lobule 8 peak2paek')
+legend('Lobule 8 Temporal')
 
 % Loop through all subject peak calculations and do averaging. Also do
 % baseline correction if requested
@@ -268,6 +281,47 @@ end
 % If baseline correct is passed, remove the baseline labels 
 if baselineCorrect
     labels(baselineVals) = [];
+end
+
+% Do correlation plots if baseline corrected
+if baselineCorrect
+    figure; 
+    
+    subplot(2,3,1);
+    scatter(subjectMat(:,1), subjectMat(:,7), 'filled');
+    xlabel('Dentate'); ylabel('CBI-1');
+    xlim([0 1]); ylim([0 1]);
+    axis square
+    
+    subplot(2,3,2);
+    scatter(subjectMat(:,2), subjectMat(:,7), 'filled');
+    xlabel('Lobule 5'); ylabel('CBI-1');
+    xlim([0 1]); ylim([0 1]);
+    axis square
+    
+    subplot(2,3,3);
+    scatter(subjectMat(:,3), subjectMat(:,7), 'filled');
+    xlabel('Lobule 8'); ylabel('CBI-1');
+    xlim([0 1]); ylim([0 1]);
+    axis square
+
+    subplot(2,3,4);
+    scatter(subjectMat(:,1), subjectMat(:,8), 'filled');
+    xlabel('Dentate'); ylabel('CBI-2');
+    xlim([0 1]); ylim([0 1]);
+    axis square
+    
+    subplot(2,3,5);
+    scatter(subjectMat(:,2), subjectMat(:,8), 'filled');
+    xlabel('Lobule 5'); ylabel('CBI-2');
+    xlim([0 1]); ylim([0 1]);
+    axis square
+    
+    subplot(2,3,6);
+    scatter(subjectMat(:,3), subjectMat(:,8), 'filled');
+    xlabel('Lobule 8'); ylabel('CBI-2');
+    xlim([0 1]); ylim([0 1]);
+    axis square    
 end
 
 % Do a boxplot
