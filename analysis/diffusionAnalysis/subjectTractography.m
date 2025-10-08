@@ -51,7 +51,7 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     siftWeights = fullfile(subjectTractographyFolder, 'sift_weights.txt');
     siftMu = fullfile(subjectTractographyFolder, 'sift_mu.txt');
     siftCoeffs = fullfile(subjectTractographyFolder, 'sift_coeffs.txt');
-    if ~isfile(tractogram)
+    if ~isfile(siftWeights)
         system(['tcksift2 -nthreads 10 -act ' tsegments_registered ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
     end
 end
