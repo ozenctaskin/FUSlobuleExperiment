@@ -11,14 +11,14 @@ function averageResponseFunctions(bidsFolder)
     wmResponse = '';
     gmResponse = '';
     csfResponse = ''; 
-    subjectList = '';
+    subjectList = strings(0,1);
     for ii = 1:length(subFolders)
         [~, subjectID] = fileparts(subFolders{ii});
         if isfile(fullfile(subFolders{ii}, 'ses-01', [subjectID '.diffusionResults'], 'preprocessed', 'wmResponse.txt'))
             wmResponse = [wmResponse fullfile(subFolders{ii}, 'ses-01', [subjectID '.diffusionResults'], 'preprocessed', 'wmResponse.txt') ' '];
             gmResponse = [gmResponse fullfile(subFolders{ii}, 'ses-01', [subjectID '.diffusionResults'], 'preprocessed', 'gmResponse.txt') ' '];
             csfResponse = [csfResponse fullfile(subFolders{ii}, 'ses-01', [subjectID '.diffusionResults'], 'preprocessed', 'csfResponse.txt') ' '];
-            subjectList = [subjectList subjectID ' '];
+            subjectList(end+1) = subjectID;
         end
     end
 
