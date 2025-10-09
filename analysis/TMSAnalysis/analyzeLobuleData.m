@@ -3,7 +3,7 @@ close all; clear all; clc
 % Decide what this function will do when run
 setDiagnostics = false; % Saves diagnostic images in the data folder
 baselineCorrect = true; % Corrects baseline
-grandBaseline = true;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
+grandBaseline = false;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
 useClean = true;        % Use the clean data for analysis. Need to run cleanCBITrials first
 plotSubject = false;    % Plots all trials for all subjects in separate figure.
 
@@ -249,9 +249,11 @@ legend('Lobule 8 Temporal')
 % baseline correction if requested
 baselineVals = find(contains(labels, 'baseline'));
 averageSubjectPeaks = {};
+rawAverageSubjectPeaks = [];
 for ii = 1:size(allSubjectPeaks,2)
     % Average all trials
     averageSubjectPeaks{ii} = nanmean(allSubjectPeaks{ii});
+    rawAverageSubjectPeaks(ii,:) = averageSubjectPeaks{ii};
     if baselineCorrect
         if grandBaseline
             % Find vectors based on "baseline" keyword in the labels cell.
@@ -278,11 +280,27 @@ for ii = 1:size(allSubjectPeaks,2)
     end
 end
 
-% If baseline correct is passed, remove the baseline labels 
+% Do t-tests between measurements (raw ones that contain baselines). FUS
+% with FUS, CBI with CBI baseline
+subjectTvals = [];
+subjectPvals = [];
+pvalsFUS = nan(1,7);
+tvalsFUS = nan(1,7);
+for numRow = 1:7
+    [~, p, ~, stats] = ttest(rawAverageSubjectPeaks(:,1), rawAverageSubjectPeaks(:,numRow)); 
+    pvalsFUS(numRow) = p;
+    tvalsFUS(numRow) = stats.tstat;
+end
+[~, pvalCBI1, ~, tvalCBI1] = ttest(rawAverageSubjectPeaks(:,8), rawAverageSubjectPeaks(:,9));
+[~, pvalCBI2, ~, tvalCBI2] = ttest(rawAverageSubjectPeaks(:,10), rawAverageSubjectPeaks(:,11));
+subjectTvals = [tvalsFUS(2:end) tvalCBI1.tstat tvalCBI2.tstat];
+subjectPvals = [pvalsFUS(2:end) pvalCBI1 pvalCBI2];
+subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
+
+% If baseline correct is passed, remove the baseline labels.
 if baselineCorrect
     labels(baselineVals) = [];
 end
-
 
 % Do a boxplot
 subjectMat = cell2mat(averageSubjectPeaks');
