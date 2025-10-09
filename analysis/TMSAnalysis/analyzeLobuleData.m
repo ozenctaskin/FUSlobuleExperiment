@@ -4,7 +4,7 @@ close all; clear all; clc
 setDiagnostics = false; % Saves diagnostic images in the data folder
 baselineCorrect = true; % Corrects baseline
 grandBaseline = true;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
-useClean = false;        % Use the clean data for analysis. Need to run cleanCBITrials first
+useClean = true;        % Use the clean data for analysis. Need to run cleanCBITrials first
 plotSubject = false;    % Plots all trials for all subjects in separate figure.
 
 % Specify subject paths. Order needs to be baseline, DN, L5, L8, V1, 0w,
@@ -52,15 +52,15 @@ plotSubject = false;    % Plots all trials for all subjects in separate figure.
 
 dataFolder = '/Volumes/chenshare/Ozzy_Taskin/Experiments/TUSLobuleExperiment_And_CBIDiffusion/Data';
 
-data.L001 =   {fullfile(dataFolder, 'L001_ses2', 'EMG', 'baseline_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001_ses2', 'EMG', 'DN_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001_ses2', 'EMG', 'L5_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001_ses2', 'EMG', 'L8_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001_ses2', 'EMG', 'V1_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001_ses2', 'EMG', 'V0W_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001_ses2', 'EMG', 'Flip_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001_ses2', 'EMG', 'CBI45_3005_1718_000.mat'), ...
-               fullfile(dataFolder, 'L001_ses2', 'EMG', 'CBI55_3005_1737_000.mat')}; 
+data.L001 =   {fullfile(dataFolder, 'L001', 'EMG', 'baseline_300525_000.mat'), ...
+               fullfile(dataFolder, 'L001', 'EMG', 'DN_300525_000.mat'), ...
+               fullfile(dataFolder, 'L001', 'EMG', 'L5_300525_000.mat'), ...
+               fullfile(dataFolder, 'L001', 'EMG', 'L8_300525_000.mat'), ...
+               fullfile(dataFolder, 'L001', 'EMG', 'V1_300525_000.mat'), ...
+               fullfile(dataFolder, 'L001', 'EMG', 'V0W_300525_000.mat'), ...
+               fullfile(dataFolder, 'L001', 'EMG', 'Flip_300525_000.mat'), ...
+               fullfile(dataFolder, 'L001', 'EMG', 'CBI45_3005_1718_000.mat'), ...
+               fullfile(dataFolder, 'L001', 'EMG', 'CBI55_3005_1737_000.mat')}; 
                % DROPPED fullfile(dataFolder, 'L001_ses2', 'EMG', 'CBI60_3005_1731_000.mat' 
 
 data.L002 =   {fullfile(dataFolder, 'L002', 'EMG', 'Baseline_110725_000.mat'), ...
@@ -251,7 +251,7 @@ baselineVals = find(contains(labels, 'baseline'));
 averageSubjectPeaks = {};
 for ii = 1:size(allSubjectPeaks,2)
     % Average all trials
-    averageSubjectPeaks{ii} = nanmedian(allSubjectPeaks{ii});
+    averageSubjectPeaks{ii} = nanmean(allSubjectPeaks{ii});
     if baselineCorrect
         if grandBaseline
             % Find vectors based on "baseline" keyword in the labels cell.
@@ -282,6 +282,46 @@ end
 if baselineCorrect
     labels(baselineVals) = [];
 end
+
+
+% Do a boxplot
+subjectMat = cell2mat(averageSubjectPeaks');
+figure('Position', [100, 100, 800, 600])
+boxplot(subjectMat, labels, 'Symbol', '')
+hold on
+h = findobj(gca, 'Tag', 'Box'); 
+for j = 1:length(h)
+    patch(get(h(j), 'XData'), get(h(j), 'YData'), [0.3010 0.7450 0.9330], 'FaceAlpha', 0.5); % Fill boxes with color
+end
+
+% Scatter plot with jitter
+jitterAmount = 0.05;  % You can increase this if needed
+for ii = 1:size(subjectMat,2) 
+    for jj = 1:numel(fieldnames(data))  
+        xJittered = ii + (rand()*2 - 1) * jitterAmount;  % adds uniform jitter between -jitterAmount and +jitterAmount
+        scatter(xJittered, subjectMat(jj,ii), 50, 'k', 'filled'); 
+    end
+end
+
+% Set plot properties
+if baselineCorrect
+    xlim([0 10]);
+    ylim([0 6]);
+    yline(1, 'r--', 'LineWidth', 1.5);
+    if grandBaseline
+        ylabel('Grand baseline corrected MEP');
+    else
+        ylabel('Local baseline corrected MEP');
+    end
+else
+    ylim([0 3]);
+    ylabel('MEP amplitude (mV)')
+end
+xticklabels(labels);
+set(gca, 'FontSize', 25) 
+ax = gca;
+ax.Box = 'off';
+title('Subject results - Averaged Peaks');
 
 % Do correlation plots if baseline corrected
 if baselineCorrect
@@ -323,45 +363,6 @@ if baselineCorrect
     xlim([0 1]); ylim([0 1]);
     axis square    
 end
-
-% Do a boxplot
-subjectMat = cell2mat(averageSubjectPeaks');
-figure('Position', [100, 100, 800, 600])
-boxplot(subjectMat, labels, 'Symbol', '')
-hold on
-h = findobj(gca, 'Tag', 'Box'); 
-for j = 1:length(h)
-    patch(get(h(j), 'XData'), get(h(j), 'YData'), [0.3010 0.7450 0.9330], 'FaceAlpha', 0.5); % Fill boxes with color
-end
-
-% Scatter plot with jitter
-jitterAmount = 0.05;  % You can increase this if needed
-for ii = 1:size(subjectMat,2) 
-    for jj = 1:numel(fieldnames(data))  
-        xJittered = ii + (rand()*2 - 1) * jitterAmount;  % adds uniform jitter between -jitterAmount and +jitterAmount
-        scatter(xJittered, subjectMat(jj,ii), 50, 'k', 'filled'); 
-    end
-end
-
-% Set plot properties
-if baselineCorrect
-    xlim([0 10]);
-    ylim([0 6]);
-    yline(1, 'r--', 'LineWidth', 1.5);
-    if grandBaseline
-        ylabel('Grand baseline corrected MEP');
-    else
-        ylabel('Local baseline corrected MEP');
-    end
-else
-    ylim([0 3]);
-    ylabel('MEP amplitude (mV)')
-end
-xticklabels(labels);
-set(gca, 'FontSize', 25) 
-ax = gca;
-ax.Box = 'off';
-title('Subject results - Averaged Peaks');
 
 % Save a sheet for future anayses. Only save if grandBaseline is used.
 if baselineCorrect
