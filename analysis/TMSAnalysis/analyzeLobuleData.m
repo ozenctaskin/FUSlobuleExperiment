@@ -3,7 +3,7 @@ close all; clear all; clc
 % Decide what this function will do when run
 setDiagnostics = false; % Saves diagnostic images in the data folder
 baselineCorrect = true; % Corrects baseline
-grandBaseline = false;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
+grandBaseline = true;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
 useClean = true;        % Use the clean data for analysis. Need to run cleanCBITrials first
 plotSubject = false;    % Plots all trials for all subjects in separate figure.
 
@@ -280,30 +280,41 @@ for ii = 1:size(allSubjectPeaks,2)
     end
 end
 
+% If baseline correct is passed, remove the baseline labels.
+if baselineCorrect
+    labels(baselineVals) = [];
+end
+
+% Convert peaks to matlab
+subjectMat = cell2mat(averageSubjectPeaks');
+
 % Do t-tests between measurements (raw ones that contain baselines). FUS
 % with FUS, CBI with CBI baseline
 subjectTvals = [];
 subjectPvals = [];
 pvalsFUS = nan(1,7);
 tvalsFUS = nan(1,7);
-for numRow = 1:7
-    [~, p, ~, stats] = ttest(rawAverageSubjectPeaks(:,1), rawAverageSubjectPeaks(:,numRow)); 
-    pvalsFUS(numRow) = p;
-    tvalsFUS(numRow) = stats.tstat;
-end
-[~, pvalCBI1, ~, tvalCBI1] = ttest(rawAverageSubjectPeaks(:,8), rawAverageSubjectPeaks(:,9));
-[~, pvalCBI2, ~, tvalCBI2] = ttest(rawAverageSubjectPeaks(:,10), rawAverageSubjectPeaks(:,11));
-subjectTvals = [tvalsFUS(2:end) tvalCBI1.tstat tvalCBI2.tstat];
-subjectPvals = [pvalsFUS(2:end) pvalCBI1 pvalCBI2];
-subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
-
-% If baseline correct is passed, remove the baseline labels.
-if baselineCorrect
-    labels(baselineVals) = [];
+if ~grandBaseline
+    for numRow = 1:7
+        [~, p, ~, stats] = ttest(rawAverageSubjectPeaks(:,1), rawAverageSubjectPeaks(:,numRow)); 
+        pvalsFUS(numRow) = p;
+        tvalsFUS(numRow) = stats.tstat;
+    end
+    [~, pvalCBI1, ~, tvalCBI1] = ttest(rawAverageSubjectPeaks(:,8), rawAverageSubjectPeaks(:,9));
+    [~, pvalCBI2, ~, tvalCBI2] = ttest(rawAverageSubjectPeaks(:,10), rawAverageSubjectPeaks(:,11));
+    subjectTvals = [tvalsFUS(2:end) tvalCBI1.tstat tvalCBI2.tstat];
+    subjectPvals = [pvalsFUS(2:end) pvalCBI1 pvalCBI2];
+    subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
+else
+    for numRow = 1:length(subjectMat)
+        [~, p, ~, stats] = ttest(subjectMat(:,numRow), 1);
+        subjectPvals(numRow) = p;
+        subjectTvals(numRow) = stats.tstat;      
+    end
+    subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
 end
 
 % Do a boxplot
-subjectMat = cell2mat(averageSubjectPeaks');
 figure('Position', [100, 100, 800, 600])
 boxplot(subjectMat, labels, 'Symbol', '')
 hold on
@@ -348,37 +359,31 @@ if baselineCorrect
     subplot(2,3,1);
     scatter(subjectMat(:,1), subjectMat(:,7), 'filled');
     xlabel('Dentate'); ylabel('CBI-1');
-    xlim([0 1]); ylim([0 1]);
     axis square
     
     subplot(2,3,2);
     scatter(subjectMat(:,2), subjectMat(:,7), 'filled');
     xlabel('Lobule 5'); ylabel('CBI-1');
-    xlim([0 1]); ylim([0 1]);
     axis square
     
     subplot(2,3,3);
     scatter(subjectMat(:,3), subjectMat(:,7), 'filled');
     xlabel('Lobule 8'); ylabel('CBI-1');
-    xlim([0 1]); ylim([0 1]);
     axis square
 
     subplot(2,3,4);
     scatter(subjectMat(:,1), subjectMat(:,8), 'filled');
     xlabel('Dentate'); ylabel('CBI-2');
-    xlim([0 1]); ylim([0 1]);
     axis square
     
     subplot(2,3,5);
     scatter(subjectMat(:,2), subjectMat(:,8), 'filled');
     xlabel('Lobule 5'); ylabel('CBI-2');
-    xlim([0 1]); ylim([0 1]);
     axis square
     
     subplot(2,3,6);
     scatter(subjectMat(:,3), subjectMat(:,8), 'filled');
     xlabel('Lobule 8'); ylabel('CBI-2');
-    xlim([0 1]); ylim([0 1]);
     axis square    
 end
 
