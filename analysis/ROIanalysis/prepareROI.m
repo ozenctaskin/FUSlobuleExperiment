@@ -121,25 +121,34 @@ function prepareROI(dataFolder, subjectID, sessionID)
     finalLabels = fullfile(ROIfolder, 'finalLabels.nii.gz');
     if ~isfile(finalLabels)
         system(['mrcalc ' subjectNodes_subcortAdded_native ' ' cerebellarParc_native ' -add ' finalLabels]);
+        system(['fslmaths ' finalLabels ' -uthr 100 ' finalLabels]);
     end
 
     % Convert 5-tissue segments to native anatomical space  
     tsegments_nifti = fullfile(intermediateFiles, 'segmented5Tissues.nii.gz');
     system(['mrconvert ' tsegments ' ' tsegments_nifti]);
     tsegments_natived = fullfile(intermediateFiles, 'segmented5Tissues_native.nii.gz');
-    system(['mri_vol2vol --mov ' tsegments_nifti ' --targ ' rawAvg ' --o ' tsegments_natived ' --regheader --no-save-reg']);
+    if ~isfile(tsegments_natived)
+        system(['mri_vol2vol --mov ' tsegments_nifti ' --targ ' rawAvg ' --o ' tsegments_natived ' --regheader --no-save-reg']);
+    end
 
     % Add cerebellar nuclei to the 5t gray matter mask and threshold to get
     % rid of the overlapping regions use 5ttedit
     cerebellarNuclei = fullfile(intermediateFiles, 'cerebellarNuclei.nii.gz');
-    system(['mri_extract_label ' finalLabels ' 91 92 93 96 97 98 ' cerebellarNuclei]);
-    system(['fslmaths ' cerebellarNuclei ' -thr 1 -bin ' cerebellarNuclei]);
+    if ~isfile(cerebellarNuclei)
+        system(['mri_extract_label ' finalLabels ' 91 92 93 96 97 98 ' cerebellarNuclei]);
+        system(['fslmaths ' cerebellarNuclei ' -thr 1 -bin ' cerebellarNuclei]);
+    end
     
     cerebellarGrayMatter = fullfile(intermediateFiles, 'cerebellarGM.nii.gz');
-    system(['fslroi ' tsegments_natived ' ' cerebellarGrayMatter ' 1 1']);
-    system(['fslmaths ' cerebellarGrayMatter ' -add ' cerebellarNuclei ' ' cerebellarGrayMatter]);
-    system(['mrcalc -force ' cerebellarGrayMatter ' 1 -min ' cerebellarGrayMatter]);
+    if ~isfile(cerebellarGrayMatter)
+        system(['fslroi ' tsegments_natived ' ' cerebellarGrayMatter ' 1 1']);
+        system(['fslmaths ' cerebellarGrayMatter ' -add ' cerebellarNuclei ' ' cerebellarGrayMatter]);
+        system(['mrcalc -force ' cerebellarGrayMatter ' 1 -min ' cerebellarGrayMatter]);
+    end
 
     finalSegmentations = fullfile(ROIfolder, 'segmented5Tissues_native_final.nii.gz');
-    system(['5ttedit -force -sgm ' cerebellarGrayMatter ' ' tsegments_natived ' ' finalSegmentations]);
+    if ~isfile(finalSegmentations)
+        system(['5ttedit -force -sgm ' cerebellarGrayMatter ' ' tsegments_natived ' ' finalSegmentations]);
+    end
 end
