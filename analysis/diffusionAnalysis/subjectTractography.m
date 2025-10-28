@@ -48,7 +48,7 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     end
 
     % SIFT2
-    siftWeights = fullfile(subjectTractographyFolder, 'sift_weights.txt');
+    siftWeights = fullfile(subjectTractographyFolder, 'sift_weights.csv');
     siftMu = fullfile(subjectTractographyFolder, 'sift_mu.txt');
     siftCoeffs = fullfile(subjectTractographyFolder, 'sift_coeffs.txt');
     if ~isfile(siftWeights)
