@@ -14,12 +14,13 @@ function connectivityAnalysis(dataFolder, subjectID, sessionID)
     % Get the stuff we need
     preprocessedResults = fullfile(analysisFolder, 'preprocessed');
     subjectTractographyFolder = fullfile(analysisFolder, 'subjectTractography');
+    funcResults = fullfile(dataFolder, subjectID, sessionID, [subjectID '.results']);
 
     upscaledCleanDWI_single = fullfile(subjectTractographyFolder, 'intermediateFiles', 'upscaledCleanDWI_single.nii.gz');
     tractogram = fullfile(subjectTractographyFolder, 'tractogram_10M.tck');
     siftWeights = fullfile(subjectTractographyFolder, 'sift_weights.txt');
     nodes = fullfile(dataFolder, subjectID, sessionID, [subjectID '.ROI'], 'finalLabels.nii.gz');
-    tstatMap = fullfile(dataFolder, subjectID, sessionID, [subjectID '.results'], 'cerebellarTarget', 'workdir', 'tstat.nii');
+    stats = fullfile(funcResults, ['stats.' subjectID '_REML+orig']);
 
     % Register the nodes to DWI space
     DWItoT1affine = fullfile(preprocessedResults, 'registrations', 'dwi2T10GenericAffine.mat');
@@ -54,9 +55,49 @@ function connectivityAnalysis(dataFolder, subjectID, sessionID)
 
     % Now we do more careful segmentation of the CTC pathway. We first
     % convert fmri tstat to zstat, move to DWI space and threshold z>2.3.
-    % Use this for the tractography segmentation. Also do it with the whole
-    % M1 so that we report both.
+    % Then, get the overlap of this mask and the motor cortex ROI. Use this
+    % for the tractography segmentation. Also do it with the whole M1 so 
+    % that we report both. Also extract thalamus and cerebellar regions
+    zstat = fullfile(intermediateFiles, 'zstat.nii.gz');
+    zstatInDWI = fullfile(intermediateFiles, 'zstat_in_DWI.nii.gz');
+    zstatInDWIthrs = fullfile(intermediateFiles, 'zstat_in_DWI_thresholded.nii.gz');
+    system(['3dmerge -1zscore -prefix ' zstat ' ' stats '[tap#0_Tstat]']);
+    system(['antsApplyTransforms -e 3 -i ' zstat ' -r ' upscaledCleanDWI_single ' -t [ ' DWItoT1affine ',1 ] -o ' zstatInDWI]);
+    system(['fslmaths ' zstatInDWI ' -thr 2.3 -bin ' zstatInDWIthrs]);
+    motorCortexSegment = fullfile(intermediateFiles, 'precentral.nii.gz');
+    system(['mri_extract_label ' nodes_registered ' 23 ' motorCortexSegment]);
+    motorCortexROI = fullfile(intermediateFiles, 'M1roi.nii.gz');
+    system(['fslmaths ' zstatInDWIthrs ' -mul ' motorCortexSegment ' ' motorCortexROI]);
+    
+    lobule5 = fullfile(intermediateFiles, 'lobule5.nii.gz');
+    system(['mri_extract_label ' nodes_registered ' 99 ' lobule5]);
+    lobule8 = fullfile(intermediateFiles, 'lobule8.nii.gz');
+    system(['mri_extract_label ' nodes_registered ' 100 ' lobule8]);
+    dentate = fullfile(intermediateFiles, 'dentate.nii.gz');
+    system(['mri_extract_label ' nodes_registered ' 96 ' dentate]);
+    thalamus = fullfile(intermediateFiles, 'thalamus.nii.gz');
+    system(['mri_extract_label ' nodes_registered ' 35 ' thalamus]);
 
+    %%%%%% SCALE BY MU SCALE BY MU
+    % Segment lobule5-dentate 
+    lobule5Dentate = fullfile(intermediateFiles, 'lobule5Dentate.tck');
+    lobule5DentateWeights = fullfile(intermediateFiles, 'lobule5Dentate_weights.csv');
+    system(['tckedit ' tractogram ' -include ' lobule5 ' -include ' dentate ' -maxlength 10 ' lobule5Dentate ' -tck_weights_in ' siftWeights ' -tck_weights_out ' lobule5DentateWeights]);
+    
+    % Segment lobule8-dentate 
+    lobule8Dentate = fullfile(intermediateFiles, 'lobule8Dentate.tck');
+    lobule8DentateWeights = fullfile(intermediateFiles, 'lobule8Dentate_weights.csv');
+    system(['tckedit ' tractogram ' -include ' lobule8 ' -include ' dentate ' -maxlength 10 ' lobule8Dentate ' -tck_weights_in ' siftWeights ' -tck_weights_out ' lobule8DentateWeights]);
+
+    % Segment dento-thalamic
+    dentoThalamicTract = fullfile(intermediateFiles, 'dentoThalamic.tck');
+    dentoThalamicTractWeights = fullfile(intermediateFiles, 'dentoThalamic_weights.csv');
+    system(['tckedit ' tractogram ' -include ' dentate ' -include ' thalamus ' -maxlength 80 ' dentoThalamicTract ' -tck_weights_in ' siftWeights ' -tck_weights_out ' dentoThalamicTractWeights]);
+
+    % Segment thalamo-cortical
+    thalamoM1 = fullfile(intermediateFiles, 'thalamoM1.tck');
+    thalamoM1Weights = fullfile(intermediateFiles, 'thalamoM1_weights.csv');
+    system(['tckedit ' tractogram ' -include ' thalamus ' -include ' motorCortexROI ' -maxlength 80 ' thalamoM1 ' -tck_weights_in ' siftWeights ' -tck_weights_out ' thalamoM1Weights]);
 
 end
 
