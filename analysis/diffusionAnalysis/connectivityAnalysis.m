@@ -45,9 +45,12 @@ function connectivityAnalysis(dataFolder, subjectID, sessionID)
         meanPerStrl = fullfile(intermediateFiles, [metrics{ii} '_mean_per_streamline.csv']);
         assignment = fullfile(intermediateFiles, [metrics{ii} '_assignments.txt']);
         connectome = fullfile(subjectConnectivityFolder, [subjectID '_' metrics{ii} '_connectome.csv']);
+        % Tracts wrighted by the metric
         if ~isfile(meanPerStrl)
             system(['tcksample ' tractogram ' ' metric ' ' meanPerStrl ' -stat_tck mean']);
         end
+        % Apply a weighted mean of metric and sift2 weights 
+        % (metric * weight) / sumWeightwithinMetric
         if ~isfile(connectome)
             system(['tck2connectome ' tractogram ' ' nodes_registered ' ' connectome ' -tck_weights_in ' siftWeights ' -scale_file ' meanPerStrl ' -stat_edge mean -symmetric -zero_diagonal -assignment_radial_search 4 -out_assignments ' assignment]);
         end
