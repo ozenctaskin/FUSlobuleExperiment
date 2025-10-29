@@ -55,4 +55,34 @@ function subjectTractography(dataFolder, subjectID, sessionID)
         system(['tcksift2 -nthreads 10 -act ' tsegments_registered ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
     end
 
+    % Scale sift weights by mu. TRY THIS OUT WITH CONNECTOME !!!!
+    fid = fopen(siftWeights, 'r');
+    data = textscan(fid, '%f', 'CommentStyle', '#');
+    fclose(fid);
+    weights = data{1};
+    mu = readmatrix(siftMu);
+    
+    scaledWeights = weights * mu;
+    
+    % Read header and write scaled sift
+    fid = fopen(siftWeights, 'r');
+    allLines = textscan(fid, '%s', 'Delimiter', '\n', 'Whitespace', '');
+    fclose(fid);
+    headerLines = allLines{1}(startsWith(allLines{1}, '#'));
+    
+    outputFile = fullfile(subjectTractographyFolder, 'sift_weights_MuScaled.txt');
+    fid = fopen(outputFile, 'w');
+    for i = 1:numel(headerLines)
+        fprintf(fid, '%s\n', headerLines{i});
+    end
+    
+    wrapLength = 1000;  
+    for i = 1:wrapLength:numel(scaledWeights)
+        idxEnd = min(i + wrapLength - 1, numel(scaledWeights));
+        fprintf(fid, '%.10f ', scaledWeights(i:idxEnd));
+        fprintf(fid, '\n');
+    end
+    
+    fclose(fid);
+
 end
