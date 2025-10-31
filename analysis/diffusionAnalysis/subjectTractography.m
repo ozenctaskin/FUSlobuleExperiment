@@ -44,45 +44,17 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     % Run tractography. 10 million tracks
     tractogram = fullfile(subjectTractographyFolder, 'tractogram_10M.tck');
     if ~isfile(tractogram)
-        system(['tckgen -act ' tsegments_registered ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 10 -select 10M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
+        system(['tckgen -act ' tsegments_registered ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 6 -select 10M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
     end
 
     % SIFT2
-    siftWeights = fullfile(subjectTractographyFolder, 'sift_weights.txt');
+    siftWeights = fullfile(subjectTractographyFolder, 'sift_weights.csv');
     siftMu = fullfile(subjectTractographyFolder, 'sift_mu.txt');
-    siftCoeffs = fullfile(subjectTractographyFolder, 'sift_coeffs.txt');
+    siftCoeffs = fullfile(subjectTractographyFolder, 'sift_coeffs.csv');
     if ~isfile(siftWeights)
-        system(['tcksift2 -nthreads 10 -act ' tsegments_registered ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
+        system(['tcksift2 -nthreads 6 -act ' tsegments_registered ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
     end
 
     % Scale sift weights by mu. TRY THIS OUT WITH CONNECTOME !!!!
-    fid = fopen(siftWeights, 'r');
-    data = textscan(fid, '%f', 'CommentStyle', '#');
-    fclose(fid);
-    weights = data{1};
-    mu = readmatrix(siftMu);
-    
-    scaledWeights = weights * mu;
-    
-    % Read header and write scaled sift
-    fid = fopen(siftWeights, 'r');
-    allLines = textscan(fid, '%s', 'Delimiter', '\n', 'Whitespace', '');
-    fclose(fid);
-    headerLines = allLines{1}(startsWith(allLines{1}, '#'));
-    
-    outputFile = fullfile(subjectTractographyFolder, 'sift_weights_MuScaled.txt');
-    fid = fopen(outputFile, 'w');
-    for i = 1:numel(headerLines)
-        fprintf(fid, '%s\n', headerLines{i});
-    end
-    
-    wrapLength = 1000;  
-    for i = 1:wrapLength:numel(scaledWeights)
-        idxEnd = min(i + wrapLength - 1, numel(scaledWeights));
-        fprintf(fid, '%.10f ', scaledWeights(i:idxEnd));
-        fprintf(fid, '\n');
-    end
-    
-    fclose(fid);
 
 end
