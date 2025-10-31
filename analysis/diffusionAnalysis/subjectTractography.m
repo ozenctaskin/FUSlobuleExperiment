@@ -42,9 +42,9 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     system(['mtnormalise ' wmFOD ' ' wmFOD_norm ' ' gmFOD ' ' gmFOD_norm ' ' csfFOD ' ' csfFOD_norm ' -mask ' upscaledMask]);
 
     % Run tractography. 10 million tracks
-    tractogram = fullfile(subjectTractographyFolder, 'tractogram_10M.tck');
+    tractogram = fullfile(subjectTractographyFolder, 'tractogram_70M.tck');
     if ~isfile(tractogram)
-        system(['tckgen -act ' tsegments_registered ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 6 -select 10M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
+        system(['tckgen -act ' tsegments_registered ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 6 -select 70M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
     end
 
     % SIFT2
@@ -55,6 +55,13 @@ function subjectTractography(dataFolder, subjectID, sessionID)
         system(['tcksift2 -nthreads 6 -act ' tsegments_registered ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
     end
 
-    % Scale sift weights by mu. TRY THIS OUT WITH CONNECTOME !!!!
-
+    % Scale sift weights by mu. We do it here instead of multiplying by
+    % connectivity beacuse we will make multiple connectivity maps and
+    % that's a lot of 
+    scaledByMu = fullfile(subjectTractographyFolder, 'sift_weights_MuScaled.csv');
+    lines = readlines(siftWeights);
+    weightsLoaded = str2double(split(lines(2), ','))';
+    muLoaded = load(siftMu);
+    scaledWeights = weightsLoaded * muLoaded;
+    writematrix(scaledWeights, scaledByMu);
 end
