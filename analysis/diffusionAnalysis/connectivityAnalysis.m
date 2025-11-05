@@ -18,7 +18,7 @@ function connectivityAnalysis(dataFolder, subjectID, sessionID)
 
     upscaledCleanDWI_single = fullfile(subjectTractographyFolder, 'intermediateFiles', 'upscaledCleanDWI_single.nii.gz');
     tractogram = fullfile(subjectTractographyFolder, 'tractogram_10M.tck');
-    siftWeights = fullfile(subjectTractographyFolder, 'sift_weights.txt');
+    siftWeights = fullfile(subjectTractographyFolder, 'sift_weights_MuScaled.csv');
     nodes = fullfile(dataFolder, subjectID, sessionID, [subjectID '.ROI'], 'finalLabels.nii.gz');
     stats = fullfile(funcResults, ['stats.' subjectID '_REML+orig']);
 
@@ -52,7 +52,7 @@ function connectivityAnalysis(dataFolder, subjectID, sessionID)
         % Apply a weighted mean of metric and sift2 weights 
         % (metric * weight) / sumWeightwithinMetric
         if ~isfile(connectome)
-            system(['tck2connectome ' tractogram ' ' nodes_registered ' ' connectome ' -tck_weights_in ' siftWeights ' -scale_file ' meanPerStrl ' -stat_edge mean -symmetric -zero_diagonal -assignment_radial_search 4 -out_assignments ' assignment]);
+            system(['tck2connectome ' tractogram ' ' nodes_registered ' ' connectome ' -tck_weights_in ' siftWeights ' -scale_file ' meanPerStrl ' -stat_edge mean -symmetric -zero_diagonal -assignment_radial_search 2 -out_assignments ' assignment]);
         end
     end
 
@@ -81,7 +81,6 @@ function connectivityAnalysis(dataFolder, subjectID, sessionID)
     thalamus = fullfile(intermediateFiles, 'thalamus.nii.gz');
     system(['mri_extract_label ' nodes_registered ' 35 ' thalamus]);
 
-    %%%%%% SCALE BY MU SCALE BY MU
     % Segment lobule5-dentate 
     lobule5Dentate = fullfile(intermediateFiles, 'lobule5Dentate.tck');
     lobule5DentateWeights = fullfile(intermediateFiles, 'lobule5Dentate_weights.csv');
