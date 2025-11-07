@@ -1,8 +1,9 @@
 function prepareROI(dataFolder, subjectID, sessionID)
     
     % Add required functions
-    addpath(genpath('/home/chenlab-linux/Documents/MATLAB/toolboxes/freesurferMatlabLibrary'));
-    addpath(genpath('/home/chenlab-linux/Documents/MATLAB/toolboxes/spm12'))
+    homeVar = getenv('HOME');
+    addpath(genpath(fullfile(homeVar, 'Documents', 'MATLAB', 'toolboxes', 'freesurferMatlabLibrary')));
+    addpath(genpath(fullfile(homeVar, 'Documents', 'MATLAB', 'toolboxes', 'spm12')))
     suit_defaults();
     spm('Defaults','fMRI');
     spm_jobman('initcfg');
