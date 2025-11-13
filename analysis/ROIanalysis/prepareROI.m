@@ -27,7 +27,10 @@ function prepareROI(dataFolder, subjectID, sessionID)
     % Run freesurfer
     surfDir = fullfile(ROIfolder, [subjectID '_freesurfer']);
     if ~isfolder(surfDir)
-        system(['recon-all -all -subject ' subjectID '_freesurfer' ' -i ' T1Image ' -T2 ' T2Image ' -T2pial -sd ' ROIfolder]);
+        [~, T1name, T1ext] = fileparts(T1Image);
+        [~, T2name, T2ext] = fileparts(T2Image);
+        system(['docker run -it --rm -v ' T1Image ':/anat/' [T1name,T1ext] ' -v ' T2Image ':/anat/' [T2name,T2ext] ' -v ' ROIfolder ':/subjects freesurfer:latest recon-all -i ' fullfile('/anat', [T1name,T1ext]) ' -T2 ' fullfile('/anat', [T2name,T2ext]) ' -T2pial -sd /subjects -s ' subjectID '_freesurfer' ' -all']);
+        system(['docker run --rm -v ' ROIfolder ':/subjects alpine chmod -R a+rwX /subjects']);
     end
 
     % Run 5ttgen
