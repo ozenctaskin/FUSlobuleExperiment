@@ -123,6 +123,26 @@ data.L007 =   {fullfile(dataFolder, 'L007', 'EMG', 'baseline_260925_000.mat'), .
                fullfile(dataFolder, 'L007', 'EMG', 'SUBJ_CBI65_2609_1830_000.mat'), ...
                fullfile(dataFolder, 'L007', 'EMG', 'SUBJ_CBI55_2609_1837_000.mat')};
 
+data.L008 =   {fullfile(dataFolder, 'L008', 'EMG', 'baseline_221025_000.mat'), ...
+               fullfile(dataFolder, 'L008', 'EMG', 'DN_221025_000.mat'), ...
+               fullfile(dataFolder, 'L008', 'EMG', 'L5_221025_000.mat'), ...
+               fullfile(dataFolder, 'L008', 'EMG', 'L8_221025_000.mat'), ...
+               fullfile(dataFolder, 'L008', 'EMG', 'V1_221025_000.mat'), ...
+               fullfile(dataFolder, 'L008', 'EMG', 'V0W_L5_221025_000.mat'), ...
+               fullfile(dataFolder, 'L008', 'EMG', 'Flip_DN_221025_000.mat'), ...
+               fullfile(dataFolder, 'L008', 'EMG', 'SUBJ65_CBI_2210_1548_000.mat'), ...
+               fullfile(dataFolder, 'L008', 'EMG', 'SUBJ55_CBI_2210_1556_000.mat')};
+
+data.LDC01 =   {fullfile(dataFolder, 'LDC01', 'EMG', 'baseline_121125_000.mat'), ...
+               fullfile(dataFolder, 'LDC01', 'EMG', 'DN_121125_000.mat'), ...
+               fullfile(dataFolder, 'LDC01', 'EMG', 'L5_121125_000.mat'), ...
+               fullfile(dataFolder, 'LDC01', 'EMG', 'L8_121125_000.mat'), ...
+               fullfile(dataFolder, 'LDC01', 'EMG', 'V1_121125_000.mat'), ...
+               fullfile(dataFolder, 'LDC01', 'EMG', 'V0WL8_121125_000.mat'), ...
+               fullfile(dataFolder, 'LDC01', 'EMG', 'Flip_121125_000.mat'), ...
+               fullfile(dataFolder, 'LDC01', 'EMG', 'SUBJ_CBI65_1211_1629_000.mat'), ...
+               fullfile(dataFolder, 'LDC01', 'EMG', 'SUBJ_CBI55_1211_1638_000.mat')};
+
 % Get fieldnames and empty cell for all subject peaks so we can do some
 % averaging at the end.
 subjectIDs = fieldnames(data);
@@ -288,31 +308,31 @@ end
 % Convert peaks to matlab
 subjectMat = cell2mat(averageSubjectPeaks');
 
-% Do t-tests between measurements (raw ones that contain baselines). FUS
-% with FUS, CBI with CBI baseline
-subjectTvals = [];
-subjectPvals = [];
-pvalsFUS = nan(1,7);
-tvalsFUS = nan(1,7);
-if ~grandBaseline
-    for numRow = 1:7
-        [~, p, ~, stats] = ttest(rawAverageSubjectPeaks(:,1), rawAverageSubjectPeaks(:,numRow)); 
-        pvalsFUS(numRow) = p;
-        tvalsFUS(numRow) = stats.tstat;
-    end
-    [~, pvalCBI1, ~, tvalCBI1] = ttest(rawAverageSubjectPeaks(:,8), rawAverageSubjectPeaks(:,9));
-    [~, pvalCBI2, ~, tvalCBI2] = ttest(rawAverageSubjectPeaks(:,10), rawAverageSubjectPeaks(:,11));
-    subjectTvals = [tvalsFUS(2:end) tvalCBI1.tstat tvalCBI2.tstat];
-    subjectPvals = [pvalsFUS(2:end) pvalCBI1 pvalCBI2];
-    subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
-else
-    for numRow = 1:length(subjectMat)
-        [~, p, ~, stats] = ttest(subjectMat(:,numRow), 1);
-        subjectPvals(numRow) = p;
-        subjectTvals(numRow) = stats.tstat;      
-    end
-    subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
-end
+% % Do t-tests between measurements (raw ones that contain baselines). FUS
+% % with FUS, CBI with CBI baseline
+% subjectTvals = [];
+% subjectPvals = [];
+% pvalsFUS = nan(1,7);
+% tvalsFUS = nan(1,7);
+% if ~grandBaseline
+%     for numRow = 1:7
+%         [~, p, ~, stats] = ttest(rawAverageSubjectPeaks(:,1), rawAverageSubjectPeaks(:,numRow)); 
+%         pvalsFUS(numRow) = p;
+%         tvalsFUS(numRow) = stats.tstat;
+%     end
+%     [~, pvalCBI1, ~, tvalCBI1] = ttest(rawAverageSubjectPeaks(:,8), rawAverageSubjectPeaks(:,9));
+%     [~, pvalCBI2, ~, tvalCBI2] = ttest(rawAverageSubjectPeaks(:,10), rawAverageSubjectPeaks(:,11));
+%     subjectTvals = [tvalsFUS(2:end) tvalCBI1.tstat tvalCBI2.tstat];
+%     subjectPvals = [pvalsFUS(2:end) pvalCBI1 pvalCBI2];
+%     subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
+% else
+%     for numRow = 1:length(subjectMat)
+%         [~, p, ~, stats] = ttest(subjectMat(:,numRow), 1);
+%         subjectPvals(numRow) = p;
+%         subjectTvals(numRow) = stats.tstat;      
+%     end
+%     subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
+% end
 
 % Do a boxplot
 figure('Position', [100, 100, 800, 600])
