@@ -24,9 +24,15 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     %                      cerebellum are continious.
 
     % Add path to functions we will use
-    addpath(genpath('/home/chenlab-linux/Documents/MATLAB/toolboxes/spm12'));
-    addpath(genpath('/home/chenlab-linux/Documents/MATLAB/toolboxes/freesurferMatlabLibrary'));
-    addpath(genpath('/home/chenlab-linux/Documents/MATLAB/toolboxes/fieldtrip/external/afni'));
+    toolboxes = fullfile(getenv('HOME'), 'MATLAB', 'toolboxes');
+    addpath(genpath(fullfile(toolboxes, 'spm12')));
+    addpath(genpath(fullfile(toolboxes, 'fieldtrip', 'external', 'afni')));
+    addpath(genpath(fullfile(getenv('FREESURFER_HOME'), 'matlab')));
+
+    % Convert outputCluster value to num if it is string 
+    if ischar(outputCluster)
+        outputCluster = str2num(outputCluster);
+    end
 
     % Get the de-obliques anatomical images and atlases
     T1pathDeobliqued = fullfile(dataFolder, subjectID, sessionID, 'anat', [subjectID '_' sessionID '_acq-btoMPRAGE2x11mmisoDEOBLIQUED_T1w.nii.gz']);
@@ -71,6 +77,7 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix ' fullfile(workdir,'beta') ' ' func '''[tap#0_Coef]''']);
     system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix ' fullfile(workdir,'tstat') ' ' func '''[tap#0_Tstat]''']);
     system(['cd ' outputFolder ';' '3dAFNItoNIFTI -prefix ' fullfile(workdir,'fstat') ' ' func '''[tap_Fstat]''']);
+    gunzip(fullfile(workdir, 'beta.nii.gz'));
     beta = fullfile(workdir, 'beta.nii');
 
     % Bias correct T1 and T2 and move them into the workdir
