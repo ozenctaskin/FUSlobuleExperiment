@@ -1,4 +1,4 @@
-function prepareROI(dataFolder, subjectID, sessionID)
+function prepareROI(dataFolder, subjectID, sessionID, freesurferType)
     
     % Add required functions
     homeVar = getenv('HOME');
@@ -27,16 +27,22 @@ function prepareROI(dataFolder, subjectID, sessionID)
     % Run freesurfer
     surfDir = fullfile(ROIfolder, [subjectID '_freesurfer']);
     if ~isfolder(surfDir)
-        [~, T1name, T1ext] = fileparts(T1Image);
-        [~, T2name, T2ext] = fileparts(T2Image);
-        system(['docker run -it --rm -v ' T1Image ':/anat/' [T1name,T1ext] ' -v ' T2Image ':/anat/' [T2name,T2ext] ' -v ' ROIfolder ':/subjects freesurfer:latest recon-all -i ' fullfile('/anat', [T1name,T1ext]) ' -T2 ' fullfile('/anat', [T2name,T2ext]) ' -T2pial -sd /subjects -s ' subjectID '_freesurfer' ' -all']);
-        system(['docker run --rm -v ' ROIfolder ':/subjects alpine chmod -R a+rwX /subjects']);
+        if strcmp(freesurferType, 'local')
+            system(['recon-all -subjid ' subjectID '_freesurfer -i ' T1Image ' -T2 ' T2Image ' -T2pial -sd ' ROIfolder ' -all']);
+        elseif strcmp(freesurferType, 'docker')
+            [~, T1name, T1ext] = fileparts(T1Image);
+            [~, T2name, T2ext] = fileparts(T2Image);
+            system(['docker run -it --rm -v ' T1Image ':/anat/' [T1name,T1ext] ' -v ' T2Image ':/anat/' [T2name,T2ext] ' -v ' ROIfolder ':/subjects freesurfer:latest recon-all -i ' fullfile('/anat', [T1name,T1ext]) ' -T2 ' fullfile('/anat', [T2name,T2ext]) ' -T2pial -sd /subjects -s ' subjectID '_freesurfer' ' -all']);
+            system(['docker run --rm -v ' ROIfolder ':/subjects alpine chmod -R a+rwX /subjects']);
+        else
+            error('Freesurfer type not recognized. Enter local or docker')
+        end
     end
 
     % Run 5ttgen
     tsegments = fullfile(intermediateFiles, 'segmented5Tissues.mif');
     if ~isfile(tsegments)
-        system(['5ttgen hsvs -nthreads 10 -white_stem ' surfDir ' ' tsegments]);
+        system(['5ttgen hsvs -nthreads 13 -white_stem ' surfDir ' ' tsegments]);
     end
 
     % Convert freesurfer labels, exclude putamen, caudate, and pallidum
