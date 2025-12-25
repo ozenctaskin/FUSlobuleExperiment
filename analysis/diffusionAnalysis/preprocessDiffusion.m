@@ -57,12 +57,12 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
         denoised = fullfile(intermediateFiles, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-denoised_dir-'}));
         noise = fullfile(intermediateFiles, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-noise_dir-'}));
         residuals = fullfile(intermediateFiles, replace(name, {'.nii', 'dir-'}, {'.mif', 'rec-residuals_dir-'}));
-        system(['dwidenoise ' mif ' ' denoised ' -noise ' noise ' -nthreads 5']);
+        system(['dwidenoise ' mif ' ' denoised ' -noise ' noise ' -nthreads 13']);
         system(['mrcalc ' mif ' ' denoised ' -subtract ' residuals]);
 
         % Perform gibbs ringing correction
         unringed = strrep(denoised, 'rec-denoised', 'rec-denoisedUnringed');
-        system(['mrdegibbs ' denoised ' ' unringed ' -axes 0,1 -nthreads 12']);
+        system(['mrdegibbs ' denoised ' ' unringed ' -axes 0,1 -nthreads 13']);
 
         % Append paths to MP denoised cell
         dataMPdenoised{ii} = unringed;
@@ -85,7 +85,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
         mkdir(eddyQC)
     end
     cleanDWI = fullfile(preprocessedResults, 'cleanDWI.mif');
-    system(['dwifslpreproc ' combinedDWI ' ' fslCorrectedDWI ' -pe_dir AP -rpe_all -readout_time 0.0959097 -eddyqc_all ' eddyQC ' -nthreads 12 -topup_options " --nthr=12 " -eddy_options " --slm=linear --repol "']);
+    system(['dwifslpreproc ' combinedDWI ' ' fslCorrectedDWI ' -pe_dir AP -rpe_all -readout_time 0.0959097 -eddyqc_all ' eddyQC ' -nthreads 13 -topup_options " --nthr=13 " -eddy_options " --slm=linear --repol "']);
     bias = fullfile(intermediateFiles, 'biasfield.mif');
     system(['dwibiascorrect ants ' fslCorrectedDWI ' ' cleanDWI ' -bias ' bias]);
 
@@ -95,7 +95,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     gmResponse = fullfile(preprocessedResults, 'gmResponse.txt');
     csfResponse = fullfile(preprocessedResults, 'csfResponse.txt');    
     responseVoxelSelection = fullfile(intermediateFiles, 'responseVoxelSelection.mif');
-    system(['dwi2response dhollander -nthreads 12 ' cleanDWI ' ' wmResponse ' ' gmResponse ' ' csfResponse ' -voxels ' responseVoxelSelection]);
+    system(['dwi2response dhollander -nthreads 13 ' cleanDWI ' ' wmResponse ' ' gmResponse ' ' csfResponse ' -voxels ' responseVoxelSelection]);
 
     % Now upscale the cleaned image
     upscaledCleanDWI = fullfile(preprocessedResults, 'upscaledCleanDWI.mif');
@@ -119,7 +119,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     % Register first volume of DWI to T1 image
     singleVolDWI = fullfile(intermediateFiles, 'singleVolDWI.nii.gz');
     system(['mrconvert ' upscaledCleanDWI ' -coord 3 0 -axes 0,1,2 ' singleVolDWI]);
-    system(['antsRegistrationSyN.sh -m ' singleVolDWI ' -f ' T1Image ' -t r -n 12 -o ' fullfile(registrationsFolder, 'dwi2T1')]);
+    system(['antsRegistrationSyN.sh -m ' singleVolDWI ' -f ' T1Image ' -t r -n 13 -o ' fullfile(registrationsFolder, 'dwi2T1')]);
     DWItoT1Affine = fullfile(registrationsFolder, 'dwi2T10GenericAffine.mat');
 
     % Apply the inverse of DWI to T1 to anatomicals so that we get them in
