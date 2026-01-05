@@ -85,9 +85,9 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
         mkdir(eddyQC)
     end
     cleanDWI = fullfile(preprocessedResults, 'cleanDWI.mif');
-    system(['dwifslpreproc ' combinedDWI ' ' fslCorrectedDWI ' -pe_dir AP -rpe_all -readout_time 0.0959097 -eddyqc_all ' eddyQC ' -nthreads 13 -topup_options " --nthr=13 " -eddy_options " --slm=linear --repol "']);
+    system(['dwifslpreproc ' combinedDWI ' ' fslCorrectedDWI ' -pe_dir AP -rpe_all -readout_time 0.0959097 -eddyqc_all ' eddyQC ' -nthreads 15 -topup_options " --nthr=15 " -eddy_options " --slm=linear --repol --nthr=15 --verbose"']);
     bias = fullfile(intermediateFiles, 'biasfield.mif');
-    system(['dwibiascorrect ants ' fslCorrectedDWI ' ' cleanDWI ' -bias ' bias]);
+    system(['dwibiascorrect ants ' fslCorrectedDWI ' ' cleanDWI ' -nthreads 15 -bias ' bias]);
 
     % Calculate multi-shell, multi-tissue response function. Happens before
     % upscaling.
@@ -95,7 +95,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     gmResponse = fullfile(preprocessedResults, 'gmResponse.txt');
     csfResponse = fullfile(preprocessedResults, 'csfResponse.txt');    
     responseVoxelSelection = fullfile(intermediateFiles, 'responseVoxelSelection.mif');
-    system(['dwi2response dhollander -nthreads 13 ' cleanDWI ' ' wmResponse ' ' gmResponse ' ' csfResponse ' -voxels ' responseVoxelSelection]);
+    system(['dwi2response dhollander -nthreads 15 ' cleanDWI ' ' wmResponse ' ' gmResponse ' ' csfResponse ' -voxels ' responseVoxelSelection]);
 
     % Now upscale the cleaned image
     upscaledCleanDWI = fullfile(preprocessedResults, 'upscaledCleanDWI.mif');
@@ -119,7 +119,7 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     % Register first volume of DWI to T1 image
     singleVolDWI = fullfile(intermediateFiles, 'singleVolDWI.nii.gz');
     system(['mrconvert ' upscaledCleanDWI ' -coord 3 0 -axes 0,1,2 ' singleVolDWI]);
-    system(['antsRegistrationSyN.sh -m ' singleVolDWI ' -f ' T1Image ' -t r -n 13 -o ' fullfile(registrationsFolder, 'dwi2T1')]);
+    system(['antsRegistrationSyN.sh -m ' singleVolDWI ' -f ' T1Image ' -t r -n 15 -o ' fullfile(registrationsFolder, 'dwi2T1')]);
     DWItoT1Affine = fullfile(registrationsFolder, 'dwi2T10GenericAffine.mat');
 
     % Apply the inverse of DWI to T1 to anatomicals so that we get them in
@@ -127,5 +127,10 @@ function preprocessDiffusion(dataFolder, subjectID, sessionID)
     % registration
     T1InDWI = fullfile(preprocessedResults, 'T1InDWI.nii.gz');
     system(['antsApplyTransforms -i ' T1Image ' -r ' T1Image ' -o ' T1InDWI ' -t [ ' DWItoT1Affine ',1 ]']);
+
+    % Create a b-value averaged image so that we can check any systatic
+    % issues
+    meanB = fullfile(preprocessedResults, 'mean_b.mif');
+    system(['mrmath ' upscaledCleanDWI ' mean ' meanB ' -axis 3']);
    
 end
