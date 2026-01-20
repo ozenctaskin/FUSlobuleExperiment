@@ -1,0 +1,446 @@
+﻿<?xml version="1.0" ?>
+<PsychoPy2experiment encoding="utf-8" version="2024.2.4">
+  <Settings>
+    <Param val="3" valType="str" updates="None" name="Audio latency priority"/>
+    <Param val="ptb" valType="str" updates="None" name="Audio lib"/>
+    <Param val="" valType="str" updates="None" name="Completed URL"/>
+    <Param val="auto" valType="str" updates="None" name="Data file delimiter"/>
+    <Param val="u'data/%s_%s_%s' % (expInfo['participant'], expName, expInfo['date'])" valType="code" updates="None" name="Data filename"/>
+    <Param val="True" valType="bool" updates="None" name="Enable Escape"/>
+    <Param val="Thank you for your patience." valType="str" updates="None" name="End Message"/>
+    <Param val="{'participant': 'f&quot;{randint(0, 999999):06.0f}&quot;', 'session': '001'}" valType="code" updates="None" name="Experiment info"/>
+    <Param val="True" valType="bool" updates="None" name="Force stereo"/>
+    <Param val="True" valType="bool" updates="None" name="Full-screen window"/>
+    <Param val="" valType="str" updates="None" name="HTML path"/>
+    <Param val="" valType="str" updates="None" name="Incomplete URL"/>
+    <Param val="testMonitor" valType="str" updates="None" name="Monitor"/>
+    <Param val="[]" valType="list" updates="None" name="Resources"/>
+    <Param val="False" valType="bool" updates="None" name="Save csv file"/>
+    <Param val="False" valType="bool" updates="None" name="Save excel file"/>
+    <Param val="False" valType="bool" updates="None" name="Save hdf5 file"/>
+    <Param val="True" valType="bool" updates="None" name="Save log file"/>
+    <Param val="True" valType="bool" updates="None" name="Save psydat file"/>
+    <Param val="True" valType="bool" updates="None" name="Save wide csv file"/>
+    <Param val="1" valType="num" updates="None" name="Screen"/>
+    <Param val="True" valType="bool" updates="None" name="Show info dlg"/>
+    <Param val="False" valType="bool" updates="None" name="Show mouse"/>
+    <Param val="height" valType="str" updates="None" name="Units"/>
+    <Param val="" valType="str" updates="None" name="Use version"/>
+    <Param val="[1470, 956]" valType="list" updates="None" name="Window size (pixels)"/>
+    <Param val="none" valType="str" updates="None" name="backgroundFit"/>
+    <Param val="" valType="str" updates="None" name="backgroundImg"/>
+    <Param val="avg" valType="str" updates="None" name="blendMode"/>
+    <Param val="float" valType="str" updates="None" name="clockFormat"/>
+    <Param val="{'thisRow.t': 'priority.CRITICAL', 'expName': 'priority.LOW'}" valType="dict" updates="None" name="colPriority"/>
+    <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
+    <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
+    <Param val="warning" valType="code" updates="None" name="consoleLoggingLevel"/>
+    <Param val="default" valType="str" updates="None" name="ecSampleRate"/>
+    <Param val="100.1.1.1" valType="str" updates="None" name="elAddress"/>
+    <Param val="FILTER_LEVEL_2" valType="str" updates="None" name="elDataFiltering"/>
+    <Param val="FILTER_LEVEL_OFF" valType="str" updates="None" name="elLiveFiltering"/>
+    <Param val="EYELINK 1000 DESKTOP" valType="str" updates="None" name="elModel"/>
+    <Param val="ELLIPSE_FIT" valType="str" updates="None" name="elPupilAlgorithm"/>
+    <Param val="PUPIL_AREA" valType="str" updates="None" name="elPupilMeasure"/>
+    <Param val="1000" valType="num" updates="None" name="elSampleRate"/>
+    <Param val="False" valType="bool" updates="None" name="elSimMode"/>
+    <Param val="RIGHT_EYE" valType="str" updates="None" name="elTrackEyes"/>
+    <Param val="PUPIL_CR_TRACKING" valType="str" updates="None" name="elTrackingMode"/>
+    <Param val="untitled" valType="str" updates="None" name="expName"/>
+    <Param val="on Sync" valType="str" updates="None" name="exportHTML"/>
+    <Param val="None" valType="str" updates="None" name="eyetracker"/>
+    <Param val="" valType="code" updates="None" name="frameRate"/>
+    <Param val="Attempting to measure frame rate of screen, please wait..." valType="str" updates="None" name="frameRateMsg"/>
+    <Param val="127.0.0.1" valType="str" updates="None" name="gpAddress"/>
+    <Param val="4242" valType="num" updates="None" name="gpPort"/>
+    <Param val="PsychToolbox" valType="str" updates="None" name="keyboardBackend"/>
+    <Param val="info" valType="code" updates="None" name="logging level"/>
+    <Param val="True" valType="bool" updates="None" name="measureFrameRate"/>
+    <Param val="('MIDDLE_BUTTON',)" valType="list" updates="None" name="mgBlink"/>
+    <Param val="CONTINUOUS" valType="str" updates="None" name="mgMove"/>
+    <Param val="0.5" valType="num" updates="None" name="mgSaccade"/>
+    <Param val="neon.local" valType="str" updates="None" name="plCompanionAddress"/>
+    <Param val="8080" valType="num" updates="None" name="plCompanionPort"/>
+    <Param val="True" valType="bool" updates="None" name="plCompanionRecordingEnabled"/>
+    <Param val="0.6" valType="num" updates="None" name="plConfidenceThreshold"/>
+    <Param val="True" valType="bool" updates="None" name="plPupilCaptureRecordingEnabled"/>
+    <Param val="" valType="str" updates="None" name="plPupilCaptureRecordingLocation"/>
+    <Param val="127.0.0.1" valType="str" updates="None" name="plPupilRemoteAddress"/>
+    <Param val="50020" valType="num" updates="None" name="plPupilRemotePort"/>
+    <Param val="1000" valType="num" updates="None" name="plPupilRemoteTimeoutMs"/>
+    <Param val="False" valType="bool" updates="None" name="plPupillometryOnly"/>
+    <Param val="psychopy_iohub_surface" valType="str" updates="None" name="plSurfaceName"/>
+    <Param val="0" valType="code" updates="None" name="runMode"/>
+    <Param val="False" valType="bool" updates="None" name="rush"/>
+    <Param val="time" valType="str" updates="None" name="sortColumns"/>
+    <Param val="" valType="str" updates="None" name="tbLicenseFile"/>
+    <Param val="" valType="str" updates="None" name="tbModel"/>
+    <Param val="60" valType="num" updates="None" name="tbSampleRate"/>
+    <Param val="" valType="str" updates="None" name="tbSerialNo"/>
+    <Param val="pyglet" valType="str" updates="None" name="winBackend"/>
+  </Settings>
+  <Routines>
+    <Routine name="baseline">
+      <RoutineSettingsComponent name="baseline" plugin="None">
+        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
+        <Param val="" valType="str" updates="None" name="backgroundImg"/>
+        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
+        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
+        <Param val="" valType="str" updates="constant" name="desc"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
+        <Param val="baseline" valType="code" updates="None" name="name"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
+      </RoutineSettingsComponent>
+      <PolygonComponent name="polygon_3" plugin="None">
+        <Param val="center" valType="str" updates="constant" name="anchor"/>
+        <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
+        <Param val="1" valType="num" updates="constant" name="contrast"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="False" valType="code" updates="constant" name="draggable"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="-1.0000, -1.0000, -1.0000" valType="color" updates="constant" name="fillColor"/>
+        <Param val="linear" valType="str" updates="constant" name="interpolate"/>
+        <Param val="-1.0000, -1.0000, -1.0000" valType="color" updates="constant" name="lineColor"/>
+        <Param val="1" valType="num" updates="constant" name="lineWidth"/>
+        <Param val="4" valType="int" updates="constant" name="nVertices"/>
+        <Param val="polygon_3" valType="code" updates="None" name="name"/>
+        <Param val="" valType="num" updates="constant" name="opacity"/>
+        <Param val="0" valType="num" updates="constant" name="ori"/>
+        <Param val="(0, 0)" valType="list" updates="constant" name="pos"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="cross" valType="str" updates="None" name="shape"/>
+        <Param val="(0.2, 0.2)" valType="list" updates="constant" name="size"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="0.0" valType="code" updates="None" name="startVal"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="10" valType="code" updates="constant" name="stopVal"/>
+        <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
+        <Param val="from exp settings" valType="str" updates="None" name="units"/>
+        <Param val="" valType="code" updates="None" name="validator"/>
+        <Param val="" valType="list" updates="constant" name="vertices"/>
+      </PolygonComponent>
+    </Routine>
+    <Routine name="red">
+      <RoutineSettingsComponent name="red" plugin="None">
+        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
+        <Param val="" valType="str" updates="None" name="backgroundImg"/>
+        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
+        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
+        <Param val="" valType="str" updates="constant" name="desc"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
+        <Param val="red" valType="code" updates="None" name="name"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
+      </RoutineSettingsComponent>
+      <PolygonComponent name="polygon" plugin="None">
+        <Param val="center" valType="str" updates="constant" name="anchor"/>
+        <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
+        <Param val="1" valType="num" updates="constant" name="contrast"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="False" valType="code" updates="constant" name="draggable"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="1.0000, -1.0000, -1.0000" valType="color" updates="constant" name="fillColor"/>
+        <Param val="linear" valType="str" updates="constant" name="interpolate"/>
+        <Param val="1.0000, -1.0000, -1.0000" valType="color" updates="constant" name="lineColor"/>
+        <Param val="1" valType="num" updates="constant" name="lineWidth"/>
+        <Param val="4" valType="int" updates="constant" name="nVertices"/>
+        <Param val="polygon" valType="code" updates="None" name="name"/>
+        <Param val="" valType="num" updates="constant" name="opacity"/>
+        <Param val="0" valType="num" updates="constant" name="ori"/>
+        <Param val="(0, 0)" valType="list" updates="constant" name="pos"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="cross" valType="str" updates="None" name="shape"/>
+        <Param val="(0.2, 0.2)" valType="list" updates="set every repeat" name="size"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="0.0" valType="code" updates="None" name="startVal"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="0.5" valType="code" updates="constant" name="stopVal"/>
+        <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
+        <Param val="from exp settings" valType="str" updates="None" name="units"/>
+        <Param val="" valType="code" updates="None" name="validator"/>
+        <Param val="" valType="list" updates="constant" name="vertices"/>
+      </PolygonComponent>
+      <CodeComponent name="code_2" plugin="None">
+        <Param val="" valType="extendedCode" updates="constant" name="Before Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Before JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin JS Experiment"/>
+        <Param val="new NFStart(NeuroFUS);&amp;#10;" valType="extendedCode" updates="constant" name="Begin JS Routine"/>
+        <Param val="serialTPO.write((&quot;START&quot; + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;" valType="extendedCode" updates="constant" name="Begin Routine"/>
+        <Param val="Py" valType="str" updates="None" name="Code Type"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each JS Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Routine"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Routine"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="code_2" valType="code" updates="None" name="name"/>
+      </CodeComponent>
+    </Routine>
+    <Routine name="white">
+      <RoutineSettingsComponent name="white" plugin="None">
+        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
+        <Param val="" valType="str" updates="None" name="backgroundImg"/>
+        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
+        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
+        <Param val="" valType="str" updates="constant" name="desc"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
+        <Param val="white" valType="code" updates="None" name="name"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
+      </RoutineSettingsComponent>
+      <PolygonComponent name="polygon_2" plugin="None">
+        <Param val="center" valType="str" updates="constant" name="anchor"/>
+        <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
+        <Param val="1" valType="num" updates="constant" name="contrast"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="False" valType="code" updates="constant" name="draggable"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="1.0000, 1.0000, 1.0000" valType="color" updates="constant" name="fillColor"/>
+        <Param val="linear" valType="str" updates="constant" name="interpolate"/>
+        <Param val="1.0000, 1.0000, 1.0000" valType="color" updates="constant" name="lineColor"/>
+        <Param val="1" valType="num" updates="constant" name="lineWidth"/>
+        <Param val="4" valType="int" updates="constant" name="nVertices"/>
+        <Param val="polygon_2" valType="code" updates="None" name="name"/>
+        <Param val="" valType="num" updates="constant" name="opacity"/>
+        <Param val="0" valType="num" updates="constant" name="ori"/>
+        <Param val="(0, 0)" valType="list" updates="constant" name="pos"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="cross" valType="str" updates="None" name="shape"/>
+        <Param val="(0.2, 0.2)" valType="list" updates="constant" name="size"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="0.0" valType="code" updates="None" name="startVal"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="0.5" valType="code" updates="constant" name="stopVal"/>
+        <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
+        <Param val="from exp settings" valType="str" updates="None" name="units"/>
+        <Param val="" valType="code" updates="None" name="validator"/>
+        <Param val="" valType="list" updates="constant" name="vertices"/>
+      </PolygonComponent>
+    </Routine>
+    <Routine name="loadFunc">
+      <RoutineSettingsComponent name="loadFunc" plugin="None">
+        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
+        <Param val="" valType="str" updates="None" name="backgroundImg"/>
+        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
+        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
+        <Param val="" valType="str" updates="constant" name="desc"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
+        <Param val="loadFunc" valType="code" updates="None" name="name"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
+      </RoutineSettingsComponent>
+      <CodeComponent name="code" plugin="None">
+        <Param val="import serial&amp;#10;import time&amp;#10;&amp;#10;def setLocal(serialTPO, local):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Sets the TPO into either local mode (1) or remote (0)&amp;#10;    Returns 0 if successful, 1 if error&amp;#10;    &quot;&quot;&quot;&amp;#10;&amp;#10;    if local == 0:&amp;#10;        outStr = &quot;LOCAL=NO&quot;&amp;#10;        serialTPO.write((outStr + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;&amp;#10;        reply = serialTPO.readline().decode(&quot;ascii&quot;).strip()&amp;#10;&amp;#10;        # MATLAB: reply(2:3) -&gt; Python: reply[1:3]&amp;#10;        if len(reply) &gt;= 3 and reply[1:3] == &quot;NO&quot;:&amp;#10;            return 0&amp;#10;        else:&amp;#10;            return 1&amp;#10;&amp;#10;    else:&amp;#10;        outStr = &quot;LOCAL=YES&quot;&amp;#10;        serialTPO.write((outStr + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;&amp;#10;        reply = serialTPO.readline().decode(&quot;ascii&quot;).strip()&amp;#10;&amp;#10;        # MATLAB: reply(2:4) -&gt; Python: reply[1:4]&amp;#10;        if len(reply) &gt;= 4 and reply[1:4] == &quot;YES&quot;:&amp;#10;            return 0&amp;#10;        else:&amp;#10;            return 1&amp;#10;&amp;#10;&amp;#10;def NFOpen(COM, trigger, advanced):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Connects to the NeuroFUS device via serial port.&amp;#10;    &amp;#10;    Parameters:&amp;#10;    - COM: String, e.g., 'COM5'&amp;#10;    - trigger: int (0 or 1). The trigger = 1 means that the ultrasound protocol &amp;#10;    will start after a TTL pulse is sent into the 'trigger' port of the &amp;#10;    NeuroFUS device.&amp;#10;    - advanced: int (0 or 1), If advanced is 1, this enables the power, &amp;#10;    frequency and phase of each element of the NeuroFUS transducer to be &amp;#10;    configured independently.&amp;#10;&amp;#10;    Returns:&amp;#10;    - NeuroFUS: the serial object&amp;#10;    - NFOK: bool, True if connection check passed&amp;#10;    &quot;&quot;&quot;&amp;#10;    &amp;#10;&amp;#10;    # Create new serial object&amp;#10;    NeuroFUS = serial.Serial(port=COM,&amp;#10;                             baudrate=115200,&amp;#10;                             bytesize=serial.EIGHTBITS,&amp;#10;                             stopbits=serial.STOPBITS_ONE,&amp;#10;                             timeout=1,  # in seconds&amp;#10;                             )&amp;#10;&amp;#10;    # Open the port&amp;#10;    NFOK = NFCheckConn(NeuroFUS)&amp;#10;&amp;#10;    # Wait before sending commands&amp;#10;    time.sleep(3)&amp;#10;&amp;#10;    # Trigger mode&amp;#10;    if trigger == 1:&amp;#10;        NeuroFUS.write(b'TRIGGERMODE=1\r')&amp;#10;        print(&quot;External triggering enabled&quot;)&amp;#10;&amp;#10;    # Advanced mode&amp;#10;    if advanced == 1:&amp;#10;        NeuroFUS.write(b'LOCAL=0\r')&amp;#10;        print(&quot;Advanced remote control enabled. Phase, power and frequency of each element can be independently configured.&quot;)&amp;#10;&amp;#10;    return NeuroFUS, NFOK&amp;#10;&amp;#10;def NFClose(NeuroFUS):&amp;#10;    &quot;Closes the communication&quot;&amp;#10;    NeuroFUS.close()    &amp;#10;&amp;#10;def NFCheckConn(NeuroFUS):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Check whether the device responds with a message containing 'TPO'.&amp;#10;    &amp;#10;    Parameters:&amp;#10;    - NeuroFUS: An open pyserial Serial object&amp;#10;&amp;#10;    Returns:&amp;#10;    - True if 'TPO' is found at the start of the response&amp;#10;    - False otherwise&amp;#10;    &quot;&quot;&quot;&amp;#10;    n_char = 24  # number of bytes to read&amp;#10;    response = NeuroFUS.read(n_char)  # returns a bytes object&amp;#10;    response_str = response.decode(errors='ignore')  # convert to string&amp;#10;&amp;#10;    if response_str.startswith('TPO'):&amp;#10;        return True&amp;#10;    else:&amp;#10;        return False&amp;#10;    &amp;#10;def NFGlobalFrequency(NeuroFUS, Frequency):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Sets the global acoustic frequency for all elements in the NeuroFUS transducer.&amp;#10;&amp;#10;    Parameters:&amp;#10;    - NeuroFUS: an open pyserial Serial object&amp;#10;    - Frequency: int, frequency in Hz (e.g., 1500000 for 1.5 MHz)&amp;#10;    &quot;&quot;&quot;&amp;#10;    &amp;#10;    # Convert frequency to string and format command&amp;#10;    freq_str = str(Frequency)&amp;#10;    command = f'GLOBALFREQ={freq_str}\r'&amp;#10;&amp;#10;    # Send command&amp;#10;    NeuroFUS.write(command.encode())&amp;#10;&amp;#10;def NFGlobalPower(NeuroFUS, Power):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Sets the power of all elements of the NeuroFUS transducer in Watts.&amp;#10;    &amp;#10;    Parameters:&amp;#10;    - NeuroFUS: an open pyserial Serial object&amp;#10;    - Power: int, power value (max 60)&amp;#10;    &quot;&quot;&quot;&amp;#10;    &amp;#10;    # # Optionally check Power range (assuming minimum power is 0 or another known value)&amp;#10;    # if not (0 &lt;= Power &lt;= 60):&amp;#10;    #     raise ValueError(&quot;Power must be between 0 and 60 Watts.&quot;)&amp;#10;    &amp;#10;    # Convert power to string and send command&amp;#10;    pow_str = str(Power)&amp;#10;    command = f'GLOBALPOWER={pow_str}\r'&amp;#10;    NeuroFUS.write(command.encode())&amp;#10;&amp;#10;def NFBurstLength(NeuroFUS, Burst):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Sets the duration of each ultrasound burst in microseconds.&amp;#10;    &amp;#10;    Parameters:&amp;#10;    - NeuroFUS: an open pyserial Serial object&amp;#10;    - Burst: int, burst duration in microseconds (min 10, max 10000)&amp;#10;    &amp;#10;    Note:&amp;#10;    - Burst cannot be longer than the pulse repetition period set by NFPulseRep.&amp;#10;    &quot;&quot;&quot;&amp;#10;&amp;#10;    # if not (10 &lt;= Burst &lt;= 10000):&amp;#10;    #     raise ValueError(&quot;Burst duration must be between 10 and 10000 microseconds.&quot;)&amp;#10;&amp;#10;    burst_str = str(Burst)&amp;#10;    command = f'BURST={burst_str}\r'&amp;#10;    NeuroFUS.write(command.encode())&amp;#10;&amp;#10;&amp;#10;def NFPulseRepPeriod(NeuroFUS, PRP):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Sets the pulse repetition period (PRP) in microseconds.&amp;#10;    &amp;#10;    Parameters:&amp;#10;    - NeuroFUS: an open pyserial Serial object&amp;#10;    - PRP: int, pulse repetition period in microseconds (min 10, max 10000)&amp;#10;    &amp;#10;    Note:&amp;#10;    - PRP cannot be lower than the burst length set using NFBurstLength.&amp;#10;    &quot;&quot;&quot;&amp;#10;&amp;#10;    # if not (10 &lt;= PRP &lt;= 10000):&amp;#10;    #     raise ValueError(&quot;Pulse repetition period (PRP) must be between 10 and 10000 microseconds.&quot;)&amp;#10;&amp;#10;    prp_str = str(PRP)&amp;#10;    command = f'PERIOD={prp_str}\r'&amp;#10;    NeuroFUS.write(command.encode())&amp;#10;&amp;#10;def NFDuration(NeuroFUS, Duration):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Sets the overall duration of a NeuroFUS protocol in microseconds.&amp;#10;    &amp;#10;    Parameters:&amp;#10;    - NeuroFUS: an open pyserial Serial object&amp;#10;    - Duration: int, duration in microseconds (1 second to 600 seconds,&amp;#10;                i.e., 1_000_000 to 600_000_000 microseconds)&amp;#10;                Can be set in increments of 10 microseconds.&amp;#10;    &quot;&quot;&quot;&amp;#10;&amp;#10;    # if not (1_000_000 &lt;= Duration &lt;= 600_000_000):&amp;#10;    #     raise ValueError(&quot;Duration must be between 1,000,000 and 600,000,000 microseconds (1 to 600 seconds).&quot;)&amp;#10;&amp;#10;    dur_str = str(Duration)&amp;#10;    command = f'TIMER={dur_str}\r'&amp;#10;    NeuroFUS.write(command.encode())&amp;#10;&amp;#10;def NFDepth(NeuroFUS, depth, utx=0):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Configures NeuroFUS focus depth in micrometers.&amp;#10;    &amp;#10;    Parameters:&amp;#10;    - NeuroFUS: an open pyserial Serial object&amp;#10;    - depth: float, depth in millimeters (with up to 1 decimal place)&amp;#10;    - utx: optional int, set to 1 if using uTx transducer with different steering range&amp;#10;    &amp;#10;    Raises ValueError if depth is outside allowed steering ranges.&amp;#10;    &quot;&quot;&quot;&amp;#10;    if utx == 0:&amp;#10;        # Default steering range&amp;#10;        if depth &lt; 30:&amp;#10;            raise ValueError(&quot;Depth value is too low and outside the steering range of NeuroFUS. Please enter a value more than 30mm and less than 70mm.&quot;)&amp;#10;        elif depth &gt; 82.5:&amp;#10;            raise ValueError(&quot;Depth value is too high (&gt; 80.51mm) and outside the steering range of NeuroFUS. Please enter a value less than 80.51mm.&quot;)&amp;#10;    else:&amp;#10;        # uTx transducer range&amp;#10;        if depth &gt; 10:&amp;#10;            raise ValueError(&quot;Depth value is too high and outside the steering range of NeuroFUS. Please enter a value less than 10mm.&quot;)&amp;#10;&amp;#10;    # Convert mm to micrometers (µm)&amp;#10;    depth_um = str(depth * 1000)&amp;#10;    command = f'FOCUS={depth_um}\r'&amp;#10;    NeuroFUS.write(command.encode())&amp;#10;&amp;#10;def NFStart(NeuroFUS):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Begins a NeuroFUS protocol by sending the START command.&amp;#10;    &amp;#10;    Parameters:&amp;#10;    - NeuroFUS: an open pyserial Serial object&amp;#10;    &quot;&quot;&quot;&amp;#10;&amp;#10;    NeuroFUS.write(b'START\r')&amp;#10;&amp;#10;def NFStop(NeuroFUS):&amp;#10;    &quot;&quot;&quot;&amp;#10;    Aborts a NeuroFUS protocol by sending the ABORT command.&amp;#10;    &amp;#10;    Parameters:&amp;#10;    - NeuroFUS: an open pyserial Serial object&amp;#10;    &quot;&quot;&quot;&amp;#10;    &amp;#10;    NeuroFUS.write(b'ABORT\r')" valType="extendedCode" updates="constant" name="Before Experiment"/>
+        <Param val="/* Syntax Error: Fix Python code */" valType="extendedCode" updates="constant" name="Before JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin JS Routine"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin Routine"/>
+        <Param val="Py" valType="str" updates="None" name="Code Type"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each JS Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Routine"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Routine"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="code" valType="code" updates="None" name="name"/>
+      </CodeComponent>
+    </Routine>
+    <Routine name="InitiateFUS">
+      <RoutineSettingsComponent name="InitiateFUS" plugin="None">
+        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
+        <Param val="" valType="str" updates="None" name="backgroundImg"/>
+        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
+        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
+        <Param val="" valType="str" updates="constant" name="desc"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
+        <Param val="InitiateFUS" valType="code" updates="None" name="name"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
+      </RoutineSettingsComponent>
+      <CodeComponent name="code_3" plugin="None">
+        <Param val="" valType="extendedCode" updates="constant" name="Before Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Before JS Experiment"/>
+        <Param val="import time&amp;#10;import serial&amp;#10;&amp;#10;port = '/dev/tty.usbmodem1101'            # Enter port name&amp;#10;&amp;#10;# Describe variables in 4ch FUS terms. We'll convert these to 2ch below &amp;#10;Depth = 50           &amp;#10;Power = 20000&amp;#10;SonicDuration = 500000 &amp;#10;xdrCenterFreq = 500000&amp;#10;PRP = 1000&amp;#10;burstLength = 300&amp;#10;&amp;#10;# Connect to port and open&amp;#10;serialTPO = serial.Serial(port=port,&amp;#10;                          baudrate=9600,&amp;#10;                          bytesize=serial.EIGHTBITS,&amp;#10;                          stopbits=serial.STOPBITS_ONE,&amp;#10;                          timeout=1,  # in seconds&amp;#10;                          )&amp;#10;if not serialTPO.is_open:&amp;#10;    serialTPO.open()&amp;#10;&amp;#10;# Wait 3 seconds &amp;#10;time.sleep(2)&amp;#10;&amp;#10;# Send variables to device&amp;#10;serialTPO.write((&quot;LOCAL=NO&quot; + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;serialTPO.write((f&quot;FREQ={int(round(xdrCenterFreq))/1000}&quot; + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;serialTPO.write((f&quot;POWER={int(round(Power))}&quot; + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;serialTPO.write((f&quot;BURST={int(round(burstLength))}&quot; + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;serialTPO.write((f&quot;RATE={1/(int(round(PRP))/1000000)}&quot; + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;serialTPO.write((f&quot;TIME={int(round(SonicDuration))/10000}&quot; + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;serialTPO.write((f&quot;DEPTH={int(round(Depth))}&quot; + &quot;\r\n&quot;).encode(&quot;ascii&quot;))&amp;#10;pause(1)" valType="extendedCode" updates="constant" name="Begin Experiment"/>
+        <Param val="NeuroFUS = null;&amp;#10;" valType="extendedCode" updates="constant" name="Begin JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin JS Routine"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin Routine"/>
+        <Param val="Py" valType="str" updates="None" name="Code Type"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each JS Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Routine"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Routine"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="code_3" valType="code" updates="None" name="name"/>
+      </CodeComponent>
+    </Routine>
+    <Routine name="TTL">
+      <RoutineSettingsComponent name="TTL" plugin="None">
+        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
+        <Param val="" valType="str" updates="None" name="backgroundImg"/>
+        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
+        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
+        <Param val="" valType="str" updates="constant" name="desc"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
+        <Param val="TTL" valType="code" updates="None" name="name"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
+      </RoutineSettingsComponent>
+      <ParallelOutComponent name="p_port_2" plugin="None">
+        <Param val="USB2TTL8" valType="str" updates="None" name="address"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="p_port_2" valType="code" updates="None" name="name"/>
+        <Param val="EIO" valType="str" updates="None" name="register"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="1" valType="code" updates="None" name="startData"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="frame N" valType="str" updates="None" name="startType"/>
+        <Param val="0.0" valType="code" updates="None" name="startVal"/>
+        <Param val="0" valType="code" updates="None" name="stopData"/>
+        <Param val="duration (frames)" valType="str" updates="None" name="stopType"/>
+        <Param val="1" valType="code" updates="constant" name="stopVal"/>
+        <Param val="True" valType="bool" updates="constant" name="syncScreen"/>
+        <Param val="False" valType="bool" updates="None" name="syncScreenRefresh"/>
+      </ParallelOutComponent>
+    </Routine>
+    <Routine name="Draw">
+      <RoutineSettingsComponent name="Draw" plugin="None">
+        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
+        <Param val="" valType="str" updates="None" name="backgroundImg"/>
+        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
+        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
+        <Param val="" valType="str" updates="constant" name="desc"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
+        <Param val="Draw" valType="code" updates="None" name="name"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
+      </RoutineSettingsComponent>
+      <KeyboardComponent name="key_resp" plugin="None">
+        <Param val="'5'" valType="list" updates="constant" name="allowedKeys"/>
+        <Param val="" valType="str" updates="constant" name="correctAns"/>
+        <Param val="" valType="str" updates="None" name="deviceLabel"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="True" valType="bool" updates="constant" name="discard previous"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="True" valType="bool" updates="constant" name="forceEndRoutine"/>
+        <Param val="key_resp" valType="code" updates="None" name="name"/>
+        <Param val="press" valType="str" updates="constant" name="registerOn"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="0.0" valType="code" updates="None" name="startVal"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="last key" valType="str" updates="constant" name="store"/>
+        <Param val="False" valType="bool" updates="constant" name="storeCorrect"/>
+        <Param val="True" valType="bool" updates="constant" name="syncScreenRefresh"/>
+      </KeyboardComponent>
+      <PolygonComponent name="polygon_4" plugin="None">
+        <Param val="center" valType="str" updates="constant" name="anchor"/>
+        <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
+        <Param val="1" valType="num" updates="constant" name="contrast"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="False" valType="code" updates="constant" name="draggable"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="-1.0000, -1.0000, -1.0000" valType="color" updates="constant" name="fillColor"/>
+        <Param val="linear" valType="str" updates="constant" name="interpolate"/>
+        <Param val="-1.0000, -1.0000, -1.0000" valType="color" updates="constant" name="lineColor"/>
+        <Param val="1" valType="num" updates="constant" name="lineWidth"/>
+        <Param val="4" valType="int" updates="constant" name="nVertices"/>
+        <Param val="polygon_4" valType="code" updates="None" name="name"/>
+        <Param val="" valType="num" updates="constant" name="opacity"/>
+        <Param val="0" valType="num" updates="constant" name="ori"/>
+        <Param val="(0, 0)" valType="list" updates="constant" name="pos"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="cross" valType="str" updates="None" name="shape"/>
+        <Param val="(0.2, 0.2)" valType="list" updates="constant" name="size"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="0.0" valType="code" updates="None" name="startVal"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
+        <Param val="from exp settings" valType="str" updates="None" name="units"/>
+        <Param val="" valType="code" updates="None" name="validator"/>
+        <Param val="" valType="list" updates="constant" name="vertices"/>
+      </PolygonComponent>
+    </Routine>
+  </Routines>
+  <Flow>
+    <Routine name="InitiateFUS"/>
+    <Routine name="Draw"/>
+    <LoopInitiator loopType="TrialHandler" name="one_cycle">
+      <Param name="Selected rows" updates="None" val="" valType="str"/>
+      <Param name="conditions" updates="None" val="None" valType="str"/>
+      <Param name="conditionsFile" updates="None" val="" valType="file"/>
+      <Param name="endPoints" updates="None" val="[0, 1]" valType="num"/>
+      <Param name="isTrials" updates="None" val="True" valType="bool"/>
+      <Param name="loopType" updates="None" val="sequential" valType="str"/>
+      <Param name="nReps" updates="None" val="10" valType="num"/>
+      <Param name="name" updates="None" val="one_cycle" valType="code"/>
+      <Param name="random seed" updates="None" val="" valType="code"/>
+    </LoopInitiator>
+    <Routine name="TTL"/>
+    <LoopInitiator loopType="TrialHandler" name="on_period">
+      <Param name="Selected rows" updates="None" val="" valType="str"/>
+      <Param name="conditions" updates="None" val="None" valType="str"/>
+      <Param name="conditionsFile" updates="None" val="" valType="file"/>
+      <Param name="endPoints" updates="None" val="[0, 1]" valType="num"/>
+      <Param name="isTrials" updates="None" val="True" valType="bool"/>
+      <Param name="loopType" updates="None" val="sequential" valType="str"/>
+      <Param name="nReps" updates="None" val="10" valType="num"/>
+      <Param name="name" updates="None" val="on_period" valType="code"/>
+      <Param name="random seed" updates="None" val="" valType="code"/>
+    </LoopInitiator>
+    <Routine name="red"/>
+    <Routine name="white"/>
+    <LoopTerminator name="on_period"/>
+    <Routine name="baseline"/>
+    <LoopTerminator name="one_cycle"/>
+  </Flow>
+</PsychoPy2experiment>
