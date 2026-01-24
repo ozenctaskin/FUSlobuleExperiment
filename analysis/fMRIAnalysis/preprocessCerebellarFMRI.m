@@ -32,6 +32,25 @@ function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, 
     funcDatasetRun1 = fullfile(dataFolder, subjectID, sessionID, 'func', [subjectID '_' sessionID '_task-fingerTap_dir-PA_run-1_echo-*_part-mag_bold.nii.gz']);
     funcDatasetRun2 = fullfile(dataFolder, subjectID, sessionID, 'func', [subjectID '_' sessionID '_task-fingerTap_dir-PA_run-2_echo-*_part-mag_bold.nii.gz']);
 
+    % Check for single run case
+    hasRun1 = ~isempty(dir(funcDatasetRun1));
+    hasRun2 = ~isempty(dir(funcDatasetRun2));
+    
+    if hasRun1 && hasRun2
+        singleRun = false;
+    
+    elseif hasRun1 && ~hasRun2
+        singleRun = true;
+        singleRunData = funcDatasetRun1;
+    
+    elseif ~hasRun1 && hasRun2
+        singleRun = true;
+        singleRunData = funcDatasetRun2;
+        blipForward = fullfile(dataFolder, subjectID, sessionID, 'func', [subjectID '_' sessionID '_task-fingerTap_dir-PA_run-2_echo-1_part-mag_bold.nii.gz']);;
+    else
+        error('Neither Run 1 nor Run 2 functional datasets were found!');
+    end 
+
     % We need to deoblique the T1 image so that our output AFNI processing
     % can be used directly across softwares. Do this without
     % interpolation. And no need to do it for EPI as afni_proc will take
@@ -45,48 +64,89 @@ function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, 
         system(['cd ' fullfile(dataFolder, subjectID, sessionID, 'anat') '; 3dcopy ' [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmiso_T2w.nii.gz'] ' _tmp_dset; 3drefit -oblique_recenter _tmp_dset+orig; 3drefit -deoblique _tmp_dset+orig; 3dcopy _tmp_dset+orig ' T2pathDeobliqued '; rm _tmp*']);
     end
     
-    % Insert slice timing info from json to nifti
-    fprintf('\nAdding slice time information to data. Do not stop the script now or your MRI images get corrupted.\n');
-    system(['abids_tool.py -add_slice_times -input ' funcDatasetRun1]);
-    system(['abids_tool.py -add_slice_times -input ' funcDatasetRun2]);
+    % % Insert slice timing info from json to nifti
+    % fprintf('\nAdding slice time information to data. Do not stop the script now or your MRI images get corrupted.\n');
+    % if hasRun1 && hasRun2
+    %     system(['abids_tool.py -add_slice_times -input ' funcDatasetRun1]);
+    %     system(['abids_tool.py -add_slice_times -input ' funcDatasetRun2]);
+    % else
+    %     system(['abids_tool.py -add_slice_times -input ' singleRunData]);
+    % end
 
     % Build and run the preprocessing setup. No blurring. If you need to
     % add it back. It needs to come after combine block. Also add the below
     % info to the main body
-    afni_line = ['cd ' fullfile(dataFolder, subjectID, sessionID) ';' 'afni_proc.py ' ...,
-    '-subj_id ' subjectID ' ' ...,
-    '-copy_anat ' T1pathDeobliqued ' '  ...,  
-    '-anat_has_skull yes ' ..., 
-    '-dsets_me_run ' funcDatasetRun1 ' ' ..., 
-    '-dsets_me_run ' funcDatasetRun2 ' ' ...,          
-    '-blip_forward_dset ' blipForward ' ' ..., 
-    '-blip_reverse_dset ' blipReverse ' ' ..., 
-    '-combine_method ' combineMethod ' ' ...,
-    '-echo_times 13.20 29.94 46.66 -reg_echo 2 ' ..., 
-    '-radial_correlate_blocks tcat volreg ' ...,
-    '-align_unifize_epi local ' ..., 
-    '-align_opts_aea -cost lpc+ZZ -giant_move -check_flip ' ...,    
-    '-volreg_align_to MIN_OUTLIER ' ...,
-    '-volreg_align_e2a ' ..., 
-    '-volreg_compute_tsnr yes ' ..., 
-    '-mask_epi_anat yes ' ...,
-    '-regress_stim_times ' stim ' ' ...,          
-    '-regress_stim_labels tap ' ...,                                
-    '-regress_basis ''BLOCK(10,1)'' ' ...,                              
-    '-regress_motion_per_run ' ...,
-    '-regress_censor_motion 0.3 ' ...,
-    '-regress_censor_outliers 0.05 ' ..., 
-    '-regress_apply_mot_types demean deriv ' ..., 
-    '-regress_3dD_stop ' ...,
-    '-regress_reml_exec ' ...,
-    '-regress_compute_fitts ' ..., 
-    '-regress_make_ideal_sum sum_ideal.1D ' ...,
-    '-regress_est_blur_epits ' ...,
-    '-regress_est_blur_errts ' ..., 
-    '-regress_run_clustsim yes ' ..., 
-    '-html_review_style pythonic ' ..., 
-    '-remove_preproc_files'];
-    
+    if ~singleRun
+        afni_line = ['cd ' fullfile(dataFolder, subjectID, sessionID) ';' 'afni_proc.py ' ...,
+        '-subj_id ' subjectID ' ' ...,
+        '-copy_anat ' T1pathDeobliqued ' '  ...,  
+        '-anat_has_skull yes ' ..., 
+        '-dsets_me_run ' funcDatasetRun1 ' ' ..., 
+        '-dsets_me_run ' funcDatasetRun2 ' ' ...,          
+        '-blip_forward_dset ' blipForward ' ' ..., 
+        '-blip_reverse_dset ' blipReverse ' ' ..., 
+        '-combine_method ' combineMethod ' ' ...,
+        '-echo_times 13.20 29.94 46.66 -reg_echo 2 ' ..., 
+        '-radial_correlate_blocks tcat volreg ' ...,
+        '-align_unifize_epi local ' ..., 
+        '-align_opts_aea -cost lpc+ZZ -giant_move -check_flip ' ...,    
+        '-volreg_align_to MIN_OUTLIER ' ...,
+        '-volreg_align_e2a ' ..., 
+        '-volreg_compute_tsnr yes ' ..., 
+        '-mask_epi_anat yes ' ...,
+        '-regress_stim_times ' stim ' ' ...,          
+        '-regress_stim_labels tap ' ...,                                
+        '-regress_basis ''BLOCK(10,1)'' ' ...,                              
+        '-regress_motion_per_run ' ...,
+        '-regress_censor_motion 0.3 ' ...,
+        '-regress_censor_outliers 0.05 ' ..., 
+        '-regress_apply_mot_types demean deriv ' ..., 
+        '-regress_3dD_stop ' ...,
+        '-regress_reml_exec ' ...,
+        '-regress_compute_fitts ' ..., 
+        '-regress_make_ideal_sum sum_ideal.1D ' ...,
+        '-regress_est_blur_epits ' ...,
+        '-regress_est_blur_errts ' ..., 
+        '-regress_run_clustsim yes ' ..., 
+        '-html_review_style pythonic ' ..., 
+        '-remove_preproc_files'];
+    else
+        warning('Single run will be used');
+        pause(3);
+        afni_line = ['cd ' fullfile(dataFolder, subjectID, sessionID) ';' 'afni_proc.py ' ...,
+        '-subj_id ' subjectID ' ' ...,
+        '-copy_anat ' T1pathDeobliqued ' '  ...,  
+        '-anat_has_skull yes ' ..., 
+        '-dsets_me_run ' singleRunData ' ' ...,        
+        '-blip_forward_dset ' blipForward ' ' ..., 
+        '-blip_reverse_dset ' blipReverse ' ' ..., 
+        '-combine_method ' combineMethod ' ' ...,
+        '-echo_times 13.20 29.94 46.66 -reg_echo 2 ' ..., 
+        '-radial_correlate_blocks tcat volreg ' ...,
+        '-align_unifize_epi local ' ..., 
+        '-align_opts_aea -cost lpc+ZZ -giant_move -check_flip ' ...,    
+        '-volreg_align_to MIN_OUTLIER ' ...,
+        '-volreg_align_e2a ' ..., 
+        '-volreg_compute_tsnr yes ' ..., 
+        '-mask_epi_anat yes ' ...,
+        '-regress_stim_times ' stim ' ' ...,          
+        '-regress_stim_labels tap ' ...,                                
+        '-regress_basis ''BLOCK(10,1)'' ' ...,                              
+        '-regress_motion_per_run ' ...,
+        '-regress_censor_motion 0.3 ' ...,
+        '-regress_censor_outliers 0.05 ' ..., 
+        '-regress_apply_mot_types demean deriv ' ..., 
+        '-regress_3dD_stop ' ...,
+        '-regress_reml_exec ' ...,
+        '-regress_compute_fitts ' ..., 
+        '-regress_make_ideal_sum sum_ideal.1D ' ...,
+        '-regress_est_blur_epits ' ...,
+        '-regress_est_blur_errts ' ..., 
+        '-regress_run_clustsim yes ' ..., 
+        '-html_review_style pythonic ' ..., 
+        '-remove_preproc_files'];
+    end
+
     % If blur is specified, add it to the function. 
     if ~strcmp(blur, 'NA')
         afni_line = [afni_line ' -blur_size ' blur ' -blur_in_mask yes -blocks despike tshift align volreg mask combine blur scale regress'];
@@ -118,4 +178,6 @@ function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, 
     % Run preprocessing 
     system(['cd ' fullfile(dataFolder, subjectID, sessionID) '; ' 'tcsh -xef ' procScript ' 2>&1 | tee ' outputReport]);
     
+    % Warning about single run 
+    warning('Single run was used');
 end
