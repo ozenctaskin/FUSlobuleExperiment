@@ -1,0 +1,68 @@
+[
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "FUSlobuleExperiment",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "git",
+		"update": "",
+		"url": "https:\/\/github.com\/ozenctaskin\/FUSlobuleExperiment.git"
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "fieldtrip",
+		"pathPlacement": "append",
+		"subfolder": "external/afni",
+		"toolboxRoot": "",
+		"type": "git",
+		"update": "never",
+		"url": "https:\/\/github.com\/fieldtrip\/fieldtrip.git"
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "NODDI_toolbox_v1.05",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "webget",
+		"update": "never",
+		"url": "https://www.nitrc.org/frs/download.php/12229/NODDI_toolbox_v1.05.zip//?i_agree=1&download_now=1"
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "spm12",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "git",
+		"update": "never",
+		"url": "https:\/\/github.com\/spm\/spm12.git"
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "suit",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"toolboxSubfolder": "spm12/toolbox",
+		"type": "git",
+		"update": "never",
+		"url": "https:\/\/github.com\/jdiedrichsen\/suit.git"
+	}				
+]

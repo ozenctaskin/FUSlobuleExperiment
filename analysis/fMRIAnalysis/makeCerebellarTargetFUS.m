@@ -23,12 +23,6 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     %                      anterior and posterior portions of the 
     %                      cerebellum are continious.
 
-    % Add path to functions we will use
-    toolboxes = fullfile(getenv('HOME'), 'MATLAB', 'toolboxes');
-    addpath(genpath(fullfile(toolboxes, 'spm12')));
-    addpath(genpath(fullfile(toolboxes, 'fieldtrip', 'external', 'afni')));
-    addpath(genpath(fullfile(getenv('FREESURFER_HOME'), 'matlab')));
-
     % Convert outputCluster value to num if it is string 
     if ischar(outputCluster)
         outputCluster = str2num(outputCluster);
