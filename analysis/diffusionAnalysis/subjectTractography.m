@@ -33,7 +33,7 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     wmFOD = fullfile(subjectTractographyFolder, 'subject_wmFOD.mif');
     gmFOD = fullfile(subjectTractographyFolder, 'subject_gmFOD.mif');
     csfFOD = fullfile(subjectTractographyFolder, 'subject_csfFOD.mif');
-    system(['dwi2fod msmt_csd -nthreads 5 ' upscaledCleanDWI ' -mask ' upscaledMaskDilated ' ' wmResponse ' ' wmFOD ' ' gmResponse ' ' gmFOD ' ' csfResponse ' ' csfFOD]);
+    system(['dwi2fod msmt_csd -nthreads 15 ' upscaledCleanDWI ' -mask ' upscaledMaskDilated ' ' wmResponse ' ' wmFOD ' ' gmResponse ' ' gmFOD ' ' csfResponse ' ' csfFOD]);
 
     % Normalize FOD
     wmFOD_norm = fullfile(subjectTractographyFolder, 'subject_wmFOD_norm.mif');
@@ -41,10 +41,10 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     csfFOD_norm = fullfile(subjectTractographyFolder, 'subject_csfFOD_norm.mif');    
     system(['mtnormalise ' wmFOD ' ' wmFOD_norm ' ' gmFOD ' ' gmFOD_norm ' ' csfFOD ' ' csfFOD_norm ' -mask ' upscaledMask]);
 
-    % Run tractography. 10 million tracks
-    tractogram = fullfile(subjectTractographyFolder, 'tractogram_70M.tck');
+    % Run tractography. 20 million tracks
+    tractogram = fullfile(subjectTractographyFolder, 'tractogram_20M.tck');
     if ~isfile(tractogram)
-        system(['tckgen -act ' tsegments_registered ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 6 -select 70M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
+        system(['tckgen -act ' tsegments_registered ' -backtrack -crop_at_gmwmi -cutoff 0.06 -maxlength 250 -nthreads 15 -select 20M -seed_dynamic ' wmFOD_norm ' ' wmFOD_norm ' ' tractogram]);
     end
 
     % SIFT2
@@ -52,7 +52,7 @@ function subjectTractography(dataFolder, subjectID, sessionID)
     siftMu = fullfile(subjectTractographyFolder, 'sift_mu.txt');
     siftCoeffs = fullfile(subjectTractographyFolder, 'sift_coeffs.csv');
     if ~isfile(siftWeights)
-        system(['tcksift2 -nthreads 6 -act ' tsegments_registered ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
+        system(['tcksift2 -nthreads 15 -act ' tsegments_registered ' -out_mu ' siftMu ' -out_coeffs ' siftCoeffs ' ' tractogram ' ' wmFOD_norm ' ' siftWeights]);
     end
 
     % Scale sift weights by mu. We do it here instead of multiplying by
