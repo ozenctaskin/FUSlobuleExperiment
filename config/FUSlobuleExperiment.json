@@ -77,5 +77,19 @@
 		"type": "git",
 		"update": "never",
 		"url": "https:\/\/github.com\/jdiedrichsen\/suit.git"
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "cerebellar_atlases",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"toolboxSubfolder": "spm12/toolbox",
+		"type": "git",
+		"update": "never",
+		"url": "https:\/\/github.com\/DiedrichsenLab\/cerebellar_atlases.git"
 	}				
 ]
