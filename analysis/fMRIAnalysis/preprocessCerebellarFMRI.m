@@ -178,6 +178,8 @@ function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, 
     % Run preprocessing 
     system(['cd ' fullfile(dataFolder, subjectID, sessionID) '; ' 'tcsh -xef ' procScript ' 2>&1 | tee ' outputReport]);
     
-    % Warning about single run 
-    warning('Single run was used');
+    % Warning about single runs
+    if singleRun
+        warning('Single run was used');
+    end
 end
