@@ -5,7 +5,7 @@ function calculateROIexposure(modellingFolder, ROI, ROIisMNI, charmFolder)
 % ultrasound energy in the ROI. The elastic solution files are found
 % automatically by the script and an output is saved in an xlsx file placed
 % in the modelling folder. 
-%
+% hyyrtftyfytfyu
 % WARNING: Needs FSL installed.
 %
 % Inputs:
