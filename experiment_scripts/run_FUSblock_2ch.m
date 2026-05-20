@@ -30,11 +30,13 @@ addpath(fullfile(fileparts(filePath), 'subfunctions'))
 % end
 
 % Check if we are doing real or sham. Set the globalPower accordingly
-condition = input('\nSelect your stimulation location \n1-DN 0w sham\n2-DN 30w sham\n3-DN\n4-V1\n5-Lobule 8\n6-Lobule 5\nEnter a number:');
+condition = input('\nSelect your stimulation location \n1-0w sham\n2-Flip\n3-DN\n4-V1\n5-Lobule 8\n6-Lobule 5\nEnter a number:');
 if isequal(condition, 1)
-    globalPower = 1;
+    globalPower = 0;
+    fprintf('Setting power to 0\n');
 elseif ~isequal(condition, 1)
-    globalPower = Power;
+    globalPower = input('\nEnter power for the target: ');
+    globalPower = round(globalPower) * 1000;
 elseif ~isnumeric(condition)
     error('Please enter the number in the beginning of the condition instead of its name');
 else
@@ -43,10 +45,9 @@ end
 
 % Get the depth measurement for the condition
 Depth = input('\nEnter the depth measurement from modelling for this region: ');
-
 %% Connect to TPO
 disp('\nConnecting to TPO....');
-port = '/dev/cu.usbmodem11101';
+port = 'COM4';
 NeuroFUS = serial(port);
 set(NeuroFUS,'BaudRate',9600);
 set(NeuroFUS,'DataBits',8);
@@ -72,3 +73,5 @@ for ii = 1:numTrials
     stopTPO(NeuroFUS);
     pause(4)
 end
+pause(1)
+fclose(NeuroFUS);
