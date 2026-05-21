@@ -76,7 +76,8 @@ def update_protocol_mode():
         depth_label.grid_configure(row=9)
         depth.grid_configure(row=9)
 
-        zero_power_checkbox.grid_configure(row=10)
+        isppa_label.grid_configure(row=10)
+        isppa.grid_configure(row=10)
 
     else:  # NORMAL MODE
 
@@ -95,7 +96,8 @@ def update_protocol_mode():
         depth_label.grid_configure(row=8)
         depth.grid_configure(row=8)
 
-        zero_power_checkbox.grid_configure(row=9)
+        isppa_label.grid_configure(row=9)
+        isppa.grid_configure(row=9)
 
 ##################### Main functions ########################################
 
@@ -108,21 +110,15 @@ def save_function():
     selected_TPO = TPO_default.get()
     selected_timer = timer.get()
     selected_depth = depth.get()
-
-    # Set power
-    if zero_power_var.get():
-        Power = 0
-    else:
-        Power = 30000
-
+    
     # Get protocol variables based on whether custom mode was set or bult-in 
     # protocols are used. TPO accepts microseconds for PRP and burstLength, 
     # but for custom we will take ms and convert. 
     if check_D_var.get():
-        PRP = int(custom_prp_entry.get())
+        PRP = int(custom_prp_entry.get()) * 1000
         burst_length = int(custom_burst_entry.get()) * 1000
     else:
-        selected_protocol = protocol_default.get() * 1000
+        selected_protocol = protocol_default.get()
         
         if selected_protocol == 'Online(1000Hz)':
             burst_length = 300 
@@ -157,25 +153,35 @@ def save_function():
                 timeout=1,
             )
 
-            time.sleep(2)
+            time.sleep(3)
 
         # Set the trigger mode and transducer type
         root.NeuroFUS.write(b'TRIGGERMODE=1\r')
         
-        if Transducer_default.get() == 'CTX_500':
-            if not check_A_var.get():
-                root.NeuroFUS.write(('xdrselect=1\r').encode())
-            else:
-                root.NeuroFUS.write(('xdrselect=2\r').encode())
-        elif Transducer_default.get() == 'DTX_500':
-            if not check_A_var.get():
-                root.NeuroFUS.write(('xdrselect=3\r').encode())
-            else:
-                root.NeuroFUS.write(('xdrselect=4\r').encode())            
+        tx = Transducer_default.get()  
+        if tx == "CTX_500":
+            root.NeuroFUS.write(f"xdrselect={1 if check_A_var.get() else 0}\r".encode())
+        
+        elif tx == "DPX_500":
+            root.NeuroFUS.write(f"xdrselect={3 if check_A_var.get() else 2}\r".encode())         
 
+        # Put it into a red development mode 
+        root.NeuroFUS.write(('ENFORCELIMITS=0\r').encode())
+        
+        # Calculate power from ISPPA, do some fine tuning to linear constant
+        selected_isppa = int(isppa.get())
+        if tx == "CTX_500" and not check_A_var.get():
+            Power = selected_isppa / 14.54 * 1000
+        elif tx == "CTX_500" and check_A_var.get():
+            Power = selected_isppa / 11.075 * 1000
+        elif tx == "DPX_500" and not check_A_var.get():
+            Power = selected_isppa / 4.949 * 1000
+        elif tx == "DPX_500" and check_A_var.get():
+            Power = selected_isppa / 3.36 * 1000
+        
         # Go from 500ms everytime because software has weird limits
-        root.NeuroFUS.write((f'PERIOD={50000}\r').encode())
-        root.NeuroFUS.write((f'BURST={50000}\r').encode())
+        root.NeuroFUS.write((f'BURST={1}\r').encode())
+        root.NeuroFUS.write((f'PERIOD={1}\r').encode())
 
         time.sleep(0.5)
 
@@ -183,8 +189,8 @@ def save_function():
         root.NeuroFUS.write((f'GLOBALFREQ={xdrCenterFreq}\r').encode())
         root.NeuroFUS.write((f'FOCUS={int(selected_depth)*1000}\r').encode())
         root.NeuroFUS.write((f'TIMER={int(selected_timer)*1000000}\r').encode())
-        root.NeuroFUS.write((f'BURST={burst_length}\r').encode())
         root.NeuroFUS.write((f'PERIOD={PRP}\r').encode())
+        root.NeuroFUS.write((f'BURST={burst_length}\r').encode())
 
     # 2-channel
     elif selected_TPO == '2_channel':
@@ -304,7 +310,7 @@ protocol_default = tk.StringVar(value="5Hz (tbTUS) - 10% DC")
 protocol_menu = tk.OptionMenu(
     root,
     protocol_default,
-    "tbTUS (5Hz) - 10% DC",
+    "5Hz (tbTUS) - 10% DC",
     "100Hz - 10% DC",
     "Online(1000Hz)"
 )
@@ -340,16 +346,13 @@ depth_label.grid(row=8, column=0, padx=5, pady=5, sticky="e")
 depth = tk.Entry(root)
 depth.grid(row=8, column=1, padx=5, pady=5, sticky="w")
 
-# Zero power
-zero_power_var = tk.BooleanVar(value=False)
+# Req ISPPA in water 
+isppa_label = tk.Label(root, text="Req. ISPPA in water W/cm^2:")
+isppa_label.grid(row=9, column=0, padx=5, pady=5, sticky="e")
 
-zero_power_checkbox = tk.Checkbutton(
-    root,
-    text="0W power",
-    variable=zero_power_var
-)
-
-zero_power_checkbox.grid(row=9, column=1, sticky="w", padx=5)
+isppa_default = tk.StringVar(value="30")
+isppa = tk.Entry(root, textvariable=isppa_default)
+isppa.grid(row=9, column=1, padx=5, pady=5, sticky="w")
 
 # Update transducer state when TPO changes
 TPO_default.trace_add("write", update_transducer_state)
