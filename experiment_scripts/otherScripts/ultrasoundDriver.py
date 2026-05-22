@@ -9,6 +9,7 @@ Created on Tue May 12 23:20:53 2026
 import tkinter as tk
 import time, serial
 import serial.tools.list_ports
+import numpy as np
 
 # Install pyserial. Don't use the standard serial
 
@@ -120,17 +121,30 @@ def save_function():
     else:
         selected_protocol = protocol_default.get()
         
-        if selected_protocol == 'Online(1000Hz)':
-            burst_length = 300 
-            PRP = 1000
     
-        elif selected_protocol == '5Hz (tbTUS) - 10% DC':
+        if selected_protocol == '5Hz (tbTUS) - 10% DC':
             burst_length = 20000
             PRP = 200000
+            
+        elif selected_protocol == '7.7Hz - 30% DC':
+            burst_length = 2300
+            PRP = 7700
+
+        elif selected_protocol == '10Hz - 30% DC':
+            burst_length = 30000
+            PRP = 100000
     
         elif selected_protocol == '100Hz - 10% DC':
             burst_length = 1000
             PRP = 10000
+
+        elif selected_protocol == '100Hz - 30% DC':
+            burst_length = 3000
+            PRP = 10000
+            
+        elif selected_protocol == '1000Hz (online) - 30% DC':
+            burst_length = 300 
+            PRP = 1000
 
     # Center frequency
     xdrCenterFreq = 500000  # Hz
@@ -209,6 +223,15 @@ def save_function():
 
             time.sleep(4)
 
+        # Calculate power from ISPPA for 2 channel using calibration table
+        selected_isppa = int(isppa.get())
+        depths = [35,40,45,50,55,60,65,70,75,80,85,90,95]
+        max_intensities = [6.690029719,10.65335428,13.65227765,15.44741492,16.73497048,
+                           17.29794313,17.76305019,17.55870846,17.10673748,16.66934595,
+                           16.45149282,15.76634466,15.54487496]
+        Power = round(selected_isppa*5/np.interp(selected_depth, depths, max_intensities))
+        
+        # Send to device
         root.NeuroFUS.write(("LOCAL=NO\r\n").encode("ascii"))
         root.NeuroFUS.write((f"POWER={int(round(Power))/1000}\r\n").encode("ascii"))
         root.NeuroFUS.write((f"FREQ={int(round(xdrCenterFreq))/1000}\r\n").encode("ascii"))
@@ -311,8 +334,11 @@ protocol_menu = tk.OptionMenu(
     root,
     protocol_default,
     "5Hz (tbTUS) - 10% DC",
+    "7.7Hz - 30% DC",
+    '10Hz - 30% DC',
     "100Hz - 10% DC",
-    "Online(1000Hz)"
+    '100Hz - 30% DC',
+    "1000Hz (online) - 30% DC"
 )
 protocol_menu.grid(row=6, column=1, padx=5, pady=5, sticky="w")
 
@@ -363,7 +389,7 @@ update_confirm_visibility()
 # Instructions
 instructions_label = tk.Label(
     root,
-    text="Save = sends settings to device (always confirm on the display)\n\nSonication starts 3 seconds after the start button is pressed",
+    text="Save = sends settings to device (Confirm on the TPO display after saving!)\n\n*Sonication starts 3 seconds after the start button is pressed",
     wraplength=400,
     justify="left"
 )
