@@ -3,7 +3,7 @@ close all; clear all; clc
 % Decide what this function will do when run
 setDiagnostics = false; % Saves diagnostic images in the data folder
 baselineCorrect = true; % Corrects baseline
-grandBaseline = true;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
+grandBaseline = false;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
 useClean = true;        % Use the clean data for analysis. Need to run cleanCBITrials first
 plotSubject = false;    % Plots all trials for all subjects in separate figure.
 
@@ -103,15 +103,15 @@ data.L005 =   {fullfile(dataFolder, 'L005', 'EMG', 'baseline33_020925_000.mat'),
                fullfile(dataFolder, 'L005', 'EMG', 'SUBJ_CBI65_0209_1640_000'), ...
                fullfile(dataFolder, 'L005', 'EMG', 'SUBJ_CBI55_0209_1654_000.mat')};
 
-data.L006 =   {fullfile(dataFolder, 'L006', 'EMG', 'baseline_220925_000.mat'), ...
-               fullfile(dataFolder, 'L006', 'EMG', 'DN_220925_000.mat'), ...
-               fullfile(dataFolder, 'L006', 'EMG', 'L5_220925_000.mat'), ...
-               fullfile(dataFolder, 'L006', 'EMG', 'L8_220925_000.mat'), ...
-               fullfile(dataFolder, 'L006', 'EMG', 'V1_220925_000.mat'), ...
-               fullfile(dataFolder, 'L006', 'EMG', 'V0w_220925_000.mat'), ...
-               fullfile(dataFolder, 'L006', 'EMG', 'flip_220925_000.mat'), ...
-               fullfile(dataFolder, 'L006', 'EMG', 'NA'), ...
-               fullfile(dataFolder, 'L006', 'EMG', 'NA')};
+% data.L006 =   {fullfile(dataFolder, 'L006', 'EMG', 'baseline_220925_000.mat'), ...
+%                fullfile(dataFolder, 'L006', 'EMG', 'DN_220925_000.mat'), ...
+%                fullfile(dataFolder, 'L006', 'EMG', 'L5_220925_000.mat'), ...
+%                fullfile(dataFolder, 'L006', 'EMG', 'L8_220925_000.mat'), ...
+%                fullfile(dataFolder, 'L006', 'EMG', 'V1_220925_000.mat'), ...
+%                fullfile(dataFolder, 'L006', 'EMG', 'V0w_220925_000.mat'), ...
+%                fullfile(dataFolder, 'L006', 'EMG', 'flip_220925_000.mat'), ...
+%                fullfile(dataFolder, 'L006', 'EMG', 'NA'), ...
+%                fullfile(dataFolder, 'L006', 'EMG', 'NA')};
 
 data.L007 =   {fullfile(dataFolder, 'L007', 'EMG', 'baseline_260925_000.mat'), ...
                fullfile(dataFolder, 'L007', 'EMG', 'DN_260925_000.mat'), ...
@@ -132,6 +132,16 @@ data.L008 =   {fullfile(dataFolder, 'L008', 'EMG', 'baseline_221025_000.mat'), .
                fullfile(dataFolder, 'L008', 'EMG', 'Flip_DN_221025_000.mat'), ...
                fullfile(dataFolder, 'L008', 'EMG', 'SUBJ65_CBI_2210_1548_000.mat'), ...
                fullfile(dataFolder, 'L008', 'EMG', 'SUBJ55_CBI_2210_1556_000.mat')};
+
+data.L010 =   {fullfile(dataFolder, 'L010', 'EMG', 'baseline_200526_000.mat'), ...
+               fullfile(dataFolder, 'L010', 'EMG', 'Dentate_200526_000.mat'), ...
+               fullfile(dataFolder, 'L010', 'EMG', 'L5_200526_000.mat'), ...
+               fullfile(dataFolder, 'L010', 'EMG', 'L8_200526_000.mat'), ...
+               fullfile(dataFolder, 'L010', 'EMG', 'V1_200526_000.mat'), ...
+               fullfile(dataFolder, 'L010', 'EMG', 'V0w_200526_000.mat'), ...
+               fullfile(dataFolder, 'L010', 'EMG', 'Flip_200526_000.mat'), ...
+               fullfile(dataFolder, 'L010', 'EMG', 'SUBJ_CBI_65_2005_1703_000.mat'), ...
+               fullfile(dataFolder, 'L010', 'EMG', 'SUBJ_CBI_55_2005_1658_000.mat')};
 
 data.LDC01 =   {fullfile(dataFolder, 'LDC01', 'EMG', 'baseline_121125_000.mat'), ...
                fullfile(dataFolder, 'LDC01', 'EMG', 'DN_121125_000.mat'), ...
@@ -249,17 +259,17 @@ end
 figure;
 title('Subject average peak2peak change with each trial')
 subplot(1,3,1)
-plot(nanmean(cell2mat(cellfun(@(x) x(:,2), allSubjectPeaks, 'UniformOutput', false)), 2), 'b')
+plot(nanmedian(cell2mat(cellfun(@(x) x(:,2), allSubjectPeaks, 'UniformOutput', false)), 2), 'b')
 legend('Dentate Temporal')
 xlabel('Trials')
 ylabel('Dentate peak2paek')
 subplot(1,3,2)
-plot(nanmean(cell2mat(cellfun(@(x) x(:,3), allSubjectPeaks, 'UniformOutput', false)), 2), 'r')
+plot(nanmedian(cell2mat(cellfun(@(x) x(:,3), allSubjectPeaks, 'UniformOutput', false)), 2), 'r')
 legend('Lobule 5 Temporal')
 xlabel('Trials')
 ylabel('Lobule 5 peak2paek')
 subplot(1,3,3)
-plot(nanmean(cell2mat(cellfun(@(x) x(:,4), allSubjectPeaks, 'UniformOutput', false)), 2), 'g')
+plot(nanmedian(cell2mat(cellfun(@(x) x(:,4), allSubjectPeaks, 'UniformOutput', false)), 2), 'g')
 legend('Lobule 8 Temporal')
 xlabel('Trials')
 ylabel('Lobule 8 peak2paek')
@@ -272,7 +282,7 @@ averageSubjectPeaks = {};
 rawAverageSubjectPeaks = [];
 for ii = 1:size(allSubjectPeaks,2)
     % Average all trials
-    averageSubjectPeaks{ii} = nanmean(allSubjectPeaks{ii});
+    averageSubjectPeaks{ii} = nanmedian(allSubjectPeaks{ii});
     rawAverageSubjectPeaks(ii,:) = averageSubjectPeaks{ii};
     if baselineCorrect
         if grandBaseline
@@ -307,32 +317,6 @@ end
 
 % Convert peaks to matlab
 subjectMat = cell2mat(averageSubjectPeaks');
-
-% % Do t-tests between measurements (raw ones that contain baselines). FUS
-% % with FUS, CBI with CBI baseline
-% subjectTvals = [];
-% subjectPvals = [];
-% pvalsFUS = nan(1,7);
-% tvalsFUS = nan(1,7);
-% if ~grandBaseline
-%     for numRow = 1:7
-%         [~, p, ~, stats] = ttest(rawAverageSubjectPeaks(:,1), rawAverageSubjectPeaks(:,numRow)); 
-%         pvalsFUS(numRow) = p;
-%         tvalsFUS(numRow) = stats.tstat;
-%     end
-%     [~, pvalCBI1, ~, tvalCBI1] = ttest(rawAverageSubjectPeaks(:,8), rawAverageSubjectPeaks(:,9));
-%     [~, pvalCBI2, ~, tvalCBI2] = ttest(rawAverageSubjectPeaks(:,10), rawAverageSubjectPeaks(:,11));
-%     subjectTvals = [tvalsFUS(2:end) tvalCBI1.tstat tvalCBI2.tstat];
-%     subjectPvals = [pvalsFUS(2:end) pvalCBI1 pvalCBI2];
-%     subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
-% else
-%     for numRow = 1:length(subjectMat)
-%         [~, p, ~, stats] = ttest(subjectMat(:,numRow), 1);
-%         subjectPvals(numRow) = p;
-%         subjectTvals(numRow) = stats.tstat;      
-%     end
-%     subjectAdjPvals = mafdr(subjectPvals, 'BHFDR', true)
-% end
 
 % Do a boxplot
 figure('Position', [100, 100, 800, 600])
@@ -371,41 +355,6 @@ set(gca, 'FontSize', 25)
 ax = gca;
 ax.Box = 'off';
 title('Subject results - Averaged Peaks');
-
-% Do correlation plots if baseline corrected
-if baselineCorrect
-    figure; 
-    
-    subplot(2,3,1);
-    scatter(subjectMat(:,1), subjectMat(:,7), 'filled');
-    xlabel('Dentate'); ylabel('CBI-1');
-    axis square
-    
-    subplot(2,3,2);
-    scatter(subjectMat(:,2), subjectMat(:,7), 'filled');
-    xlabel('Lobule 5'); ylabel('CBI-1');
-    axis square
-    
-    subplot(2,3,3);
-    scatter(subjectMat(:,3), subjectMat(:,7), 'filled');
-    xlabel('Lobule 8'); ylabel('CBI-1');
-    axis square
-
-    subplot(2,3,4);
-    scatter(subjectMat(:,1), subjectMat(:,8), 'filled');
-    xlabel('Dentate'); ylabel('CBI-2');
-    axis square
-    
-    subplot(2,3,5);
-    scatter(subjectMat(:,2), subjectMat(:,8), 'filled');
-    xlabel('Lobule 5'); ylabel('CBI-2');
-    axis square
-    
-    subplot(2,3,6);
-    scatter(subjectMat(:,3), subjectMat(:,8), 'filled');
-    xlabel('Lobule 8'); ylabel('CBI-2');
-    axis square    
-end
 
 % Save a sheet for future anayses. Only save if grandBaseline is used.
 if baselineCorrect
