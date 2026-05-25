@@ -1,0 +1,6 @@
+{
+  "protocol_name": "Ozzy's test protocol",
+  "BurstLength(ms)": 20,
+  "PRP(ms)": 200,
+  "Description": "This json field is not used in code. Just for taking notes about the protocol. Anything can go here."
+}
