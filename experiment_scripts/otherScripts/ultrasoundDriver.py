@@ -100,6 +100,7 @@ def update_confirm_visibility(*args):
         # Hide BOTH display panels
         display_outer.grid_remove()
         display_outer_2.grid_remove()
+        depth_limit_label.grid_remove()
 
     else:
 
@@ -107,10 +108,21 @@ def update_confirm_visibility(*args):
         check_A.grid()
         check_B.grid()
         check_C.grid()
+        depth_limit_label.grid()
 
         # Show BOTH display panels again
         display_outer.grid()
         display_outer_2.grid()
+        
+def update_depth_limit_label(*args):
+    tx = Transducer_default.get()
+
+    if tx == "CTX_500":
+        depth_limit_var.set("CTX limit: 25–69 mm")
+    elif tx == "DPX_500":
+        depth_limit_var.set("DPX limit: 55–120 mm")
+    else:
+        depth_limit_var.set("")
         
 ##################### Main functions ########################################
 
@@ -138,6 +150,23 @@ def save_function():
     
     if not selected_timer or not selected_depth:
         print("No timer or depth was selected.")
+        return
+
+    # Validate depth based on selected transducer
+    try:
+        selected_depth_float = float(selected_depth)
+    except ValueError:
+        print("Depth must be a number.")
+        return
+    
+    tx = Transducer_default.get()
+    
+    if tx == "CTX_500" and not (25 <= selected_depth_float <= 69):
+        print("CTX depth must be between 25 and 69 mm.")
+        return
+    
+    if tx == "DPX_500" and not (55 <= selected_depth_float <= 120):
+        print("DPX depth must be between 55 and 120 mm.")
         return
     
     # Convert PRP and Burst length to milliseconds. This is how TPO wants them.
@@ -463,6 +492,16 @@ depth_label.grid(row=7, column=0, padx=5, pady=5, sticky="e")
 depth = tk.Entry(root)
 depth.grid(row=7, column=1, padx=5, pady=5, sticky="w")
 
+# Depth limits shown next to target depth
+depth_limit_var = tk.StringVar(value="DPX limit: 55–120 mm")
+
+depth_limit_label = tk.Label(
+    root,
+    textvariable=depth_limit_var,
+    fg="gray"
+)
+depth_limit_label.grid(row=7, column=1, padx=(150, 5), pady=5, sticky="e")
+
 # Timer label and box
 timer_label = tk.Label(root, text="Timer (seconds):")
 timer_label.grid(row=8, column=0, padx=5, pady=5, sticky="e")
@@ -482,6 +521,8 @@ isppa.grid(row=9, column=1, padx=5, pady=5, sticky="w")
 TPO_default.trace_add("write", update_transducer_state)
 TPO_default.trace_add("write", update_confirm_visibility)
 update_transducer_state()
+Transducer_default.trace_add("write", update_depth_limit_label)
+update_depth_limit_label()
 
 # Instructions above buttons
 instructions_label = tk.Label(
