@@ -15,7 +15,7 @@ from tkinter import filedialog
 import json
 
 # Version check
-version = 'v3.0'
+version = 'v4.0'
 
 # Protocol placeholder. Will be replaced after a JSON file is loaded
 loaded_protocol = {
@@ -67,11 +67,16 @@ def sniff_port_based_on_deviceID(vid, pid):
 
 # Function to make Start button available only if the checkboxes are checked. 
 def update_start_state():
-    """Enable Start only if A and B are checked."""
-    if check_B_var.get() and check_C_var.get():
+    """Enable Start depending on selected TPO."""
+    
+    if TPO_default.get() == "2_channel":
         start_button.config(state="normal")
-    else:
-        start_button.config(state="disabled")
+    
+    elif TPO_default.get() == "4_channel":
+        if check_B_var.get() and check_C_var.get():
+            start_button.config(state="normal")
+        else:
+            start_button.config(state="disabled")
 
 # Update transducer options
 def update_transducer_state(*args):
@@ -100,7 +105,9 @@ def update_confirm_visibility(*args):
         # Hide BOTH display panels
         display_outer.grid_remove()
         display_outer_2.grid_remove()
-        depth_limit_label.grid_remove()
+
+        # Keep depth limit visible
+        depth_limit_label.grid()
 
     else:
 
@@ -114,16 +121,35 @@ def update_confirm_visibility(*args):
         display_outer.grid()
         display_outer_2.grid()
         
+    update_depth_limit_label()
+    update_start_state()
+
 def update_depth_limit_label(*args):
     tx = Transducer_default.get()
-
-    if tx == "CTX_500":
-        depth_limit_var.set("CTX limit: 25–69 mm")
-    elif tx == "DPX_500":
-        depth_limit_var.set("DPX limit: 55–120 mm")
-    else:
-        depth_limit_var.set("")
+    tpo = TPO_default.get()
+    
+    if tpo == '2_channel':
+        depth_limit_var.set("2_channel limits: 20–100 mm")
+    elif tpo == '4_channel':
+        if tx == "CTX_500":
+            depth_limit_var.set("CTX limits: 25–69 mm")
+        elif tx == "DPX_500":
+            depth_limit_var.set("DPX limits: 55–120 mm")
+        else:
+            depth_limit_var.set("")
         
+def calculate_mi_from_isppa(isppa_w_cm2):
+    rho = 1000      # kg/m3, water
+    c = 1500        # m/s, water
+    freq_mhz = 0.5  # 500 kHz
+
+    intensity_w_m2 = isppa_w_cm2 * 10000
+    pressure_pa = np.sqrt(2 * rho * c * intensity_w_m2)
+    pressure_mpa = pressure_pa / 1e6
+
+    mi = pressure_mpa / np.sqrt(freq_mhz)
+    return mi
+
 ##################### Main functions ########################################
 
 # Save button functionality. This is called Init in the program. 
@@ -161,17 +187,39 @@ def save_function():
     
     tx = Transducer_default.get()
     
-    if tx == "CTX_500" and not (25 <= selected_depth_float <= 69):
-        print("CTX depth must be between 25 and 69 mm.")
+    if selected_TPO == '4_channel':
+        if tx == "CTX_500" and not (25 <= selected_depth_float <= 69):
+            print("CTX depth must be between 25 and 69 mm.")
+            return
+        
+        if tx == "DPX_500" and not (55 <= selected_depth_float <= 120):
+            print("DPX depth must be between 55 and 120 mm.")
+            return
+    elif selected_TPO == '2_channel':
+        if not (20 <= selected_depth_float <= 100):
+            print("2_channel depth must be between 20 and 100 mm.")
+    
+    # Calculate mechanical index from requested ISPPA
+    try:
+        selected_isppa_float = float(isppa.get())
+    except ValueError:
+        print("ISPPA must be a number.")
         return
     
-    if tx == "DPX_500" and not (55 <= selected_depth_float <= 120):
-        print("DPX depth must be between 55 and 120 mm.")
-        return
+    mechanical_index = calculate_mi_from_isppa(selected_isppa_float)
     
-    # Convert PRP and Burst length to milliseconds. This is how TPO wants them.
-    PRP = int(PRP) * 1000
-    burst_length = int(burst_length) * 1000
+    if mechanical_index > 1.5:
+        mi_warning_label.config(
+            text=f"WARNING: Estimated MI in water = {mechanical_index:.2f}, Limit in the brain is 1.9. Do modelling to make sure the values are acceptable in the brain"
+        )
+    else:
+        mi_warning_label.config(
+            text=""
+        )
+    
+    # Convert PRP and Burst length to microseconds. This is how TPO wants them.
+    PRP = float(PRP) * 1000
+    burst_length = float(burst_length) * 1000
 
     # Center frequency. We hard code this. We can't do anything else. 
     xdrCenterFreq = 500000  # Hz
@@ -210,7 +258,7 @@ def save_function():
         root.NeuroFUS.write(('ENFORCELIMITS=0\r').encode())
         
         # Calculate power from ISPPA with constants. 
-        selected_isppa = int(isppa.get())
+        selected_isppa = selected_isppa_float
         if tx == "CTX_500" and not check_A_var.get():
             Power = selected_isppa / 14.54 * 1000
         elif tx == "CTX_500" and check_A_var.get():
@@ -253,20 +301,21 @@ def save_function():
 
         # Calculate power from ISPPA for 2 channel using Paul's calibration table
         # Round to the nearest power as decimals are not allowed
-        selected_isppa = int(isppa.get())
+        selected_isppa = selected_isppa_float
         depths = [35,40,45,50,55,60,65,70,75,80,85,90,95]
         max_intensities = [6.690029719,10.65335428,13.65227765,15.44741492,16.73497048,
                            17.29794313,17.76305019,17.55870846,17.10673748,16.66934595,
                            16.45149282,15.76634466,15.54487496]
-        Power = round(selected_isppa*5/np.interp(selected_depth, depths, max_intensities))
+        Power = round(selected_isppa*5/np.interp(selected_depth, depths, max_intensities)) * 1000
         
+        print('burst length is ' + str(burst_length))
         # Set variables to what is requested
         root.NeuroFUS.write(("LOCAL=NO\r\n").encode("ascii"))
-        root.NeuroFUS.write((f"POWER={int(round(Power))/1000}\r\n").encode("ascii"))
-        root.NeuroFUS.write((f"FREQ={int(round(xdrCenterFreq))/1000}\r\n").encode("ascii"))
+        root.NeuroFUS.write((f"POWER={int(Power)/1000}\r\n").encode("ascii"))
+        root.NeuroFUS.write((f"FREQ={int(xdrCenterFreq)/1000}\r\n").encode("ascii"))
         root.NeuroFUS.write((f"DEPTH={int(selected_depth)}\r\n").encode("ascii"))
         root.NeuroFUS.write((f"TIME={int(selected_timer)*100}\r\n").encode("ascii"))
-        root.NeuroFUS.write((f"BURST={int(round(burst_length))}\r\n").encode("ascii"))
+        root.NeuroFUS.write((f"BURST={int(burst_length)}\r\n").encode("ascii"))
         root.NeuroFUS.write((f"RATE={1e6 / int(round(PRP))}\r\n").encode("ascii"))
 
     # Re-check checkbox state after saving
@@ -520,8 +569,8 @@ isppa.grid(row=9, column=1, padx=5, pady=5, sticky="w")
 # Update transducer state when TPO changes
 TPO_default.trace_add("write", update_transducer_state)
 TPO_default.trace_add("write", update_confirm_visibility)
-update_transducer_state()
 Transducer_default.trace_add("write", update_depth_limit_label)
+update_transducer_state()
 update_depth_limit_label()
 
 # Instructions above buttons
@@ -532,6 +581,17 @@ instructions_label = tk.Label(
     justify="left"
 )
 instructions_label.grid(row=11, column=1, pady=10, sticky='w')
+
+# MI warning
+mi_warning_label = tk.Label(
+    root,
+    text="",
+    fg="red",
+    font=("Arial", 14, "bold"),
+    wraplength=400,
+    justify="left"
+)
+mi_warning_label.grid(row=10, column=1, pady=5, sticky="w")
 
 # The buttons to Init and start 
 save_button = tk.Button(root, text="Init", command=save_function)
