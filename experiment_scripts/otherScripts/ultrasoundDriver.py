@@ -10,13 +10,49 @@ import tkinter as tk
 import time, serial
 import serial.tools.list_ports
 import numpy as np
+from tkinter import filedialog
+import json
 
 # Install pyserial. Don't use the standard serial
 
 # Version check
-version = 'v2.0'
+version = 'v3.0'
+
+# Protocol placeholder
+loaded_protocol = {
+    "PRP(ms)": None,
+    "BurstLength(ms)": None,
+    "protocol_name": None
+}
 
 ##################### Helper functions #######################################
+
+def load_protocol_json():
+    global loaded_protocol
+
+    file_path = filedialog.askopenfilename(
+        title="Select Protocol JSON",
+        filetypes=[("JSON files", "*.json")]
+    )
+
+    if not file_path:
+        return
+
+    with open(file_path, "r") as f:
+        data = json.load(f)
+
+    loaded_protocol["PRP(ms)"] = data.get("PRP(ms)")
+    loaded_protocol["BurstLength(ms)"] = data.get("BurstLength(ms)")
+    loaded_protocol["protocol_name"] = data.get("protocol_name")
+
+    name = loaded_protocol.get("protocol_name")
+    
+    if name:
+        protocol_name_var.set('Loaded: ' + name)
+    else:
+        protocol_name_var.set("No protocol loaded")
+
+    print("Loaded protocol:", loaded_protocol)
 
 def sniff_port_based_on_deviceID(vid, pid):
     for p in serial.tools.list_ports.comports():
@@ -45,61 +81,29 @@ def update_transducer_state(*args):
     Transducer.grid(row=2, column=1, padx=5, pady=5, sticky="w")
 
 def update_confirm_visibility(*args):
+
     if TPO_default.get() == "2_channel":
+
         check_A.grid_remove()
         check_B.grid_remove()
         check_C.grid_remove()
         check_and_confirm_label.grid_remove()
+
+        # Hide BOTH display panels
+        display_outer.grid_remove()
+        display_outer_2.grid_remove()
+
     else:
+
         check_and_confirm_label.grid()
         check_A.grid()
         check_B.grid()
         check_C.grid()
+
+        # Show BOTH display panels again
+        display_outer.grid()
+        display_outer_2.grid()
         
-def update_protocol_mode():
-
-    if check_D_var.get():  # CUSTOM MODE
-
-        protocol_label.grid_remove()
-        protocol_menu.grid_remove()
-
-        # Align exactly like Timer / Depth
-        custom_prp_label.grid(row=6, column=0, padx=5, pady=5, sticky="e")
-        custom_prp_entry.grid(row=6, column=1, padx=5, pady=5, sticky="w")
-
-        custom_burst_label.grid(row=7, column=0, padx=5, pady=5, sticky="e")
-        custom_burst_entry.grid(row=7, column=1, padx=5, pady=5, sticky="w")
-
-        # shift Timer/Depth down
-        timer_label.grid_configure(row=8)
-        timer.grid_configure(row=8)
-
-        depth_label.grid_configure(row=9)
-        depth.grid_configure(row=9)
-
-        isppa_label.grid_configure(row=10)
-        isppa.grid_configure(row=10)
-
-    else:  # NORMAL MODE
-
-        protocol_label.grid()
-        protocol_menu.grid(row=6, column=1, padx=5, pady=5, sticky="w")
-
-        custom_prp_label.grid_remove()
-        custom_prp_entry.grid_remove()
-        custom_burst_label.grid_remove()
-        custom_burst_entry.grid_remove()
-
-        # restore original layout
-        timer_label.grid_configure(row=7)
-        timer.grid_configure(row=7)
-
-        depth_label.grid_configure(row=8)
-        depth.grid_configure(row=8)
-
-        isppa_label.grid_configure(row=9)
-        isppa.grid_configure(row=9)
-
 ##################### Main functions ########################################
 
 def save_function():
@@ -115,36 +119,15 @@ def save_function():
     # Get protocol variables based on whether custom mode was set or bult-in 
     # protocols are used. TPO accepts microseconds for PRP and burstLength, 
     # but for custom we will take ms and convert. 
-    if check_D_var.get():
-        PRP = int(custom_prp_entry.get()) * 1000
-        burst_length = int(custom_burst_entry.get()) * 1000
-    else:
-        selected_protocol = protocol_default.get()
-        
+    PRP = loaded_protocol["PRP(ms)"]
+    burst_length = loaded_protocol["BurstLength(ms)"]
     
-        if selected_protocol == '5Hz (tbTUS) - 10% DC':
-            burst_length = 20000
-            PRP = 200000
-            
-        elif selected_protocol == '7.7Hz - 30% DC':
-            burst_length = 2300
-            PRP = 7700
-
-        elif selected_protocol == '10Hz - 30% DC':
-            burst_length = 30000
-            PRP = 100000
+    if PRP is None or burst_length is None:
+        print("No protocol loaded. Please select a JSON file first.")
+        return
     
-        elif selected_protocol == '100Hz - 10% DC':
-            burst_length = 1000
-            PRP = 10000
-
-        elif selected_protocol == '100Hz - 30% DC':
-            burst_length = 3000
-            PRP = 10000
-            
-        elif selected_protocol == '1000Hz (online) - 30% DC':
-            burst_length = 300 
-            PRP = 1000
+    PRP = int(PRP) * 1000
+    burst_length = int(burst_length) * 1000
 
     # Center frequency
     xdrCenterFreq = 500000  # Hz
@@ -247,7 +230,7 @@ def start_function():
     selected_TPO = TPO_default.get()
 
     if not hasattr(root, "NeuroFUS"):
-        print("You need to click Save first")
+        print("You need to click Init first")
         return
 
     time.sleep(3)
@@ -323,54 +306,41 @@ check_C.grid(row=4, column=1, padx=5, pady=5, sticky='w')
 
 # Protocol
 
-protocol_label = tk.Label(root, text="Lab Protocols:")
+protocol_label = tk.Label(root, text="Protocol")
 protocol_label.grid(row=6, column=0, padx=5, pady=5, sticky="e")
 
-protocol_default = tk.StringVar(value="5Hz (tbTUS) - 10% DC")
-
-protocol_default = tk.StringVar(value="5Hz (tbTUS) - 10% DC")
-
-protocol_menu = tk.OptionMenu(
+protocol_button = tk.Button(
     root,
-    protocol_default,
-    "5Hz (tbTUS) - 10% DC",
-    "7.7Hz - 30% DC",
-    '10Hz - 30% DC',
-    "100Hz - 10% DC",
-    '100Hz - 30% DC',
-    "1000Hz (online) - 30% DC"
+    text="Select JSON",
+    command=load_protocol_json
 )
-protocol_menu.grid(row=6, column=1, padx=5, pady=5, sticky="w")
 
-# Custom protocol function
-check_D = tk.Checkbutton(
+protocol_button.grid(row=6, column=1, padx=5, pady=5, sticky="w")
+
+# Protocol loaded display
+protocol_name_var = tk.StringVar(value="No protocol loaded")
+
+protocol_name_label = tk.Label(
     root,
-    text="Custom Protocol",
-    variable=check_D_var,
-    command=update_protocol_mode,
-    wraplength=300
+    textvariable=protocol_name_var,
+    fg="blue"
 )
-check_D.grid(row=6, column=1, padx=5, pady=5, sticky='e')
 
-custom_prp_label = tk.Label(root, text="PRP (ms):")
-custom_prp_entry = tk.Entry(root, width=10)
+protocol_name_label.grid(row=6, column=1, padx=(120,5), pady=5, sticky="w")
 
-custom_burst_label = tk.Label(root, text="Burst Length (ms):")
-custom_burst_entry = tk.Entry(root, width=10)
+# Depth
+depth_label = tk.Label(root, text="Target Depth (mm):")
+depth_label.grid(row=7, column=0, padx=5, pady=5, sticky="e")
+
+depth = tk.Entry(root)
+depth.grid(row=7, column=1, padx=5, pady=5, sticky="w")
 
 # Timer
 timer_label = tk.Label(root, text="Timer (seconds):")
-timer_label.grid(row=7, column=0, padx=5, pady=5, sticky="e")
+timer_label.grid(row=8, column=0, padx=5, pady=5, sticky="e")
 
 timer = tk.Entry(root)
-timer.grid(row=7, column=1, padx=5, pady=5, sticky="w")
-
-# Depth
-depth_label = tk.Label(root, text="Depth (mm):")
-depth_label.grid(row=8, column=0, padx=5, pady=5, sticky="e")
-
-depth = tk.Entry(root)
-depth.grid(row=8, column=1, padx=5, pady=5, sticky="w")
+timer.grid(row=8, column=1, padx=5, pady=5, sticky="w")
 
 # Req ISPPA in water 
 isppa_label = tk.Label(root, text="Req. ISPPA in water W/cm^2:")
@@ -384,33 +354,32 @@ isppa.grid(row=9, column=1, padx=5, pady=5, sticky="w")
 TPO_default.trace_add("write", update_transducer_state)
 TPO_default.trace_add("write", update_confirm_visibility)
 update_transducer_state()
-update_confirm_visibility()
 
 # Instructions
 instructions_label = tk.Label(
     root,
-    text="Save = sends settings to device (Confirm on the TPO display after saving!)\n\n*Sonication starts 3 seconds after the start button is pressed",
+    text="Init = Sends settings to device. Press this after loading protocol and setting your values, then confirm on the device display!\n\n* Sonication starts 3 seconds after the start button is pressed",
     wraplength=400,
     justify="left"
 )
 instructions_label.grid(row=11, column=1, pady=10, sticky='w')
 
 # Buttons
-save_button = tk.Button(root, text="Save", command=save_function)
+save_button = tk.Button(root, text="Init", command=save_function)
 save_button.grid(row=12, column=0, pady=10)
 
 start_button = tk.Button(
     root,
-    text="Start sonication (Click save first!)",
+    text="Start sonication (Click Init first!)",
     command=start_function,
     state="disabled"
 )
 
 start_button.grid(row=12, column=1, pady=10)
 
-####################### Mock display #########################################
+####################### FIRST MOCK DISPLAY ###################################
 
-# ---------- SCALE ----------
+# Scales
 SCALE = 0.8
 
 def sx(x):
@@ -419,15 +388,14 @@ def sx(x):
 def sf(x):
     return max(8, int(x * SCALE))
 
-# ---------- COLORS ----------
+# Colors
 DISPLAY_BG = "#7a0000"
 DISPLAY_YELLOW = "#ffe600"
 DISPLAY_WHITE = "white"
 DISPLAY_GREEN = "#39ff14"
 DISPLAY_BUTTON = "#b30000"
 
-######################## PANEL ###############################################
-
+# Frames
 display_outer = tk.Frame(
     root,
     bg="black",
@@ -454,22 +422,22 @@ display_frame = tk.Frame(
 display_frame.pack()
 display_frame.pack_propagate(False)
 
-# ---------- TITLE ----------
+# Title of the frame
 display_title = tk.Label(
     display_frame,
-    text="COMPARE THESE TO ACTUAL DISPLAY AFTER PRESSING SAVE\n (OK IF ISSPA AND POWER ARE CLOSE BUT NOT EXACT)",
+    text="AFTER PRESSING INIT COMPARE THESE TO ACTUAL DEVICE VALUES \n (IT'S OK IF ISSPA / ISPTA AND POWER ARE CLOSE BUT NOT EXACT)",
     fg="white",
     bg=DISPLAY_BG,
     font=("Helvetica", sf(18), "bold")
 )
 
-display_title.place(x=sx(50), y=sx(10))
+display_title.place(x=sx(20), y=sx(10))
 
-######################## POWER ###############################################
+# Power block default values
 
 power_max_label = tk.Label(
     display_frame,
-    text="0.009 W max     Power/Ch.",
+    text="----- W max     Power/Ch.",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
     font=("Helvetica", sf(16), "bold")
@@ -478,7 +446,7 @@ power_max_label.place(x=sx(20), y=sx(60))
 
 power_actual_label = tk.Label(
     display_frame,
-    text="not shown          PACTUAL",
+    text="not shown           PACTUAL",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
     font=("Helvetica", sf(16))
@@ -487,7 +455,7 @@ power_actual_label.place(x=sx(20), y=sx(95))
 
 isppa_display = tk.Label(
     display_frame,
-    text="30.00 W/cm²    ISPPA",
+    text="---- W/cm²       ISPPA",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
     font=("Helvetica", sf(16), "bold")
@@ -496,14 +464,14 @@ isppa_display.place(x=sx(20), y=sx(130))
 
 ispta_display = tk.Label(
     display_frame,
-    text="not shown          ISPTA",
+    text="----     W/cm²           ISPTA",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
     font=("Helvetica", sf(16))
 )
 ispta_display.place(x=sx(20), y=sx(165))
 
-######################## FREQUENCY ###########################################
+# Frequency default values
 
 freq_title = tk.Label(
     display_frame,
@@ -523,7 +491,7 @@ freq_value = tk.Label(
 )
 freq_value.place(x=sx(280), y=sx(120))
 
-######################## FOCUS ###############################################
+# Focus defaults
 
 focus_title = tk.Label(
     display_frame,
@@ -532,18 +500,18 @@ focus_title = tk.Label(
     bg=DISPLAY_BG,
     font=("Helvetica", sf(28))
 )
-focus_title.place(x=sx(550), y=sx(70))
+focus_title.place(x=sx(500), y=sx(70))
 
 focus_value = tk.Label(
     display_frame,
-    text="65.000 mm",
+    text="----- mm",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
     font=("Helvetica", sf(24))
 )
 focus_value.place(x=sx(500), y=sx(120))
 
-######################## BURST ###############################################
+#Burst default values
 
 burst_title = tk.Label(
     display_frame,
@@ -556,14 +524,14 @@ burst_title.place(x=sx(20), y=sx(200))
 
 burst_value = tk.Label(
     display_frame,
-    text="20.000 ms",
+    text="------- ms",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
     font=("Helvetica", sf(24))
 )
 burst_value.place(x=sx(40), y=sx(250))
 
-######################## PERIOD ##############################################
+# Period default values
 
 period_title = tk.Label(
     display_frame,
@@ -576,14 +544,14 @@ period_title.place(x=sx(320), y=sx(200))
 
 period_value = tk.Label(
     display_frame,
-    text="200.000 ms",
+    text="------- ms",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
     font=("Helvetica", sf(24))
 )
 period_value.place(x=sx(300), y=sx(250))
 
-######################## TIMER ###############################################
+# Timer default values
 
 timer_title_display = tk.Label(
     display_frame,
@@ -592,19 +560,106 @@ timer_title_display = tk.Label(
     bg=DISPLAY_BG,
     font=("Helvetica", sf(28))
 )
-timer_title_display.place(x=sx(560), y=sx(200))
+timer_title_display.place(x=sx(500), y=sx(200))
 
 timer_value_display = tk.Label(
     display_frame,
-    text="120.0 s",
+    text="------- s",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
     font=("Helvetica", sf(24))
 )
-timer_value_display.place(x=sx(530), y=sx(250))
+timer_value_display.place(x=sx(500), y=sx(250))
+
+######################## SECOND DISPLAY PANEL ################################
+
+display_outer_2 = tk.Frame(
+    root,
+    bg="black",
+    bd=4,
+    relief="raised"
+)
+
+display_outer_2.grid(
+    row=7,
+    column=3,
+    rowspan=20,
+    padx=10,
+    pady=10,
+    sticky="n"
+)
+
+display_frame_2 = tk.Frame(
+    display_outer_2,
+    bg=DISPLAY_BG,
+    width=sx(650),
+    height=sx(300)
+)
+
+display_frame_2.pack()
+display_frame_2.pack_propagate(False)
+
+# Title of the frame
+display_title = tk.Label(
+    display_frame_2,
+    text="PRESS \"Opt.\" ON THE DEVICE AND CHECK IF YOUR TRANSDUCER\n IS MATCHING WHAT IS SHOWN HERE",
+    fg="white",
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(18), "bold")
+)
+
+display_title.place(x=sx(20), y=sx(10))
+
+rf_params_label = tk.Label(
+    display_frame_2,
+    text="RF Parameters: Std.\nExtra Field: Comp. Focus\nPower Limits Enforced: OFF",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(22))
+)
+rf_params_label.place(x=sx(130), y=sx(70))
+
+selected_transducer_label = tk.Label(
+    display_frame_2,
+    text="Selected Transducer:",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(22))
+)
+selected_transducer_label.place(x=sx(100), y=sx(150))
+
+selected_transducer_value = tk.Label(
+    display_frame_2,
+    text="DPX-500-058A",
+    fg=DISPLAY_YELLOW,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(20))
+)
+selected_transducer_value.place(x=sx(320), y=sx(150))
+
+trigger_mode_label = tk.Label(
+    display_frame_2,
+    text="Trigger Mode: Off",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(22))
+)
+trigger_mode_label.place(x=sx(150), y=sx(180))
 
 
-######################## LIVE UPDATE #########################################
+#### Functions for transducer selection and live update 
+
+def get_selected_transducer_display_name():
+    tx = Transducer_default.get()
+    mri = check_A_var.get()
+
+    if tx == "DPX_500":
+        return "DPX-500-058B" if mri else "DPX-500-058A"
+
+    elif tx == "CTX_500":
+        return "CTX-500-130B" if mri else "CTX-500-130A"
+
+    return "-----"
 
 def update_live_display():
 
@@ -613,16 +668,31 @@ def update_live_display():
         # Frequency
         freq_value.config(text="500.00 kHz")
 
+        # Transducer config
+        selected_transducer_value.config(text=get_selected_transducer_display_name())
+
         # Depth / Focus
-        if depth.get():
+        depth_val = depth.get().strip()
+        
+        if depth_val:
             focus_value.config(
-                text=f"{float(depth.get()):.3f} mm"
+                text=f"{float(depth_val):.3f} mm"
+            )
+        else:
+            focus_value.config(
+                text="----- mm"
             )
 
         # Timer
-        if timer.get():
+        timer_val = timer.get().strip()
+        
+        if timer_val:
             timer_value_display.config(
-                text=f"{float(timer.get()):.1f} s"
+                text=f"{float(timer_val):.3f} s"
+            )
+        else:
+            timer_value_display.config(
+                text="------- s"
             )
 
         # ISPPA
@@ -642,64 +712,52 @@ def update_live_display():
 
             # Fake power estimate
             power_max_label.config(
-                text=f"{Power} W max      Power/Ch."
+                text=f"{Power:.3f} W max     Power/Ch."
             )
 
-            isppa_display.config(
-                text=f"{current_isppa:.2f} W/cm²     ISPPA"
-            )
-
-            # # Fake ISPTA estimate
-            # ispta_display.config(
-            #     text=f"{current_isppa * 0.1:.2f} W/cm²"
+            # # Fake PACTUAL
+            # power_actual_label.config(
+            #     text=f"{current_isppa * 0.1:.3f} W/cm²"
             # )
 
+            isppa_display.config(
+                text=f"{current_isppa:.2f} W/cm²      ISPPA"
+            )
+
+            # ISPTA
+            if (
+                loaded_protocol["PRP(ms)"] is not None
+                and loaded_protocol["BurstLength(ms)"] is not None
+            ):
+                duty_cycle = float(loaded_protocol["BurstLength(ms)"]) / float(loaded_protocol["PRP(ms)"])
+                current_ispta = current_isppa * duty_cycle
+            
+                ispta_display.config(
+                    text=f"{current_ispta:.2f} W/cm²        ISPTA"
+                )
+            else:
+                ispta_display.config(
+                    text="----     W/cm²       ISPTA"
+                )
 
         # Protocol display
-        if check_D_var.get():
-
-            if custom_burst_entry.get():
-                burst_value.config(
-                    text=f"{float(custom_burst_entry.get()):.3f} ms"
-                )
-
-            if custom_prp_entry.get():
-                period_value.config(
-                    text=f"{float(custom_prp_entry.get()):.3f} ms"
-                )
-
-        else:
-
-            selected_protocol = protocol_default.get()
-
-            if selected_protocol == '5Hz (tbTUS) - 10% DC':
-                burst_value.config(text="20.000 ms")
-                period_value.config(text="200.000 ms")
-
-            elif selected_protocol == '7.7Hz - 30% DC':
-                burst_value.config(text="2.300 ms")
-                period_value.config(text="7.700 ms")
-
-            elif selected_protocol == '10Hz - 30% DC':
-                burst_value.config(text="30.000 ms")
-                period_value.config(text="100.000 ms")
-
-            elif selected_protocol == '100Hz - 10% DC':
-                burst_value.config(text="1.000 ms")
-                period_value.config(text="10.000 ms")
-
-            elif selected_protocol == '100Hz - 30% DC':
-                burst_value.config(text="3.000 ms")
-                period_value.config(text="10.000 ms")
-
-            elif selected_protocol == '1000Hz (online) - 30% DC':
-                burst_value.config(text="0.300 ms")
-                period_value.config(text="1.000 ms")
-
-    except:
-        pass
+        if loaded_protocol["PRP(ms)"] is not None:
+            period_value.config(
+                text=f"{float(loaded_protocol['PRP(ms)']):.2f} ms"
+            )
+        
+        if loaded_protocol["BurstLength(ms)"] is not None:
+            burst_value.config(
+                text=f"{float(loaded_protocol['BurstLength(ms)']):.3f} ms"
+            )
+    
+    except Exception as e:
+        print("Live display error:", e)
 
     root.after(200, update_live_display)
+
+# Apply visibility
+update_confirm_visibility()
 
 # Start updating
 update_live_display()
