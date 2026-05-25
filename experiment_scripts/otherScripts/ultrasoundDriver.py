@@ -408,5 +408,301 @@ start_button = tk.Button(
 
 start_button.grid(row=12, column=1, pady=10)
 
+####################### Mock display #########################################
+
+# ---------- SCALE ----------
+SCALE = 0.8
+
+def sx(x):
+    return int(x * SCALE)
+
+def sf(x):
+    return max(8, int(x * SCALE))
+
+# ---------- COLORS ----------
+DISPLAY_BG = "#7a0000"
+DISPLAY_YELLOW = "#ffe600"
+DISPLAY_WHITE = "white"
+DISPLAY_GREEN = "#39ff14"
+DISPLAY_BUTTON = "#b30000"
+
+######################## PANEL ###############################################
+
+display_outer = tk.Frame(
+    root,
+    bg="black",
+    bd=4,
+    relief="raised"
+)
+
+display_outer.grid(
+    row=0,
+    column=3,
+    rowspan=20,
+    padx=10,
+    pady=10,
+    sticky="n"
+)
+
+display_frame = tk.Frame(
+    display_outer,
+    bg=DISPLAY_BG,
+    width=sx(650),
+    height=sx(300)
+)
+
+display_frame.pack()
+display_frame.pack_propagate(False)
+
+# ---------- TITLE ----------
+display_title = tk.Label(
+    display_frame,
+    text="COMPARE THESE TO ACTUAL DISPLAY AFTER PRESSING SAVE\n (OK IF ISSPA AND POWER ARE CLOSE BUT NOT EXACT)",
+    fg="white",
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(18), "bold")
+)
+
+display_title.place(x=sx(50), y=sx(10))
+
+######################## POWER ###############################################
+
+power_max_label = tk.Label(
+    display_frame,
+    text="0.009 W max     Power/Ch.",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(16), "bold")
+)
+power_max_label.place(x=sx(20), y=sx(60))
+
+power_actual_label = tk.Label(
+    display_frame,
+    text="not shown          PACTUAL",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(16))
+)
+power_actual_label.place(x=sx(20), y=sx(95))
+
+isppa_display = tk.Label(
+    display_frame,
+    text="30.00 W/cm²    ISPPA",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(16), "bold")
+)
+isppa_display.place(x=sx(20), y=sx(130))
+
+ispta_display = tk.Label(
+    display_frame,
+    text="not shown          ISPTA",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(16))
+)
+ispta_display.place(x=sx(20), y=sx(165))
+
+######################## FREQUENCY ###########################################
+
+freq_title = tk.Label(
+    display_frame,
+    text="Freq.",
+    fg=DISPLAY_YELLOW,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(28))
+)
+freq_title.place(x=sx(330), y=sx(70))
+
+freq_value = tk.Label(
+    display_frame,
+    text="500.00 kHz",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(26))
+)
+freq_value.place(x=sx(280), y=sx(120))
+
+######################## FOCUS ###############################################
+
+focus_title = tk.Label(
+    display_frame,
+    text="Focus",
+    fg=DISPLAY_YELLOW,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(28))
+)
+focus_title.place(x=sx(550), y=sx(70))
+
+focus_value = tk.Label(
+    display_frame,
+    text="65.000 mm",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(24))
+)
+focus_value.place(x=sx(500), y=sx(120))
+
+######################## BURST ###############################################
+
+burst_title = tk.Label(
+    display_frame,
+    text="Burst",
+    fg=DISPLAY_YELLOW,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(28))
+)
+burst_title.place(x=sx(20), y=sx(200))
+
+burst_value = tk.Label(
+    display_frame,
+    text="20.000 ms",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(24))
+)
+burst_value.place(x=sx(40), y=sx(250))
+
+######################## PERIOD ##############################################
+
+period_title = tk.Label(
+    display_frame,
+    text="Period",
+    fg=DISPLAY_YELLOW,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(28))
+)
+period_title.place(x=sx(320), y=sx(200))
+
+period_value = tk.Label(
+    display_frame,
+    text="200.000 ms",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(24))
+)
+period_value.place(x=sx(300), y=sx(250))
+
+######################## TIMER ###############################################
+
+timer_title_display = tk.Label(
+    display_frame,
+    text="Timer",
+    fg=DISPLAY_YELLOW,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(28))
+)
+timer_title_display.place(x=sx(560), y=sx(200))
+
+timer_value_display = tk.Label(
+    display_frame,
+    text="120.0 s",
+    fg=DISPLAY_WHITE,
+    bg=DISPLAY_BG,
+    font=("Helvetica", sf(24))
+)
+timer_value_display.place(x=sx(530), y=sx(250))
+
+
+######################## LIVE UPDATE #########################################
+
+def update_live_display():
+
+    try:
+
+        # Frequency
+        freq_value.config(text="500.00 kHz")
+
+        # Depth / Focus
+        if depth.get():
+            focus_value.config(
+                text=f"{float(depth.get()):.3f} mm"
+            )
+
+        # Timer
+        if timer.get():
+            timer_value_display.config(
+                text=f"{float(timer.get()):.1f} s"
+            )
+
+        # ISPPA
+        if isppa.get():
+
+            current_isppa = float(isppa.get())
+            current_tx = Transducer_default.get()  
+            
+            if current_tx == "CTX_500" and not check_A_var.get():
+                Power = round(current_isppa / 14.54, 2)
+            elif current_tx == "CTX_500" and check_A_var.get():
+                Power = round(current_isppa / 11.075, 2)
+            elif current_tx == "DPX_500" and not check_A_var.get():
+                Power = round(current_isppa / 4.949, 2)
+            elif current_tx == "DPX_500" and check_A_var.get():
+                Power = round(current_isppa / 3.36, 2)
+
+            # Fake power estimate
+            power_max_label.config(
+                text=f"{Power} W max      Power/Ch."
+            )
+
+            isppa_display.config(
+                text=f"{current_isppa:.2f} W/cm²     ISPPA"
+            )
+
+            # # Fake ISPTA estimate
+            # ispta_display.config(
+            #     text=f"{current_isppa * 0.1:.2f} W/cm²"
+            # )
+
+
+        # Protocol display
+        if check_D_var.get():
+
+            if custom_burst_entry.get():
+                burst_value.config(
+                    text=f"{float(custom_burst_entry.get()):.3f} ms"
+                )
+
+            if custom_prp_entry.get():
+                period_value.config(
+                    text=f"{float(custom_prp_entry.get()):.3f} ms"
+                )
+
+        else:
+
+            selected_protocol = protocol_default.get()
+
+            if selected_protocol == '5Hz (tbTUS) - 10% DC':
+                burst_value.config(text="20.000 ms")
+                period_value.config(text="200.000 ms")
+
+            elif selected_protocol == '7.7Hz - 30% DC':
+                burst_value.config(text="2.300 ms")
+                period_value.config(text="7.700 ms")
+
+            elif selected_protocol == '10Hz - 30% DC':
+                burst_value.config(text="30.000 ms")
+                period_value.config(text="100.000 ms")
+
+            elif selected_protocol == '100Hz - 10% DC':
+                burst_value.config(text="1.000 ms")
+                period_value.config(text="10.000 ms")
+
+            elif selected_protocol == '100Hz - 30% DC':
+                burst_value.config(text="3.000 ms")
+                period_value.config(text="10.000 ms")
+
+            elif selected_protocol == '1000Hz (online) - 30% DC':
+                burst_value.config(text="0.300 ms")
+                period_value.config(text="1.000 ms")
+
+    except:
+        pass
+
+    root.after(200, update_live_display)
+
+# Start updating
+update_live_display()
+
 # Run app
 root.mainloop()
