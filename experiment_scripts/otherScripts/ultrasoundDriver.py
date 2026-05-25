@@ -8,7 +8,7 @@ Created on Tue May 12 23:20:53 2026
 
 # Import functions. # Install pyserial. Don't use the standard serial
 import tkinter as tk
-import time, serial
+import time, serial, platform
 import serial.tools.list_ports
 import numpy as np
 from tkinter import filedialog
@@ -23,6 +23,8 @@ loaded_protocol = {
     "BurstLength(ms)": None,
     "protocol_name": None
 }
+
+# Platform specific text
 
 ##################### Helper functions #######################################
 
@@ -511,8 +513,14 @@ SCALE = 0.8
 def sx(x):
     return int(x * SCALE)
 
+IS_WINDOWS = platform.system() == "Windows"
+
+DISPLAY_FONT = "Arial" if IS_WINDOWS else "Helvetica"
+DISPLAY_WIDTH = 720 if IS_WINDOWS else 650
+
 def sf(x):
-    return max(8, int(x * SCALE))
+    scale = 0.72 if IS_WINDOWS else SCALE
+    return max(8, int(x * scale))
 
 # Box colors 
 DISPLAY_BG = "#7a0000"
@@ -541,7 +549,7 @@ display_outer.grid(
 display_frame = tk.Frame(
     display_outer,
     bg=DISPLAY_BG,
-    width=sx(650),
+    width=sx(DISPLAY_WIDTH),
     height=sx(300)
 )
 
@@ -554,7 +562,7 @@ display_title = tk.Label(
     text="AFTER PRESSING INIT COMPARE THESE TO ACTUAL DEVICE VALUES \n (IT'S OK IF ISSPA / ISPTA AND POWER ARE CLOSE BUT NOT EXACT)",
     fg="white",
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(18), "bold")
+    font=(DISPLAY_FONT, sf(18), "bold")
 )
 
 display_title.place(x=sx(20), y=sx(10))
@@ -565,7 +573,7 @@ power_max_label = tk.Label(
     text="----- W max     Power/Ch.",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(16), "bold")
+    font=(DISPLAY_FONT, sf(16), "bold")
 )
 power_max_label.place(x=sx(20), y=sx(60))
 
@@ -574,7 +582,7 @@ power_actual_label = tk.Label(
     text="not shown           PACTUAL",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(16))
+    font=(DISPLAY_FONT, sf(16))
 )
 power_actual_label.place(x=sx(20), y=sx(95))
 
@@ -583,7 +591,7 @@ isppa_display = tk.Label(
     text="---- W/cm²       ISPPA",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(16), "bold")
+    font=(DISPLAY_FONT, sf(16), "bold")
 )
 isppa_display.place(x=sx(20), y=sx(130))
 
@@ -592,7 +600,7 @@ ispta_display = tk.Label(
     text="----     W/cm²           ISPTA",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(16))
+    font=(DISPLAY_FONT, sf(16))
 )
 ispta_display.place(x=sx(20), y=sx(165))
 
@@ -602,7 +610,7 @@ freq_title = tk.Label(
     text="Freq.",
     fg=DISPLAY_YELLOW,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(28))
+    font=(DISPLAY_FONT, sf(28))
 )
 freq_title.place(x=sx(330), y=sx(70))
 
@@ -611,7 +619,7 @@ freq_value = tk.Label(
     text="500.00 kHz",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(26))
+    font=(DISPLAY_FONT, sf(26))
 )
 freq_value.place(x=sx(280), y=sx(120))
 
@@ -621,7 +629,7 @@ focus_title = tk.Label(
     text="Focus",
     fg=DISPLAY_YELLOW,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(28))
+    font=(DISPLAY_FONT, sf(28))
 )
 focus_title.place(x=sx(500), y=sx(70))
 
@@ -630,7 +638,7 @@ focus_value = tk.Label(
     text="----- mm",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(24))
+    font=(DISPLAY_FONT, sf(24))
 )
 focus_value.place(x=sx(500), y=sx(120))
 
@@ -640,7 +648,7 @@ burst_title = tk.Label(
     text="Burst",
     fg=DISPLAY_YELLOW,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(28))
+    font=(DISPLAY_FONT, sf(28))
 )
 burst_title.place(x=sx(20), y=sx(200))
 
@@ -649,7 +657,7 @@ burst_value = tk.Label(
     text="------- ms",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(24))
+    font=(DISPLAY_FONT, sf(24))
 )
 burst_value.place(x=sx(40), y=sx(250))
 
@@ -659,7 +667,7 @@ period_title = tk.Label(
     text="Period",
     fg=DISPLAY_YELLOW,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(28))
+    font=(DISPLAY_FONT, sf(28))
 )
 period_title.place(x=sx(320), y=sx(200))
 
@@ -668,7 +676,7 @@ period_value = tk.Label(
     text="------- ms",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(24))
+    font=(DISPLAY_FONT, sf(24))
 )
 period_value.place(x=sx(300), y=sx(250))
 
@@ -678,7 +686,7 @@ timer_title_display = tk.Label(
     text="Timer",
     fg=DISPLAY_YELLOW,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(28))
+    font=(DISPLAY_FONT, sf(28))
 )
 timer_title_display.place(x=sx(500), y=sx(200))
 
@@ -687,7 +695,7 @@ timer_value_display = tk.Label(
     text="------- s",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(24))
+    font=(DISPLAY_FONT, sf(24))
 )
 timer_value_display.place(x=sx(500), y=sx(250))
 
@@ -713,7 +721,7 @@ display_outer_2.grid(
 display_frame_2 = tk.Frame(
     display_outer_2,
     bg=DISPLAY_BG,
-    width=sx(650),
+    width=sx(DISPLAY_WIDTH),
     height=sx(300)
 )
 
@@ -726,7 +734,7 @@ display_title = tk.Label(
     text="PRESS \"Opt.\" ON THE DEVICE AND CHECK IF YOUR TRANSDUCER\n IS MATCHING WHAT IS SHOWN HERE",
     fg="white",
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(18), "bold")
+    font=(DISPLAY_FONT, sf(18), "bold")
 )
 
 display_title.place(x=sx(20), y=sx(10))
@@ -737,36 +745,39 @@ rf_params_label = tk.Label(
     text="RF Parameters: Std.\nExtra Field: Comp. Focus\nPower Limits Enforced: OFF",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(22))
+    font=(DISPLAY_FONT, sf(22))
 )
 rf_params_label.place(x=sx(130), y=sx(70))
+
+WINDOWSPOS_DIFF = 15
+WINDOWSPOS_DIFF = 15 if IS_WINDOWS else 0
 
 selected_transducer_label = tk.Label(
     display_frame_2,
     text="Selected Transducer:",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(22))
+    font=(DISPLAY_FONT, sf(22))
 )
-selected_transducer_label.place(x=sx(100), y=sx(150))
+selected_transducer_label.place(x=sx(100), y=sx(150 + WINDOWSPOS_DIFF))
 
 selected_transducer_value = tk.Label(
     display_frame_2,
     text="DPX-500-058A",
     fg=DISPLAY_YELLOW,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(20))
+    font=(DISPLAY_FONT, sf(20))
 )
-selected_transducer_value.place(x=sx(320), y=sx(150))
+selected_transducer_value.place(x=sx(320 + WINDOWSPOS_DIFF), y=sx(150 + WINDOWSPOS_DIFF))
 
 trigger_mode_label = tk.Label(
     display_frame_2,
     text="Trigger Mode: On",
     fg=DISPLAY_WHITE,
     bg=DISPLAY_BG,
-    font=("Helvetica", sf(22))
+    font=(DISPLAY_FONT, sf(22))
 )
-trigger_mode_label.place(x=sx(180), y=sx(180))
+trigger_mode_label.place(x=sx(180), y=sx(180 + WINDOWSPOS_DIFF))
 
 # Apply visibility
 update_confirm_visibility()
