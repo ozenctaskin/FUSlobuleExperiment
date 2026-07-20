@@ -64,20 +64,20 @@ function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, 
         system(['cd ' fullfile(dataFolder, subjectID, sessionID, 'anat') '; 3dcopy ' [subjectID '_' sessionID '_acq-btoSPACET22x2CAIPI1mmiso_T2w.nii.gz'] ' _tmp_dset; 3drefit -oblique_recenter _tmp_dset+orig; 3drefit -deoblique _tmp_dset+orig; 3dcopy _tmp_dset+orig ' T2pathDeobliqued '; rm _tmp*']);
     end
     
-    % % Insert slice timing info from json to nifti
-    % fprintf('\nAdding slice time information to data. Do not stop the script now or your MRI images get corrupted.\n');
-    % if hasRun1 && hasRun2
-    %     system(['abids_tool.py -add_slice_times -input ' funcDatasetRun1]);
-    %     system(['abids_tool.py -add_slice_times -input ' funcDatasetRun2]);
-    % else
-    %     system(['abids_tool.py -add_slice_times -input ' singleRunData]);
-    % end
+    % Insert slice timing info from json to nifti
+    fprintf('\nAdding slice time information to data. Do not stop the script now or your MRI images get corrupted.\n');
+    if hasRun1 && hasRun2
+        system(['abids_tool.py -add_slice_times -input ' funcDatasetRun1]);
+        system(['abids_tool.py -add_slice_times -input ' funcDatasetRun2]);
+    else
+        system(['abids_tool.py -add_slice_times -input ' singleRunData]);
+    end
 
     % Build and run the preprocessing setup. No blurring. If you need to
     % add it back. It needs to come after combine block. Also add the below
     % info to the main body
     if ~singleRun
-        afni_line = ['cd ' fullfile(dataFolder, subjectID, sessionID) ';' 'afni_proc.py ' ...,
+        afni_line = ['unset LD_LIBRARY_PATH; cd ' fullfile(dataFolder, subjectID, sessionID) ';' 'afni_proc.py ' ...,
         '-subj_id ' subjectID ' ' ...,
         '-copy_anat ' T1pathDeobliqued ' '  ...,  
         '-anat_has_skull yes ' ..., 
@@ -113,7 +113,7 @@ function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, 
     else
         warning('Single run will be used');
         pause(3);
-        afni_line = ['cd ' fullfile(dataFolder, subjectID, sessionID) ';' 'afni_proc.py ' ...,
+        afni_line = ['unset LD_LIBRARY_PATH; cd ' fullfile(dataFolder, subjectID, sessionID) ';' 'afni_proc.py ' ...,
         '-subj_id ' subjectID ' ' ...,
         '-copy_anat ' T1pathDeobliqued ' '  ...,  
         '-anat_has_skull yes ' ..., 
@@ -176,7 +176,7 @@ function preprocessCerebellarFMRI(dataFolder, subjectID, sessionID, stim, blur, 
     end
 
     % Run preprocessing 
-    system(['cd ' fullfile(dataFolder, subjectID, sessionID) '; ' 'tcsh -xef ' procScript ' 2>&1 | tee ' outputReport]);
+    system(['unset LD_LIBRARY_PATH; cd ' fullfile(dataFolder, subjectID, sessionID) '; ' 'tcsh -xef ' procScript ' 2>&1 | tee ' outputReport]);
     
     % Warning about single runs
     if singleRun
