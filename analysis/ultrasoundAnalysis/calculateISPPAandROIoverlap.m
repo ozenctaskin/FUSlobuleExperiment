@@ -1,9 +1,13 @@
-function calculateISPPAandROIoverlap(modellingFolder, atlas)
+function calculateISPPAandROIoverlap(modellingFolder, atlas, m2m_folder)
 
+    % !! Start matlab from terminal 
     % !! Add fieldtrip to path  
     % !! Make sure FSL is installed and can be called from terminal
-    % !! Start matlab from terminal 
-    % !! Do not use huge ROI (e.g. half a hemisphere)
+    %
+    % Note: No spaces are allowed in modelling target names. Get rid of
+    % them, but do not replace with underscores. Just get rid of them using
+    % the code below on a terminal after cd'ing into the modelling folder
+    % for f in *\ *; do mv -- "$f" "${f// /}"; done
     %
     % This function generates intensity maps for each modelling target,
     % calculates overlap with the specified ROI, and calculates average 
@@ -20,11 +24,17 @@ function calculateISPPAandROIoverlap(modellingFolder, atlas)
     %
     %%%%%%
     
+    % Convert atlas from MNI to subject space
+    subjectAtlas = fullfile(m2m_folder, 'subjectAtlas.nii.gz');
+    system(['mni2subject -i ' atlas ' -m ' m2m_folder ' -o ' fullfile(m2m_folder, 'subjectAtlas.nii.gz ') ' --interpolation_order 0']);
+    atlas = subjectAtlas; 
+
     % Set the target ISPPA in water 
     targetInWater = 30;
 
     % Find all files with mat extension and Isppa-5.0W in the name
     files = dir(fullfile(modellingFolder, '*Isppa-5.0W*.mat'));
+    files = files(~startsWith({files.name}, '.'));
     
     % Create a folder in modelling folder to save files
     saveDir = fullfile(modellingFolder, 'ISPPA_measurementFiles');
@@ -38,12 +48,14 @@ function calculateISPPAandROIoverlap(modellingFolder, atlas)
         targetName = extractBefore(files(ii).name, '_');
     
         % Load the mat file containing BabelBrain calculations
-        load(fullfile(modellingFolder, files(ii).name), 'MaterialMap', 'MaterialList', 'RatioLosses', 'Isppa', 'p_map', 'TxSystem')
+        load(fullfile(modellingFolder, files(ii).name), 'MaterialMap', 'MaterialList', 'RatioLosses', 'Isppa', 'p_map')
 
         % Find the Full elastic image for that target. We will only use this 
         % to make sure the generated ISPPA image has the same resolution 
         % and headers
+        TxSystem = 'traj_CTX_500';
         fullElastic = dir(fullfile(modellingFolder, [targetName '_' TxSystem '*PPW_FullElasticSolution_Sub.nii.gz']));
+        fullElastic = fullElastic(~startsWith({fullElastic.name}, '.'));
 
         % Load the full elastic 
         fullElasticLoaded = MRIread(fullfile(modellingFolder, fullElastic.name));
@@ -87,12 +99,13 @@ function calculateISPPAandROIoverlap(modellingFolder, atlas)
             % Resample atlas to the intensity field resolution.
             [~, atlasName, ~] = fileparts(atlas);
             atlasName = strrep(atlasName, '.nii', '');
-            atlasResampled = fullfile(workdir, [atlasName '_resampled_to_target' targetName '.nii.gz']);
-            system(['fslmaths ' atlas ' -bin ' atlasResampled]);
-            system(['flirt -in ' atlas ' -ref ' ISPPAout ' -applyxfm -usesqform -nosearch -interp nearestneighbour -out ' atlasResampled]);
-    
+            targetResampled = fullfile(workdir, [targetName '_resampled_to_target' atlasName '.nii.gz']);
+            % system(['fslmaths ' atlas ' -bin ' atlasResampled]);
+            % system(['flirt -in ' atlas ' -ref ' ISPPAout ' -applyxfm -usesqform -nosearch -interp nearestneighbour -out ' atlasResampled]);
+            system(['flirt -in ' ISPPAout ' -ref ' atlas ' -applyxfm -usesqform -nosearch -interp nearestneighbour -out ' targetResampled]);      
+
             % Load atlas resampled and check the number of ROIs in it
-            atlasLoaded = MRIread(atlasResampled);
+            atlasLoaded = MRIread(atlas);
             saveTemp = atlasLoaded;
             uniqueROI = unique(atlasLoaded.vol);
             uniqueROI(uniqueROI == 0) = [];
@@ -116,9 +129,9 @@ function calculateISPPAandROIoverlap(modellingFolder, atlas)
     
                 % Threshold very small values in the ISPPA beam
                 beamMask = fullfile(workdir, 'beamMask.nii.gz');
-                system(['fslmaths ' ISPPAout ' -thr 0.1 -bin ' beamMask]);
+                system(['fslmaths ' targetResampled ' -thr 0.1 -bin ' beamMask]);
                 ISPPAoutThresh = fullfile(workdir, 'ISPPAthresh.nii.gz');
-                system(['fslmaths ' ISPPAout ' -mul ' beamMask ' ' ISPPAoutThresh]);
+                system(['fslmaths ' targetResampled ' -mul ' beamMask ' ' ISPPAoutThresh]);
 
                 % Get ISSPA within each ROI and append to subject list.
                 % Do 2 calculations (-M and -m), first not including zero
@@ -157,8 +170,7 @@ function calculateISPPAandROIoverlap(modellingFolder, atlas)
             end
 
             % Pop the workdir
-            system(['rm -r ' workdir]);
+            rmdir(workdir, 's');
         end
     end
 end
-
