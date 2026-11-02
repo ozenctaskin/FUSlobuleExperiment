@@ -1,0 +1,26 @@
+function nuisanceCleanup(bidsFolder, subjectID)
+
+% Cleanup fMRI-related stuff. Delete everything in the workdir but T1, T2
+% registered, iw_atl-Anatom_space-SUIT_dseg_u_a_T1_seg1, 
+% iw_atl-NettekovenAsym32_space-SUIT_dseg_u_a_T1_seg1, M3R, beta, tstat
+fmriWorkdir = fullfile(bidsFolder, subjectID, 'ses-01', [subjectID, '.results'], 'cerebellarTarget', 'workdir');
+system(['find ' fmriWorkdir ' -maxdepth 1 -type f ' ...
+        '! -name T1.nii ' ...
+        '! -name T2registeredWarped.nii ' ...
+        '! -name iw_atl-Anatom_space-SUIT_dseg_u_a_T1_seg1.nii ' ...
+        '! -name iw_atl-NettekovenAsym32_space-SUIT_dseg_u_a_T1_seg1.nii ' ...
+        '-delete']);
+
+% Pop the entire ROI intermediate folder
+ROIworkdir = fullfile(bidsFolder, subjectID, 'ses-01', [subjectID, '.ROI'], 'intermediateFiles');
+system(['rm -r ' ROIworkdir]);
+
+% Cleanup diffusion 
+diffusionWorkdir = fullfile(bidsFolder, subjectID, 'ses-01', [subjectID, '.diffusionResults']);
+system(['rm -r ' fullfile(diffusionWorkdir, 'diffusionMetrics', 'intermediateFiles')]);
+
+diffusionPreprocessed = fullfile(diffusionWorkdir, 'preprocessed', 'intermediateFiles');
+system(['find ' diffusionPreprocessed ' -maxdepth 1 -type f ' ...
+        '! -name biasfield.mif ' ...
+        '! -name responseVoxelSelection.mif ' ...
+        '-delete']);
