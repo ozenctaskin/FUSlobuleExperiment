@@ -101,15 +101,29 @@ function prepareROI(dataFolder, subjectID, sessionID, freesurferType)
     end
 
     % Register cerebellar structures to anatomy. Use calculations we make
-    % during the functional analysis
+    % during the functional analysis. Also check if MNI registration was
+    % used or not and decide on adding the MNI in the name if it was
     cerebellarParc = fullfile(intermediateFiles, 'combinedAtlas.nii');
-    cerebellarAffine = fullfile(intermediateFiles, 'Affine_T1_seg1.mat');
-    cerebellarFlow = fullfile(intermediateFiles, 'u_a_T1_seg1.nii');
     system(['cp ' fullfile(currentPath, 'cerebellarAtlas_DiedrichsenNettekoven', 'combinedAtlas.nii') ' ' intermediateFiles]);
-    system(['cp ' fullfile(cerebellarWorkdir, 'Affine_T1_seg1.mat') ' ' intermediateFiles]);
-    system(['cp ' fullfile(cerebellarWorkdir, 'u_a_T1_seg1.nii') ' ' intermediateFiles]);
 
-    cerebellarParc_native = fullfile(intermediateFiles, 'iw_combinedAtlas_u_a_T1_seg1.nii');
+    if isfile(fullfile(cerebellarWorkdir, 'Affine_T1_MNI_seg1.mat'))
+        system(['cp ' fullfile(cerebellarWorkdir, 'Affine_T1_MNI_seg1.mat') ' ' intermediateFiles]);
+        system(['cp ' fullfile(cerebellarWorkdir, 'u_a_T1_MNI_seg1.nii') ' ' intermediateFiles]);
+        cerebellarAffine = fullfile(intermediateFiles, 'Affine_T1_MNI_seg1.mat');
+        cerebellarFlow = fullfile(intermediateFiles, 'u_a_T1_MNI_seg1.nii');        
+    else
+        system(['cp ' fullfile(cerebellarWorkdir, 'Affine_T1_seg1.mat') ' ' intermediateFiles]);
+        system(['cp ' fullfile(cerebellarWorkdir, 'u_a_T1_seg1.nii') ' ' intermediateFiles]);
+        cerebellarAffine = fullfile(intermediateFiles, 'Affine_T1_seg1.mat');
+        cerebellarFlow = fullfile(intermediateFiles, 'u_a_T1_seg1.nii');        
+    end
+
+    if isfile(fullfile(cerebellarWorkdir, 'Affine_T1_MNI_seg1.mat'))
+        cerebellarParc_native = fullfile(intermediateFiles, 'iw_combinedAtlas_u_a_T1_MNI_seg1.nii');
+    else
+        cerebellarParc_native = fullfile(intermediateFiles, 'iw_combinedAtlas_u_a_T1_seg1.nii');
+    end
+
     if ~isfile(cerebellarParc_native)
         job = [];
         job.Affine = {cerebellarAffine};
@@ -117,6 +131,11 @@ function prepareROI(dataFolder, subjectID, sessionID, freesurferType)
         job.resample = {cerebellarParc};
         job.ref = {T1Image};
         suit_reslice_dartel_inv(job);
+    end
+
+    if isfile(fullfile(cerebellarWorkdir, 'Affine_T1_MNI_seg1.mat'))
+        T1toMNI_affine = fullfile(cerebellarWorkdir, 'T1_MNIregistered0GenericAffine.mat');
+        system(['antsApplyTransforms -i ' cerebellarParc_native ' -r ' cerebellarParc_native ' -t [' T1toMNI_affine ',1] -n NearestNeighbor -o ' cerebellarParc_native]);   
     end
     system(['mrcalc -force ' cerebellarParc_native ' -finite ' cerebellarParc_native ' 0.0 -if ' cerebellarParc_native]);
 

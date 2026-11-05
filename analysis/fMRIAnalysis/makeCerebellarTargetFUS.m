@@ -1,4 +1,4 @@
-function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster, handedness)
+function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster, handedness, advancedRegistration)
     
     % This function takes the output of preprocessCerebellarFMRI function
     % and produces cerebellar targets for sonication. Cluster analysis is
@@ -86,7 +86,21 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     T2 = fullfile(workdir, 'T2registeredWarped.nii');
     anatomy = {T1, T2};
     [filePath, fileName, ~] = fileparts(anatomy{1});
-    
+  
+    % If advancedRegistration is passed, do an initial registration to suit
+    % space with ANTs to kick things off
+    if advancedRegistration
+        T1_MNI = fullfile(workdir, 'T1_MNI.nii');     
+        T2_MNI = fullfile(workdir, 'T2_MNI.nii');
+        T1toMNI_affine = fullfile(workdir, 'T1_MNIregistered0GenericAffine.mat');
+        MNIbrain = fullfile(getenv('FSLDIR'), 'data', 'standard', 'MNI152_T1_2mm.nii.gz');
+        system(['antsRegistrationSyN.sh -m ' T1 ' -f ' MNIbrain ' -n 7 -t r -o ' fullfile(workdir, 'T1_MNIregistered')]);
+        system(['antsApplyTransforms -i ' T1 ' -r ' T1 ' -t ' T1toMNI_affine ' -o ' T1_MNI]);
+        system(['antsApplyTransforms -i ' T2 ' -r ' T2 ' -t ' T1toMNI_affine ' -o ' T2_MNI]);
+        anatomy = {T1_MNI, T2_MNI};
+        [filePath, fileName, ~] = fileparts(anatomy{1});
+    end
+
     % Segment cerebellum, and normalize to SUIT atlas coordinates
     suit_isolate_seg(anatomy);
     job.subjND.gray = {fullfile(filePath, [fileName '_seg1.nii'])};
@@ -135,6 +149,19 @@ function makeCerebellarTargetFUS(dataFolder, subjectID, sessionID, outputCluster
     else
         anteriorCerebellumResampled = fullfile(filePath, ['iw_anteriorCerebellumMask_left_u_a_' fileName '_seg1.nii']);
         posteriorCerebellumResampled = fullfile(filePath, ['iw_posteriorCerebellumMask_left_u_a_' fileName '_seg1.nii']);
+    end
+
+    if advancedRegistration
+        system(['antsApplyTransforms -i ' anteriorCerebellumResampled ' -r ' anteriorCerebellumResampled ' -t [' T1toMNI_affine ',1] -n NearestNeighbor -o ' strrep(anteriorCerebellumResampled, '_MNI', '')]);
+        system(['antsApplyTransforms -i ' posteriorCerebellumResampled ' -r ' posteriorCerebellumResampled ' -t [' T1toMNI_affine ',1] -n NearestNeighbor -o ' strrep(posteriorCerebellumResampled, '_MNI', '')]);
+        system(['antsApplyTransforms -i ' atlasNettekovenResampled ' -r ' atlasNettekovenResampled ' -t [' T1toMNI_affine ',1] -n NearestNeighbor -o ' strrep(atlasNettekovenResampled, '_MNI', '')]);
+        system(['antsApplyTransforms -i ' atlasDiedrichsenResampled ' -r ' atlasDiedrichsenResampled ' -t [' T1toMNI_affine ',1] -n NearestNeighbor -o ' strrep(atlasDiedrichsenResampled, '_MNI', '')]);        
+        system(['antsApplyTransforms -i ' cerebellarMaskResampled ' -r ' cerebellarMaskResampled ' -t [' T1toMNI_affine ',1] -n NearestNeighbor -o ' strrep(cerebellarMaskResampled, '_MNI', '')]);   
+        anteriorCerebellumResampled = strrep(anteriorCerebellumResampled, '_MNI', '');
+        posteriorCerebellumResampled = strrep(posteriorCerebellumResampled, '_MNI', '');
+        atlasNettekovenResampled = strrep(atlasNettekovenResampled, '_MNI', '');
+        atlasDiedrichsenResampled = strrep(atlasDiedrichsenResampled, '_MNI', '');
+        cerebellarMaskResampled = strrep(cerebellarMaskResampled, '_MNI', '');    
     end
 
     % Get the left/right motor regions from the Nettekoven atlas
