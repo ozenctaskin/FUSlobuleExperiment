@@ -12,10 +12,6 @@ subjectList = {'L001','L002','L003','L007','L009','L010','LDC01',...
 % Based on the randomization file, find the sham and real sessions.
 randTable = readtable(randomizationFile, 'ReadVariableNames', false);
 
-% Get subject folders
-subjectFolders = dir(fullfile(subjectDataPath, 'L*'));
-subjectFolders = subjectFolders([subjectFolders.isdir]);
-
 % Get the sham and GPi session orders from excel file
 shamVisitFolder = cell(size(subjectList));
 gpiVisitFolder = cell(size(subjectList));
