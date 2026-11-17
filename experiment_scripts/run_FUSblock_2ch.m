@@ -47,7 +47,7 @@ end
 Depth = input('\nEnter the depth measurement from modelling for this region: ');
 %% Connect to TPO
 disp('\nConnecting to TPO....');
-port = 'COM4';
+port = '/dev/tty.usbmodem11101';
 NeuroFUS = serial(port);
 set(NeuroFUS,'BaudRate',9600);
 set(NeuroFUS,'DataBits',8);

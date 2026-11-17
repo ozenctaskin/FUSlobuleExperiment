@@ -46,7 +46,7 @@ Depth = input('\nEnter the depth measurement from modelling for this region: ');
 
 %% Connect to TPO
 disp('\nConnecting to TPO....');
-% NFOpen('COM8',1,1);
+NFOpen('/dev/tty.usbmodem1101',1,1);
 
 % Setup variables 
 fprintf(NeuroFUS,'ENFORCELIMITS=0');
