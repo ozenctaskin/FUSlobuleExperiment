@@ -1,394 +1,294 @@
-close all; clear all; clc
+close all; clear; clc
 
-% Decide what this function will do when run
-setDiagnostics = false; % Saves diagnostic images in the data folder
-baselineCorrect = true; % Corrects baseline
-grandBaseline = false;   % Corrects a grand average baseline. Alternative is FUS corrected with FUS, TMS with TMS
-useClean = true;        % Use the clean data for analysis. Need to run cleanCBITrials first
-plotSubject = false;    % Plots all trials for all subjects in separate figure.
+%% WARNING!! IF YOU DROP TRIALS IN CLEANING, MAKE SURE THE TRIAL AVERAGE ORDER IS PRESERVED
 
-% Specify subject paths. Order needs to be baseline, DN, L5, L8, V1, 0w,
-% 30wFlip
-% dataFolder = '/Volumes/chenshare/Ozzy_Taskin/Experiments/pilot/lobuleExperiment/data/';
-% data.HERO01 = {fullfile(dataFolder, 'HERO_01', 'clean_Baseline_160125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_01', 'clean_DN_160125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_01', 'clean_L5_160125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_01', 'clean_L8_160125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_01', 'clean_V1_160125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_01', 'clean_DN_0wsham_160125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_01', 'clean_DN_30wflip_160125_000.mat')};
-% 
-% data.HERO02 = {fullfile(dataFolder, 'HERO_02', 'clean_X_161224_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_02', 'clean_Dentate_161224_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_02', 'clean_Lobule5_161224_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_02', 'clean_Lobule8_161224_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_02', 'clean_V1_161224_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_02', 'clean_DentateSham0w_161224_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_02', 'clean_DentateSham302_161224_000.mat')};
-% 
-% data.HERO03 = {fullfile(dataFolder, 'HERO_03', 'clean_Baseline_030125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_03', 'clean_DN_030125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_03', 'clean_L5_030125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_03', 'clean_L8_take2_030125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_03', 'clean_V1_030125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_03', 'clean_DN_0w_030125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_03', 'clean_Dn_30wflip_030125_000.mat')}; 
-% 
-% data.HERO04 = {fullfile(dataFolder, 'HERO_04', 'clean_Baseline_220125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_04', 'clean_DN2_220125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_04', 'clean_L5_220125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_04', 'clean_L8_220125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_04', 'clean_V1_220125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_04', 'clean_DN0w_220125_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_04', 'clean_DN_flip30w_220125_000.mat')}; 
-% 
-% data.HERO05 = {fullfile(dataFolder, 'HERO_05', 'clean_baseline_280225_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_05', 'clean_DN_280225_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_05', 'clean_L5_280225_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_05', 'clean_L8_280225_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_05', 'clean_V1_280225_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_05', 'clean_sham0w_280225_000.mat'), ...
-%                fullfile(dataFolder, 'HERO_05', 'clean_shamFlip_280225_000.mat')}; 
+%% Organize data
 
-dataFolder = '/Volumes/chenshare/Ozzy_Taskin/Experiments/TUSLobuleExperiment_And_CBIDiffusion/Data';
+% Subject path and randomization file
+subjectDataPath = '/Users/ozzy/Desktop/FUSlobuleExperiment';
+sumMethod = 'median'; % Or mean
 
-data.L001 =   {fullfile(dataFolder, 'L001', 'EMG', 'baseline_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001', 'EMG', 'DN_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001', 'EMG', 'L5_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001', 'EMG', 'L8_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001', 'EMG', 'V1_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001', 'EMG', 'V0W_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001', 'EMG', 'Flip_300525_000.mat'), ...
-               fullfile(dataFolder, 'L001', 'EMG', 'CBI45_3005_1718_000.mat'), ...
-               fullfile(dataFolder, 'L001', 'EMG', 'CBI55_3005_1737_000.mat')}; 
-               % DROPPED fullfile(dataFolder, 'L001_ses2', 'EMG', 'CBI60_3005_1731_000.mat' 
+% Subject names and randomization key (codes real sessions)
+subjectList = {'L001','L002','L003','L004','L005','L007','L008','L009', ...
+               'L010','LDC01','LDC02','LDC04','LDC05','LDC06','LDC07'}; 
 
-data.L002 =   {fullfile(dataFolder, 'L002', 'EMG', 'Baseline_110725_000.mat'), ...
-               fullfile(dataFolder, 'L002', 'EMG', 'DN_110725_000.mat'), ...
-               fullfile(dataFolder, 'L002', 'EMG', 'L5_110725_000.mat'), ...
-               fullfile(dataFolder, 'L002', 'EMG', 'L8_110725_000.mat'), ...
-               fullfile(dataFolder, 'L002', 'EMG', 'V1_110725_000.mat'), ...
-               fullfile(dataFolder, 'L002', 'EMG', 'V0W-DN_110725_000.mat'), ...
-               fullfile(dataFolder, 'L002', 'EMG', 'Flip_110725_000.mat'), ...
-               fullfile(dataFolder, 'L002', 'EMG', 'SUBJ_CBI65_1107_1501_000.mat'), ...
-               fullfile(dataFolder, 'L002', 'EMG', 'SUBJ_CBI55_1107_1513_000.mat')}; 
+baseline = {};
+L5 = {};
+L8 = {};
+DN = {};
+sham0W = {};
+shamFlip = {};
+CBIfixTS = {};
+CBIfixCBI = {};
+CBIthresholdTS = {};
+CBIthresholdCBI = {};
 
-data.L003 =   {fullfile(dataFolder, 'L003', 'EMG', 'baseline_220725_000.mat'), ...
-               fullfile(dataFolder, 'L003', 'EMG', 'DN_220725_000.mat'), ...
-               fullfile(dataFolder, 'L003', 'EMG', 'L5_220725_000.mat'), ...
-               fullfile(dataFolder, 'L003', 'EMG', 'L8_220725_000.mat'), ...
-               fullfile(dataFolder, 'L003', 'EMG', 'V1_220725_000.mat'), ...
-               fullfile(dataFolder, 'L003', 'EMG', 'V0wL8_220725_000.mat'), ...
-               fullfile(dataFolder, 'L003', 'EMG', 'L5Flip_220725_000.mat'), ...
-               fullfile(dataFolder, 'L003', 'EMG', 'SUBJ_CBI65_2207_1621_000.mat'), ...
-               fullfile(dataFolder, 'L003', 'EMG', 'SUBJ_CBI55_2207_1621_000.mat')}; 
+% Loop through subjects
+for i = 1:numel(subjectList)
+    subjectFolder = fullfile(subjectDataPath, subjectList{i}, 'EMG');
+    baseline{end+1} = processSubjectData(subjectFolder, 'baseline');
+    L5{end+1} = processSubjectData(subjectFolder, 'L5');
+    L8{end+1} = processSubjectData(subjectFolder, 'L8');
+    DN{end+1} = processSubjectData(subjectFolder, 'DN');
+    sham0W{end+1} = processSubjectData(subjectFolder, 'sham0W');
+    shamFlip{end+1} = processSubjectData(subjectFolder, 'shamFlip');
+    [CBIfixTS{end+1}, CBIfixCBI{end+1}] = ...
+        processSubjectData(subjectFolder, 'CBIfix');
+    [CBIthresholdTS{end+1}, CBIthresholdCBI{end+1}] = ...
+        processSubjectData(subjectFolder, 'CBIthreshold');
+end
 
-data.L004 =   {fullfile(dataFolder, 'L004', 'EMG', 'baseline_030725_000.mat'), ...
-               fullfile(dataFolder, 'L004', 'EMG', 'dentate_030725_000.mat'), ...
-               fullfile(dataFolder, 'L004', 'EMG', 'L5p2_030725_000.mat'), ...
-               fullfile(dataFolder, 'L004', 'EMG', 'L8_030725_000.mat'), ...
-               fullfile(dataFolder, 'L004', 'EMG', 'V1_030725_000.mat'), ...
-               fullfile(dataFolder, 'L004', 'EMG', 'V0w_030725_000.mat'), ...
-               fullfile(dataFolder, 'L004', 'EMG', 'Flip_030725_000.mat'), ...
-               fullfile(dataFolder, 'L004', 'EMG', 'NA'), ...
-               fullfile(dataFolder, 'L004', 'EMG', 'NA')};
+%% Plot temporal changes (median across subjects)
+conditions = {'DN', 'L8', 'L5'};
 
-data.L005 =   {fullfile(dataFolder, 'L005', 'EMG', 'baseline33_020925_000.mat'), ...
-               fullfile(dataFolder, 'L005', 'EMG', 'DN_020925_000.mat'), ...
-               fullfile(dataFolder, 'L005', 'EMG', 'L5_020925_000.mat'), ...
-               fullfile(dataFolder, 'L005', 'EMG', 'L8_020925_000.mat'), ...
-               fullfile(dataFolder, 'L005', 'EMG', 'V1_020925_000.mat'), ...
-               fullfile(dataFolder, 'L005', 'EMG', 'V0W_L8_020925_000.mat'), ...
-               fullfile(dataFolder, 'L005', 'EMG', 'Flip_020925_000.mat'), ...
-               fullfile(dataFolder, 'L005', 'EMG', 'SUBJ_CBI65_0209_1640_000'), ...
-               fullfile(dataFolder, 'L005', 'EMG', 'SUBJ_CBI55_0209_1654_000.mat')};
+for i = 1:numel(conditions)
+    data = eval(conditions{i});
 
-% data.L006 =   {fullfile(dataFolder, 'L006', 'EMG', 'baseline_220925_000.mat'), ...
-%                fullfile(dataFolder, 'L006', 'EMG', 'DN_220925_000.mat'), ...
-%                fullfile(dataFolder, 'L006', 'EMG', 'L5_220925_000.mat'), ...
-%                fullfile(dataFolder, 'L006', 'EMG', 'L8_220925_000.mat'), ...
-%                fullfile(dataFolder, 'L006', 'EMG', 'V1_220925_000.mat'), ...
-%                fullfile(dataFolder, 'L006', 'EMG', 'V0w_220925_000.mat'), ...
-%                fullfile(dataFolder, 'L006', 'EMG', 'flip_220925_000.mat'), ...
-%                fullfile(dataFolder, 'L006', 'EMG', 'NA'), ...
-%                fullfile(dataFolder, 'L006', 'EMG', 'NA')};
+    % Normalize each subject's trials to their baseline median
+    data = cellfun(@(x,b) x ./ median(b, 'omitnan'), ...
+        data, baseline, 'UniformOutput', false);
 
-data.L007 =   {fullfile(dataFolder, 'L007', 'EMG', 'baseline_260925_000.mat'), ...
-               fullfile(dataFolder, 'L007', 'EMG', 'DN_260925_000.mat'), ...
-               fullfile(dataFolder, 'L007', 'EMG', 'L5_260925_000.mat'), ...
-               fullfile(dataFolder, 'L007', 'EMG', 'L8_2_260925_000.mat'), ...
-               fullfile(dataFolder, 'L007', 'EMG', 'V1_260925_000.mat'), ...
-               fullfile(dataFolder, 'L007', 'EMG', 'V0wL8_260925_000.mat'), ...
-               fullfile(dataFolder, 'L007', 'EMG', 'Flip_260925_000.mat'), ...
-               fullfile(dataFolder, 'L007', 'EMG', 'SUBJ_CBI65_2609_1830_000.mat'), ...
-               fullfile(dataFolder, 'L007', 'EMG', 'SUBJ_CBI55_2609_1837_000.mat')};
+    maxTrials = max(cellfun(@numel, data));
+    M = cell2mat(cellfun(@(x) ...
+        [x(:)' nan(1, maxTrials-numel(x))], ...
+        data(:), 'UniformOutput', false));
 
-data.L008 =   {fullfile(dataFolder, 'L008', 'EMG', 'baseline_221025_000.mat'), ...
-               fullfile(dataFolder, 'L008', 'EMG', 'DN_221025_000.mat'), ...
-               fullfile(dataFolder, 'L008', 'EMG', 'L5_221025_000.mat'), ...
-               fullfile(dataFolder, 'L008', 'EMG', 'L8_221025_000.mat'), ...
-               fullfile(dataFolder, 'L008', 'EMG', 'V1_221025_000.mat'), ...
-               fullfile(dataFolder, 'L008', 'EMG', 'V0W_L5_221025_000.mat'), ...
-               fullfile(dataFolder, 'L008', 'EMG', 'Flip_DN_221025_000.mat'), ...
-               fullfile(dataFolder, 'L008', 'EMG', 'SUBJ65_CBI_2210_1548_000.mat'), ...
-               fullfile(dataFolder, 'L008', 'EMG', 'SUBJ55_CBI_2210_1556_000.mat')};
+    % Median and interquartile range across subjects
+    groupMedian = median(M, 1, 'omitnan');
+    Q1 = prctile(M, 25, 1);
+    Q3 = prctile(M, 75, 1);
 
-data.L010 =   {fullfile(dataFolder, 'L010', 'EMG', 'baseline_200526_000.mat'), ...
-               fullfile(dataFolder, 'L010', 'EMG', 'Dentate_200526_000.mat'), ...
-               fullfile(dataFolder, 'L010', 'EMG', 'L5_200526_000.mat'), ...
-               fullfile(dataFolder, 'L010', 'EMG', 'L8_200526_000.mat'), ...
-               fullfile(dataFolder, 'L010', 'EMG', 'V1_200526_000.mat'), ...
-               fullfile(dataFolder, 'L010', 'EMG', 'V0w_200526_000.mat'), ...
-               fullfile(dataFolder, 'L010', 'EMG', 'Flip_200526_000.mat'), ...
-               fullfile(dataFolder, 'L010', 'EMG', 'SUBJ_CBI_65_2005_1703_000.mat'), ...
-               fullfile(dataFolder, 'L010', 'EMG', 'SUBJ_CBI_55_2005_1658_000.mat')};
+    figure('Color', 'w');
+    errorbar(1:maxTrials, groupMedian, ...
+        groupMedian-Q1, Q3-groupMedian, ...
+        '-o', 'Color', [0.12 0.35 0.65], 'LineWidth', 1.5);
 
-data.LDC01 =   {fullfile(dataFolder, 'LDC01', 'EMG', 'baseline_121125_000.mat'), ...
-               fullfile(dataFolder, 'LDC01', 'EMG', 'DN_121125_000.mat'), ...
-               fullfile(dataFolder, 'LDC01', 'EMG', 'L5_121125_000.mat'), ...
-               fullfile(dataFolder, 'LDC01', 'EMG', 'L8_121125_000.mat'), ...
-               fullfile(dataFolder, 'LDC01', 'EMG', 'V1_121125_000.mat'), ...
-               fullfile(dataFolder, 'LDC01', 'EMG', 'V0WL8_121125_000.mat'), ...
-               fullfile(dataFolder, 'LDC01', 'EMG', 'Flip_121125_000.mat'), ...
-               fullfile(dataFolder, 'LDC01', 'EMG', 'SUBJ_CBI65_1211_1629_000.mat'), ...
-               fullfile(dataFolder, 'LDC01', 'EMG', 'SUBJ_CBI55_1211_1638_000.mat')};
+    yline(1, '--', 'Color', [0.5 0.5 0.5]);
 
-% Get fieldnames and empty cell for all subject peaks so we can do some
-% averaging at the end.
-subjectIDs = fieldnames(data);
-allSubjectPeaks = {};
-% Set labels and colors. WARNING the word baseline needs to be used for
-% baseline labels, as the scripts look for it to find the baseline data
-labels = {'baseline','dentate','lobule 5','lobule 8','sham V1','sham 0w','sham 30w','baseline-1','CBI-1','baseline-2','CBI-2'};
-colors = {'r', 'g', 'b', 'c', 'm', 'y', 'k', [0.8500, 0.3250, 0.0980], [0.8500, 0.3250, 0.0980], [0.4940, 0.1840, 0.5560], [0.4940, 0.1840, 0.5560]};
-% Loop through sujects
-for sub = 1:length(subjectIDs)
-    % Get the path of the subject from the first input and create a folder
-    % for diagnostic images if asked 
-    if setDiagnostics
-        dataPath = fileparts(data.(subjectIDs{sub}){1});
-        if ~isfolder(fullfile(dataPath, 'diagnostics'))
-            mkdir(fullfile(dataPath, 'diagnostics'))
+    title(conditions{i});
+    xlabel('Trial number');
+    ylabel('Normalized MEP amplitude (ratio)');
+    grid on;
+
+    exportgraphics(gcf, fullfile(subjectDataPath, ...
+        ['Trial_Median_' conditions{i} '.png']), 'Resolution', 300);
+end
+
+%% Plot inhibition for all conditions
+conditions = {DN, L8, L5, sham0W, shamFlip, ...
+              CBIfixCBI, CBIthresholdCBI};
+
+controls = {baseline, baseline, baseline, baseline, baseline, ...
+            CBIfixTS, CBIthresholdTS};
+
+labels = {'DN', 'L8', 'L5', 'Sham 0W', 'Sham Flip', ...
+          'CBI Fix', 'CBI Threshold'};
+
+normalized = nan(numel(subjectList), numel(conditions));
+
+for c = 1:numel(conditions)
+    for s = 1:numel(subjectList)
+
+        response = median(conditions{c}{s}, 'omitnan');
+        control = median(controls{c}{s}, 'omitnan');
+
+        if isfinite(control) && control > 0
+            normalized(s,c) = response / control;
         end
     end
-    % Load data into cells
-    if useClean
-        data.(subjectIDs{sub}) = cellfun(@(p) fullfile(fileparts(p), ['clean_' extractAfter(p, [filesep 'EMG' filesep])]), data.(subjectIDs{sub}), 'UniformOutput', false);
+end
+
+figure('Color', 'w', 'Position', [200 200 1050 500]);
+boxplot(normalized, 'Labels', labels, ...
+    'Colors', [0.12 0.35 0.65], ...
+    'Widths', 0.55, ...
+    'Symbol', '');
+boxes = findobj(gca, 'Tag', 'Box');
+for k = 1:numel(boxes)
+    patch(get(boxes(k), 'XData'), get(boxes(k), 'YData'), ...
+        [0.35 0.60 0.85], 'FaceAlpha', 0.65, ...
+        'EdgeColor', [0.12 0.35 0.65]);
+end
+
+% Overlay individual subjects
+hold on;
+for c = 1:size(normalized, 2)
+    y = normalized(:,c);
+    scatter(c + 0.12*(rand(size(y))-0.5), y, ...
+        22, [0.10 0.25 0.45], 'filled', ...
+        'MarkerFaceAlpha', 0.6);
+end
+
+yline(1, '--', '', 'Color', [0.4 0.4 0.4], ...
+    'LineWidth', 1.2);
+ylabel('Normalized MEP amplitude (ratio)', 'FontSize', 12);
+title('Normalized MEP amplitudes', 'FontSize', 15, ...
+    'FontWeight', 'bold');
+
+set(gca, 'FontSize', 11, 'LineWidth', 1, ...
+    'Box', 'off', 'TickDir', 'out');
+
+grid on;
+set(gca, 'GridAlpha', 0.12);
+
+exportgraphics(gcf, fullfile(subjectDataPath, 'Normalized_MEP_Boxplot.png'), ...
+    'Resolution', 300);
+
+%% CBI correlations
+figure('Color', 'w', 'Position', [200 200 1200 400]);
+
+for i = 1:3
+    x = normalized(:,6);  % CBI Fix
+    y = normalized(:,i);  % DN, L8, L5
+
+    valid = isfinite(x) & isfinite(y);
+    [r, p] = corr(x(valid), y(valid), 'Type', 'Pearson');
+
+    subplot(1,3,i);
+    scatter(x(valid), y(valid), 55, [0.25 0.50 0.80], 'filled');
+    hold on;
+
+    if sum(valid) >= 3
+        coeff = polyfit(x(valid), y(valid), 1);
+        xx = linspace(min(x(valid)), max(x(valid)), 100);
+        plot(xx, polyval(coeff, xx), 'Color', [0.1 0.3 0.6], ...
+            'LineWidth', 1.8);
+    end
+
+    xlabel('CBI Fix (CBI / TS)');
+    ylabel([labels{i} ' / Baseline']);
+    title(sprintf('%s: r = %.2f, p = %.3f', labels{i}, r, p));
+    grid on;
+    set(gca, 'Box', 'off', 'FontSize', 11, 'TickDir', 'out');
+end
+sgtitle('CBI Fix vs FUS responses');
+exportgraphics(gcf, fullfile(subjectDataPath, ...
+    'CBIfix_FUS_Correlations.png'), 'Resolution', 300);
+
+%% Helper function to load and process data
+function [data, CBIdata] = processSubjectData(sessionFolder, target)
+
+    % Identify CBI recordings and select MEP window
+    isCBI = startsWith(target, 'CBI');
+    if isCBI
+        MEPframes = 1065:1250;
     else
-        data.(subjectIDs{sub}) = cellfun(@(p) fullfile(fileparts(p), [extractAfter(p, [filesep 'EMG' filesep])]), data.(subjectIDs{sub}), 'UniformOutput', false);
-    end        
-    dataLoaded = cellfun(@(p) load_wave_data(p, useClean), data.(subjectIDs{sub}), 'UniformOutput', false);
-    % Get an empty cell for subject peaks
-    subjectPeaks = {};
-    % Loop through trials, load, and get peak to peak
-    peakIndex = 0;
-    for ii = 1:length(dataLoaded)
-        dataset = dataLoaded{ii};
-        if ii < 8
-            peaks = peak2peak(reshape(dataset.values(2800:3100,1,:), [], size(dataset.values,3)));
-            testPeaks = [];
-            condPeaks = peaks;
-        else
-            peaks = peak2peak(reshape(dataset.values(1025:end,1,:), [], size(dataset.values,3)));
-            testPeaks = peaks(find([dataset.frameinfo.state] == 1));
-            condPeaks = peaks(find([dataset.frameinfo.state] == 2));
-        end
-        % Here we do diagnostic plotting if asked
-        if setDiagnostics
-            plotLabels = labels;
-            plotLabels(contains(plotLabels, 'baseline-')) = []; % drop baseline labels cuz we are plotting the entire CBI
-            f = figure('visible','off');
-            sgtitle([subjectIDs{sub} ' ' plotLabels{ii}])
-            for plt = 1:size(dataset.values, 3)
-                if ii < 8
-                    subplot(4,5,plt)
-                    plot(dataset.values(2800:3100,1,plt))
-                else
-                    subplot(4,6,plt)
-                    plot(dataset.values(1025:end,1,plt))
-                end
-            end
-            saveas(f,fullfile(dataPath, 'diagnostics', [subjectIDs{sub} '_' plotLabels{ii}]),'jpg')
-        end
-        % Check if the vector has less than 20 elements, if so add NaNs to
-        % make it 20
-        if length(condPeaks) < 20
-            needNaNs = 20 - length(condPeaks);
-            condPeaks(length(condPeaks)+1:20) = NaN;
-        end
-        if ~isempty(testPeaks)
-            if length(testPeaks) < 20
-                needNaNs = 20 - length(testPeaks);
-                testPeaks(length(testPeaks)+1:20) = NaN;
+        MEPframes = 2850:2980;
+    end
+    
+    % Find condition files
+    if strcmp(target, 'CBIfix')
+        files = dir(fullfile(sessionFolder, 'clean_CBI55_*.mat'));
+    elseif strcmp(target, 'CBIthreshold')
+        files = dir(fullfile(sessionFolder, 'clean_CBI*_*.mat'));
+    
+        % Keep only numeric intensities other than 55
+        isThreshold = false(1, numel(files));
+        for k = 1:numel(files)
+            tokens = regexp(files(k).name, ...
+                '^clean_CBI(\d+)_.*\.mat$', 'tokens', 'once');
+            if ~isempty(tokens)
+                isThreshold(k) = str2double(tokens{1}) ~= 55;
             end
         end
-
-        % Append to subjectPeaks
-        if ii < 8
-            peakIndex = peakIndex + 1;
-            subjectPeaks{peakIndex} = condPeaks';
-        else
-            peakIndex = peakIndex + 1;
-            subjectPeaks{peakIndex} = testPeaks';
-            peakIndex = peakIndex + 1;
-            subjectPeaks{peakIndex} = condPeaks';
-        end
-    end
-    % Convert cell to matrix 
-    subjectPeaks = cell2mat(subjectPeaks);
-    % Plot if requested 
-    if plotSubject
-        % Do a box plot for the values 
-        figure('Position', [100, 100, 800, 600])
-        boxplot(subjectPeaks, labels(1:size(subjectPeaks, 2)), 'Symbol', '')
-        ylim([0 6])
-        title(subjectIDs{sub})
-        hold on
-        % Add scatter points next to each boxplot
-        x = repmat(1:size(subjectPeaks, 2), size(subjectPeaks, 1), 1); % X-coordinates
-        x = x + 0.1 * (rand(size(x)) - 0.5); % Add a small random jitter to spread points
-        for sct = 1:size(x,2)
-            scatter(x(:,sct), subjectPeaks(:,sct), 'filled', 'MarkerFaceAlpha', 0.6, 'MarkerFaceColor', colors{sct})
-        end
-        hold off 
-    end
-    allSubjectPeaks{sub} = subjectPeaks;
-end
-
-% Plot dentate, lobule 5 and 8 increase
-figure;
-title('Subject average peak2peak change with each trial')
-subplot(1,3,1)
-plot(nanmedian(cell2mat(cellfun(@(x) x(:,2), allSubjectPeaks, 'UniformOutput', false)), 2), 'b')
-legend('Dentate Temporal')
-xlabel('Trials')
-ylabel('Dentate peak2paek')
-subplot(1,3,2)
-plot(nanmedian(cell2mat(cellfun(@(x) x(:,3), allSubjectPeaks, 'UniformOutput', false)), 2), 'r')
-legend('Lobule 5 Temporal')
-xlabel('Trials')
-ylabel('Lobule 5 peak2paek')
-subplot(1,3,3)
-plot(nanmedian(cell2mat(cellfun(@(x) x(:,4), allSubjectPeaks, 'UniformOutput', false)), 2), 'g')
-legend('Lobule 8 Temporal')
-xlabel('Trials')
-ylabel('Lobule 8 peak2paek')
-legend('Lobule 8 Temporal')
-
-% Loop through all subject peak calculations and do averaging. Also do
-% baseline correction if requested
-baselineVals = find(contains(labels, 'baseline'));
-averageSubjectPeaks = {};
-rawAverageSubjectPeaks = [];
-for ii = 1:size(allSubjectPeaks,2)
-    % Average all trials
-    averageSubjectPeaks{ii} = nanmedian(allSubjectPeaks{ii});
-    rawAverageSubjectPeaks(ii,:) = averageSubjectPeaks{ii};
-    if baselineCorrect
-        if grandBaseline
-            % Find vectors based on "baseline" keyword in the labels cell.
-            baselines = allSubjectPeaks{ii}(:,baselineVals);
-            % Flatten and average baseline trials 
-            gBaseline = nanmean(baselines(:));
-            % Replace the first item on the cell (FUS baseline) with the
-            % grand baseline. Drop the rest of the baseline measurements
-            % from the averagePeaks.
-            averageSubjectPeaks{ii}(1) = gBaseline; 
-            averageSubjectPeaks{ii}(baselineVals(2:end)) = [];
-            % Now normalize each value with the baseline
-            averageSubjectPeaks{ii} = averageSubjectPeaks{ii}./averageSubjectPeaks{ii}(1);
-            averageSubjectPeaks{ii}(1) = [];
-        else
-            FUS = averageSubjectPeaks{ii}(1:7);
-            FUSbaselineCorrected = FUS./FUS(1);
-            FUSbaselineCorrected(1) = [];
-            TMS = averageSubjectPeaks{ii}(8:end);
-            TMSbaselineCorrected = TMS(2:2:end) ./ TMS(1:2:end);
-            averageSubjectPeaks{ii} = [];
-            averageSubjectPeaks{ii} = [FUSbaselineCorrected, TMSbaselineCorrected];
-        end
-    end
-end
-
-% If baseline correct is passed, remove the baseline labels.
-if baselineCorrect
-    labels(baselineVals) = [];
-end
-
-% Convert peaks to matlab
-subjectMat = cell2mat(averageSubjectPeaks');
-
-% Do a boxplot
-figure('Position', [100, 100, 800, 600])
-boxplot(subjectMat, labels, 'Symbol', '')
-hold on
-h = findobj(gca, 'Tag', 'Box'); 
-for j = 1:length(h)
-    patch(get(h(j), 'XData'), get(h(j), 'YData'), [0.3010 0.7450 0.9330], 'FaceAlpha', 0.5); % Fill boxes with color
-end
-
-% Scatter plot with jitter
-jitterAmount = 0.05;  % You can increase this if needed
-for ii = 1:size(subjectMat,2) 
-    for jj = 1:numel(fieldnames(data))  
-        xJittered = ii + (rand()*2 - 1) * jitterAmount;  % adds uniform jitter between -jitterAmount and +jitterAmount
-        scatter(xJittered, subjectMat(jj,ii), 50, 'k', 'filled'); 
-    end
-end
-
-% Set plot properties
-if baselineCorrect
-    xlim([0 10]);
-    ylim([0 6]);
-    yline(1, 'r--', 'LineWidth', 1.5);
-    if grandBaseline
-        ylabel('Grand baseline corrected MEP');
+        files = files(isThreshold);
     else
-        ylabel('Local baseline corrected MEP');
+        files = dir(fullfile(sessionFolder, ...
+            ['clean_' target '*.mat']));
     end
-else
-    ylim([0 3]);
-    ylabel('MEP amplitude (mV)')
-end
-xticklabels(labels);
-set(gca, 'FontSize', 25) 
-ax = gca;
-ax.Box = 'off';
-title('Subject results - Averaged Peaks');
-
-% Save a sheet for future anayses. Only save if grandBaseline is used.
-if baselineCorrect
-    sheetLabels = [{'subject'}, labels];
-    subjects = fieldnames(data);
-    % Create table
-    T = array2table(subjectMat, 'VariableNames', sheetLabels(2:end));
-    T = addvars(T, subjects, 'Before', 1, 'NewVariableNames', sheetLabels{1});
-    if ~grandBaseline
-        writetable(T, fullfile(dataFolder, 'subject_results_individualBaseline.xlsx'))
-    else
-        writetable(T, fullfile(dataFolder, 'subject_results_grandBaseline.xlsx'))
-    end
-end
-
-% Helper function to load data in without sub variable names
-function data = load_wave_data(filename, useClean)
-    testName = string(split(filename, '/')); testName = testName{end};
-    if ~strcmp(testName, 'NA') && ~strcmp(testName, 'clean_NA')
-        vars = whos('-file', filename);
-        if useClean
-            idx = find(contains({vars.name}, 'data'), 1);
+    
+    % Handle missing files
+    if isempty(files)
+        if isCBI
+            warning('Missing %s in %s', target, sessionFolder);
+            % 12 trials per state
+            data = nan(1, 12);
+            CBIdata = nan(1, 12);
+            return;
         else
-            idx = find(contains({vars.name}, '_wave_data'), 1);
+            error('Missing %s in %s', target, sessionFolder);
         end
-        if isempty(idx)
-            error(['No variable with "_wave_data" in file: ' filename]);
-        end
-        varname = vars(idx).name;
-        tmp = load(filename, varname);
-        data = tmp.(varname);
-    else
-        data.frameinfo.state = ones(20,1);
-        data.frameinfo.state(11:end) = 2;
-        data.values = nan(4000,2,20);
+    elseif numel(files) > 1
+        error('Multiple files found for %s in %s', ...
+            target, sessionFolder);
     end
+    file = fullfile(sessionFolder, files(1).name);
+    
+    %Load waveform data
+    vars = whos('-file', file);
+    idx = find(contains({vars.name}, '_wave_data'));
+    
+    if numel(idx) ~= 1
+        error('Expected one waveform variable in %s', file);
+    end
+    
+    fileLoaded = load(file, vars(idx).name);
+    waveData = fileLoaded.(vars(idx).name);
+    
+    % Extract MEP traces
+    if size(waveData.values, 1) < MEPframes(end)
+        error('MEP window exceeds recording length in %s', file);
+    end
+    
+    allData = reshape(waveData.values(MEPframes, 1, :), ...
+        numel(MEPframes), []);
+    
+    % Calculate peak-to-peak amplitude for each trial
+    allP2P = peak2peak(allData);
+    
+    %Separate CBI states and plot waveform
+    if isCBI
+
+        % Extract trial states
+        states = [waveData.frameinfo.state];
+        if numel(states) ~= size(allData, 2)
+            error('Number of states does not match trials in %s', file);
+        end
+    
+        % Separate waveforms by state
+        TStraces = allData(:, states == 1);
+        CBItraces = allData(:, states == 2);
+    
+        % Return peak-to-peak amplitudes
+        data = allP2P(states == 1);
+        CBIdata = allP2P(states == 2);
+    
+        % Plot all cut traces separately by state
+        fig = figure('Visible', 'off');
+        subplot(1, 2, 1);
+        plot(MEPframes, TStraces);
+        title('TS');
+        xlabel('Sample');
+        ylabel('EMG (mV)');
+        grid on;
+    
+        subplot(1, 2, 2);
+        plot(MEPframes, CBItraces);
+        title('CBI');
+        xlabel('Sample');
+        ylabel('EMG (mV)');
+        grid on;
+    
+    else
+    
+        % Return peak-to-peak amplitudes
+        data = allP2P;
+        CBIdata = [];
+    
+        % Plot all individual cut traces
+        fig = figure('Visible', 'off');
+    
+        plot(MEPframes, allData);
+        title(target, 'Interpreter', 'none');
+        xlabel('Sample');
+        ylabel('EMG (mV)');
+        grid on;
+    end
+    
+    %Save waveform plot
+    saveas(fig, fullfile(sessionFolder, ...
+        ['plot_' vars(idx).name '.png']));
+    
+    close(fig);
+
 end
