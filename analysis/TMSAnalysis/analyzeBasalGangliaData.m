@@ -144,7 +144,7 @@ function avgP2P = processSubjectData(sessionFolder, target, condition, sumMethod
     % sumMethod: session mean or median
 
     % Define where in the time we are looking for the MEP
-    MEPframes = (2850:2980);
+    MEPframes = (2800:3000);
 
     % Find the condition file in the directory
     files = dir(fullfile(sessionFolder, ['clean_' target '_' condition '*.mat']));
