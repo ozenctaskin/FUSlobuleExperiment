@@ -18,6 +18,7 @@ L8 = {};
 DN = {};
 sham0W = {};
 shamFlip = {};
+V1 = {};
 CBIfixTS = {};
 CBIfixCBI = {};
 CBIthresholdTS = {};
@@ -32,56 +33,22 @@ for i = 1:numel(subjectList)
     DN{end+1} = processSubjectData(subjectFolder, 'DN');
     sham0W{end+1} = processSubjectData(subjectFolder, 'sham0W');
     shamFlip{end+1} = processSubjectData(subjectFolder, 'shamFlip');
+    V1{end+1} = processSubjectData(subjectFolder, 'V1');
     [CBIfixTS{end+1}, CBIfixCBI{end+1}] = ...
         processSubjectData(subjectFolder, 'CBIfix');
     [CBIthresholdTS{end+1}, CBIthresholdCBI{end+1}] = ...
         processSubjectData(subjectFolder, 'CBIthreshold');
 end
 
-%% Plot temporal changes (median across subjects)
-conditions = {'DN', 'L8', 'L5'};
-
-for i = 1:numel(conditions)
-    data = eval(conditions{i});
-
-    % Normalize each subject's trials to their baseline median
-    data = cellfun(@(x,b) x ./ median(b, 'omitnan'), ...
-        data, baseline, 'UniformOutput', false);
-
-    maxTrials = max(cellfun(@numel, data));
-    M = cell2mat(cellfun(@(x) ...
-        [x(:)' nan(1, maxTrials-numel(x))], ...
-        data(:), 'UniformOutput', false));
-
-    % Median and interquartile range across subjects
-    groupMedian = median(M, 1, 'omitnan');
-    Q1 = prctile(M, 25, 1);
-    Q3 = prctile(M, 75, 1);
-
-    figure('Color', 'w');
-    errorbar(1:maxTrials, groupMedian, ...
-        groupMedian-Q1, Q3-groupMedian, ...
-        '-o', 'Color', [0.12 0.35 0.65], 'LineWidth', 1.5);
-
-    yline(1, '--', 'Color', [0.5 0.5 0.5]);
-
-    title(conditions{i});
-    xlabel('Trial number');
-    ylabel('Normalized MEP amplitude (ratio)');
-    grid on;
-
-    exportgraphics(gcf, fullfile(subjectDataPath, ...
-        ['Trial_Median_' conditions{i} '.png']), 'Resolution', 300);
-end
 
 %% Plot inhibition for all conditions
-conditions = {DN, L8, L5, sham0W, shamFlip, ...
+conditions = {DN, L8, L5, sham0W, shamFlip, V1, ...
               CBIfixCBI, CBIthresholdCBI};
 
 controls = {baseline, baseline, baseline, baseline, baseline, ...
-            CBIfixTS, CBIthresholdTS};
+            baseline, CBIfixTS, CBIthresholdTS};
 
-labels = {'DN', 'L8', 'L5', 'Sham 0W', 'Sham Flip', ...
+labels = {'DN', 'L8', 'L5', 'Sham 0W', 'Sham Flip', 'Sham V1', ...
           'CBI Fix', 'CBI Threshold'};
 
 normalized = nan(numel(subjectList), numel(conditions));
@@ -134,11 +101,96 @@ set(gca, 'GridAlpha', 0.12);
 exportgraphics(gcf, fullfile(subjectDataPath, 'Normalized_MEP_Boxplot.png'), ...
     'Resolution', 300);
 
+%% Plot temporal changes - compact 3-panel figure
+
+conditions = {'DN', 'L8', 'L5'};
+
+fig = figure('Color', 'w', ...
+    'Units', 'pixels', ...
+    'Position', [100 100 1200 350]);
+
+t = tiledlayout(fig, 1, 3, ...
+    'TileSpacing', 'compact', ...
+    'Padding', 'compact');
+
+% Store axes for consistent Y limits
+ax = gobjects(1, 3);
+
+for i = 1:3
+
+    data = eval(conditions{i});
+
+    % Normalize to each subject's baseline median
+    data = cellfun(@(x,b) x ./ median(b, 'omitnan'), ...
+        data, baseline, 'UniformOutput', false);
+
+    maxTrials = max(cellfun(@numel, data));
+
+    M = cell2mat(cellfun(@(x) ...
+        [x(:)' nan(1, maxTrials-numel(x))], ...
+        data(:), 'UniformOutput', false));
+
+    groupMedian = median(M, 1, 'omitnan');
+    Q1 = prctile(M, 25, 1);
+    Q3 = prctile(M, 75, 1);
+
+    ax(i) = nexttile(t);
+    hold(ax(i), 'on');
+
+    errorbar(1:maxTrials, groupMedian, ...
+        groupMedian-Q1, Q3-groupMedian, ...
+        '-o', ...
+        'Color', [0.12 0.35 0.65], ...
+        'MarkerFaceColor', [0.12 0.35 0.65], ...
+        'LineWidth', 1.4, ...
+        'MarkerSize', 4, ...
+        'CapSize', 3);
+
+    yline(1, '--', ...
+        'Color', [0.5 0.5 0.5], ...
+        'LineWidth', 1);
+
+    title(conditions{i}, 'FontSize', 12, ...
+        'FontWeight', 'bold');
+
+    xlabel('Trial number');
+
+    % Only first panel needs Y label
+    if i == 1
+        ylabel('Normalized MEP amplitude');
+    end
+
+    xlim([0.5 maxTrials+0.5]);
+
+    grid on;
+    set(gca, 'FontSize', 10, ...
+        'Box', 'off', ...
+        'TickDir', 'out', ...
+        'GridAlpha', 0.12);
+
+end
+
+% Match Y-axis scales across all panels
+linkaxes(ax, 'y');
+
+% Compact title
+title(t, 'Temporal MEP responses', ...
+    'FontSize', 14, 'FontWeight', 'bold');
+
+% Export at fixed physical dimensions
+set(fig, 'PaperUnits', 'inches');
+set(fig, 'PaperPosition', [0 0 12 3.5]);
+set(fig, 'PaperSize', [12 3.5]);
+
+exportgraphics(fig, fullfile(subjectDataPath, ...
+    'Temporal_MEP_Combined.png'), ...
+    'Resolution', 300);
+
 %% CBI correlations
 figure('Color', 'w', 'Position', [200 200 1200 400]);
 
 for i = 1:3
-    x = normalized(:,6);  % CBI Fix
+    x = normalized(:,7);  % CBI Fix
     y = normalized(:,i);  % DN, L8, L5
 
     valid = isfinite(x) & isfinite(y);
@@ -164,6 +216,106 @@ end
 sgtitle('CBI Fix vs FUS responses');
 exportgraphics(gcf, fullfile(subjectDataPath, ...
     'CBIfix_FUS_Correlations.png'), 'Resolution', 300);
+
+%% Do the diffusion comparison 
+connectivityPath = fullfile(subjectDataPath, 'diffusionConnectivity');
+
+% normalized columns from the existing analysis:
+% 1 = DN, 2 = L8, 3 = L5
+fusLabels = {'DN', 'L8', 'L5'};
+
+% Load CTC strength for each subject
+CTCstrength = nan(numel(subjectList), 1);
+
+for s = 1:numel(subjectList)
+
+    subjectID = subjectList{s};
+
+    file = fullfile(connectivityPath, ...
+        [subjectID '_CTC_connectivity.mat']);
+
+    if ~isfile(file)
+        warning('Missing connectivity file for %s', subjectID);
+        continue;
+    end
+
+    S = load(file, 'CTCstrength');
+
+    if ~isfield(S, 'CTCstrength')
+        warning('CTCstrength missing for %s', subjectID);
+        continue;
+    end
+
+    % Expect one scalar connectivity value per subject
+    if ~isnumeric(S.CTCstrength) || ...
+            ~isscalar(S.CTCstrength)
+        warning('CTCstrength is not scalar for %s', subjectID);
+        continue;
+    end
+
+    CTCstrength(s) = double(S.CTCstrength);
+
+end
+
+% Generate scatter plots
+
+fig = figure('Color', 'w', ...
+    'Position', [150 200 1200 400]);
+
+for c = 1:3
+
+    x = CTCstrength;
+    y = normalized(:, c);
+
+    % Exclude missing or invalid observations
+    valid = isfinite(x) & isfinite(y);
+
+    subplot(1, 3, c);
+    hold on;
+
+    % Scatter individual subjects
+    scatter(x(valid), y(valid), 65, ...
+        [0.20 0.45 0.75], 'filled', ...
+        'MarkerFaceAlpha', 0.75);
+
+    % Linear best-fit line (visualization only)
+    if sum(valid) >= 2 && numel(unique(x(valid))) >= 2
+
+        coefficients = polyfit(x(valid), y(valid), 1);
+
+        xFit = linspace(min(x(valid)), ...
+            max(x(valid)), 100);
+
+        yFit = polyval(coefficients, xFit);
+
+        plot(xFit, yFit, '-', ...
+            'Color', [0.85 0.25 0.20], ...
+            'LineWidth', 2);
+
+    end
+
+    % Reference line: no change from baseline
+    yline(1, '--', 'Color', [0.5 0.5 0.5], ...
+        'LineWidth', 1);
+
+    xlabel('CTC strength');
+    ylabel('Normalized MEP amplitude');
+    title(fusLabels{c}, 'FontWeight', 'bold');
+
+    grid on;
+    set(gca, 'Box', 'off', ...
+        'FontSize', 11, ...
+        'TickDir', 'out', ...
+        'LineWidth', 1);
+
+end
+
+sgtitle('CTC connectivity vs FUS responses', ...
+    'FontSize', 15, 'FontWeight', 'bold');
+
+exportgraphics(fig, fullfile(subjectDataPath, ...
+    'CTC_FUS_Scatter.png'), 'Resolution', 300);
+
 
 %% Helper function to load and process data
 function [data, CBIdata] = processSubjectData(sessionFolder, target)
